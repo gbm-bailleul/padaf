@@ -5,6 +5,14 @@
 	<packaging>pom</packaging>
 	<version>0.4.2-SNAPSHOT</version>
 	
+
+	<scm>
+		<connection>scm:git:git://github.com/gbailleul/padaf.git</connection>
+		<developerConnection>scm:git:https://github.com/gbailleul/padaf.git</developerConnection>
+		<url>http://github.com/gbailleul/padaf</url>
+	</scm>
+
+
 	<modules>
 		<module>parent</module>
 		<module>preflight</module>
