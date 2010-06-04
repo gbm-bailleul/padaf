@@ -1,0 +1,4226 @@
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/pom.xml pdfbox-reactor/fontbox/pom.xml
+*** pdfbox-1.1.0/fontbox/pom.xml	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/pom.xml	2010-06-03 17:37:47.000000000 +0200
+***************
+*** 21,27 ****
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0</version>
+      <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+  
+--- 21,27 ----
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0-awl-3</version>
+      <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+  
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CFFFont.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CFFFont.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CFFFont.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CFFFont.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 243,249 ****
+      }
+  
+      /** 
+!      * Returns the character strings dictionary.
+       * @return the dictionary
+       */
+      public Map<String, byte[]> getCharStringsDict()
+--- 243,282 ----
+      }
+  
+      /** 
+!     * Return the Width value of the given Glyph identifier
+!     * 
+!     * @param SID
+!     * @return -1 if the SID is missing from the Font.
+!     * @throws IOException
+!     */
+!    public int getWidth(int SID) throws IOException {
+!        int nominalWidth = privateDict.containsKey("nominalWidthX") ? ((Number)privateDict.get("nominalWidthX")).intValue() : 0;
+!        int defaultWidth = privateDict.containsKey("defaultWidthX") ? ((Number)privateDict.get("defaultWidthX")).intValue() : 1000 ;
+!        for (Mapping m : getMappings() ){
+!            if (m.getSID() == SID) {
+!  
+!                CharStringRenderer csr = null;
+!                if (((Number)getProperty("CharstringType")).intValue() == 2 ) {
+!                    List<Object> lSeq = m.toType2Sequence();
+!                    csr = new CharStringRenderer(false);
+!                    csr.render(lSeq);
+!                } else {
+!                    List<Object> lSeq = m.toType1Sequence();
+!                    csr = new CharStringRenderer();
+!                    csr.render(lSeq);
+!                }
+!  
+!                // ---- If the CharString has a Width nominalWidthX must be added, 
+!                //      otherwise it is the default width.
+!                return csr.getWidth() != 0 ? csr.getWidth() + nominalWidth : defaultWidth;
+!            }
+!        }
+!  
+!        // ---- Width not found, return the default width
+!        return defaultWidth;
+!    }
+!      
+!      /**    * Returns the character strings dictionary.
+       * @return the dictionary
+       */
+      public Map<String, byte[]> getCharStringsDict()
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CFFFontROS.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CFFFontROS.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CFFFontROS.java	1970-01-01 01:00:00.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CFFFontROS.java	2010-06-03 17:21:28.000000000 +0200
+***************
+*** 0 ****
+--- 1,149 ----
++ package org.apache.fontbox.cff;
++ 
++ import java.io.IOException;
++ import java.util.LinkedList;
++ import java.util.List;
++ import java.util.Map;
++ 
++ public class CFFFontROS extends CFFFont {
++ 	private String registry;
++ 	private String ordering;
++ 	private int supplement;
++ 
++ 	private List<Map<String, Object>> fontDictionaries = new LinkedList<Map<String,Object>>();
++ 	private List<Map<String, Object>> privateDictionaries = new LinkedList<Map<String,Object>>();
++ 	private CIDKeyedFDSelect fdSelect = null;
++ 
++ 	/**
++ 	 * @return the registry
++ 	 */
++ 	public String getRegistry() {
++ 		return registry;
++ 	}
++ 
++ 	/**
++ 	 * @param registry the registry to set
++ 	 */
++ 	public void setRegistry(String registry) {
++ 		this.registry = registry;
++ 	}
++ 
++ 	/**
++ 	 * @return the ordering
++ 	 */
++ 	public String getOrdering() {
++ 		return ordering;
++ 	}
++ 
++ 	/**
++ 	 * @param ordering the ordering to set
++ 	 */
++ 	public void setOrdering(String ordering) {
++ 		this.ordering = ordering;
++ 	}
++ 
++ 	/**
++ 	 * @return the supplement
++ 	 */
++ 	public int getSupplement() {
++ 		return supplement;
++ 	}
++ 
++ 	/**
++ 	 * @param supplement the supplement to set
++ 	 */
++ 	public void setSupplement(int supplement) {
++ 		this.supplement = supplement;
++ 	}
++ 
++ 	/**
++ 	 * @return the fontDict
++ 	 */
++ 	public List<Map<String, Object>> getFontDict() {
++ 		return fontDictionaries;
++ 	}
++ 
++ 	/**
++ 	 * @param fontDict the fontDict to set
++ 	 */
++ 	public void setFontDict(List<Map<String, Object>> fontDict) {
++ 		this.fontDictionaries = fontDict;
++ 	}
++ 
++ 	/**
++ 	 * @return the privDict
++ 	 */
++ 	public List<Map<String, Object>> getPrivDict() {
++ 		return privateDictionaries;
++ 	}
++ 
++ 	/**
++ 	 * @param privDict the privDict to set
++ 	 */
++ 	public void setPrivDict(List<Map<String, Object>> privDict) {
++ 		this.privateDictionaries = privDict;
++ 	}
++ 
++ 	/**
++ 	 * @return the fdSelect
++ 	 */
++ 	public CIDKeyedFDSelect getFdSelect() {
++ 		return fdSelect;
++ 	}
++ 
++ 	/**
++ 	 * @param fdSelect the fdSelect to set
++ 	 */
++ 	public void setFdSelect(CIDKeyedFDSelect fdSelect) {
++ 		this.fdSelect = fdSelect;
++ 	}
++ 
++ 	/**
++ 	 * Return the Width value of the given Glyph identifier
++ 	 * 
++ 	 * @param SID
++ 	 * @return -1 if the SID is missing from the Font.
++ 	 * @throws IOException
++ 	 */
++ 	public int getWidth(int SID) throws IOException {
++ 		// ---- search the right FDArray index in the FDSelect according to the Character identifier
++ 		// 		this index will be used to access the private dictionary which contains useful values 
++ 		//		to compute width.
++ 		int fdArrayIndex = this.fdSelect.getFd(SID);
++ 		if (fdArrayIndex == -1 && SID == 0 ) { // --- notdef char
++ 			return super.getWidth(SID);
++ 		} else if (fdArrayIndex == -1) {
++ 			return 1000;
++ 		}
++ 
++ 		Map<String, Object> fontDict = this.fontDictionaries.get(fdArrayIndex);
++ 		Map<String, Object> privDict = this.privateDictionaries.get(fdArrayIndex);
++ 
++ 		int nominalWidth = privDict.containsKey("nominalWidthX") ? ((Number)privDict.get("nominalWidthX")).intValue() : 0;
++ 		int defaultWidth = privDict.containsKey("defaultWidthX") ? ((Number)privDict.get("defaultWidthX")).intValue() : 1000 ;
++ 
++ 		for (Mapping m : getMappings() ){
++ 			if (m.getSID() == SID) {
++ 
++ 				CharStringRenderer csr = null;
++ 				Number charStringType = (Number)getProperty("CharstringType");
++ 				if ( charStringType.intValue() == 2 ) {
++ 					List<Object> lSeq = m.toType2Sequence();
++ 					csr = new CharStringRenderer(false);
++ 					csr.render(lSeq);
++ 				} else {
++ 					List<Object> lSeq = m.toType1Sequence();
++ 					csr = new CharStringRenderer();
++ 					csr.render(lSeq);
++ 				}
++ 
++ 				// ---- If the CharString has a Width nominalWidthX must be added, 
++ 				//	    otherwise it is the default width.
++ 				return csr.getWidth() != 0 ? csr.getWidth() + nominalWidth : defaultWidth;
++ 			}
++ 		}
++ 
++ 		// ---- Width not found, return the default width
++ 		return defaultWidth;
++ 	}
++ }
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CFFParser.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CFFParser.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CFFParser.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CFFParser.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 20,27 ****
+--- 20,32 ----
+  import java.util.ArrayList;
+  import java.util.Arrays;
+  import java.util.Collections;
++ import java.util.LinkedHashMap;
++ import java.util.LinkedList;
+  import java.util.List;
++ import java.util.Map;
++ import java.util.Set;
+  
++ import org.apache.fontbox.cff.CFFFont.Mapping;
+  import org.apache.fontbox.cff.charset.CFFCharset;
+  import org.apache.fontbox.cff.charset.CFFExpertCharset;
+  import org.apache.fontbox.cff.charset.CFFExpertSubsetCharset;
+***************
+*** 32,39 ****
+  
+  /**
+   * This class represents a parser for a CFF font. 
+!  * @author Villu Ruusmann
+!  * @version $Revision: 1.0 $
+   */
+  public class CFFParser
+  {
+--- 37,44 ----
+  
+  /**
+   * This class represents a parser for a CFF font. 
+!  * @author Villu Russmann
+!  * @version $Revision: 1.2 $
+   */
+  public class CFFParser
+  {
+***************
+*** 255,277 ****
+  
+      private CFFFont parseFont(int index) throws IOException
+      {
+!         CFFFont font = new CFFFont();
+          DataInput nameInput = new DataInput(nameIndex.getBytes(index));
+          String name = nameInput.getString();
+!         font.setName(name);
+!         CFFDataInput topDictInput = new CFFDataInput(topDictIndex
+!                 .getBytes(index));
+          DictData topDict = readDictData(topDictInput);
+          DictData.Entry syntheticBaseEntry = topDict.getEntry("SyntheticBase");
+          if (syntheticBaseEntry != null)
+          {
+              throw new IOException("Synthetic Fonts are not supported");
+          }
+          DictData.Entry rosEntry = topDict.getEntry("ROS");
+!         if (rosEntry != null)
+!         {
+!             throw new IOException("CID-keyed Fonts are not supported");
+          }
+          font.addValueToTopDict("version", getString(topDict,"version"));
+          font.addValueToTopDict("Notice", getString(topDict,"Notice"));
+          font.addValueToTopDict("Copyright", getString(topDict,"Copyright"));
+--- 260,292 ----
+  
+      private CFFFont parseFont(int index) throws IOException
+      {
+!         CFFFont font = null;
+          DataInput nameInput = new DataInput(nameIndex.getBytes(index));
+          String name = nameInput.getString();
+! 
+!         CFFDataInput topDictInput = new CFFDataInput(topDictIndex.getBytes(index));
+          DictData topDict = readDictData(topDictInput);
+          DictData.Entry syntheticBaseEntry = topDict.getEntry("SyntheticBase");
+          if (syntheticBaseEntry != null)
+          {
+              throw new IOException("Synthetic Fonts are not supported");
+          }
++ 
+          DictData.Entry rosEntry = topDict.getEntry("ROS");
+!         if (rosEntry != null) {
+!         	font = new CFFFontROS();
+!         	((CFFFontROS)font).setRegistry(readString(rosEntry.getNumber(0).intValue()));
+!         	((CFFFontROS)font).setOrdering(readString(rosEntry.getNumber(1).intValue()));
+!         	((CFFFontROS)font).setSupplement(rosEntry.getNumber(2).intValue());
+          }
++ 
++         if (font == null) {
++         	// -- No specific behavior for this font
++         	font = new CFFFont();
++         }
++         
++         font.setName(name);
++ 
+          font.addValueToTopDict("version", getString(topDict,"version"));
+          font.addValueToTopDict("Notice", getString(topDict,"Notice"));
+          font.addValueToTopDict("Copyright", getString(topDict,"Copyright"));
+***************
+*** 294,299 ****
+--- 309,315 ----
+                          Integer.valueOf(0), Integer.valueOf(0))));
+          font.addValueToTopDict("StrokeWidth", getNumber(topDict, "StrokeWidth", 0));
+          font.addValueToTopDict("XUID", getArray(topDict, "XUID", null));
++ 
+          DictData.Entry charStringsEntry = topDict.getEntry("CharStrings");
+          int charStringsOffset = charStringsEntry.getNumber(0).intValue();
+          input.setPosition(charStringsOffset);
+***************
+*** 323,339 ****
+          font.getCharStringsDict().put(".notdef", charStringsIndex.getBytes(0));
+          int[] gids = new int[charStringsIndex.count];
+          List<CFFCharset.Entry> glyphEntries = charset.getEntries();
+!         for (int i = 1; i < charStringsIndex.count; i++)
+          {
+!             CFFCharset.Entry glyphEntry = glyphEntries.get(i - 1);
+!             gids[i - 1] = glyphEntry.getSID();
+!             font.getCharStringsDict().put(glyphEntry.getName(), charStringsIndex.getBytes(i));
+          }
+          DictData.Entry encodingEntry = topDict.getEntry("Encoding");
+          CFFEncoding encoding;
+!         int encodingId = encodingEntry != null ? encodingEntry.getNumber(0)
+!                 .intValue() : 0;
+!         if (encodingId == 0)
+          {
+              encoding = CFFStandardEncoding.getInstance();
+          } 
+--- 339,356 ----
+          font.getCharStringsDict().put(".notdef", charStringsIndex.getBytes(0));
+          int[] gids = new int[charStringsIndex.count];
+          List<CFFCharset.Entry> glyphEntries = charset.getEntries();
+!         for (int i = 0; i < glyphEntries.size(); i++)
+          {
+!             CFFCharset.Entry glyphEntry = glyphEntries.get(i);
+!             gids[i] = glyphEntry.getSID();
+!             font.getCharStringsDict().put(glyphEntry.getName(), charStringsIndex.getBytes(i + 1));
+          }
++ 
++ 
+          DictData.Entry encodingEntry = topDict.getEntry("Encoding");
+          CFFEncoding encoding;
+!         int encodingId = encodingEntry != null ? encodingEntry.getNumber(0).intValue() : 0;
+!         if (encodingId == 0 || rosEntry != null) // --- ROS uses StandardEncoding
+          {
+              encoding = CFFStandardEncoding.getInstance();
+          } 
+***************
+*** 347,375 ****
+              encoding = readEncoding(input, gids);
+          }
+          font.setEncoding(encoding);
+!         DictData.Entry privateEntry = topDict.getEntry("Private");
+!         int privateOffset = privateEntry.getNumber(1).intValue();
+!         input.setPosition(privateOffset);
+!         int privateSize = privateEntry.getNumber(0).intValue();
+!         CFFDataInput privateDictData = new CFFDataInput(input.readBytes(privateSize));
+!         DictData privateDict = readDictData(privateDictData);
+!         font.addValueToPrivateDict("BlueValues", getDelta(privateDict, "BlueValues", null));
+!         font.addValueToPrivateDict("OtherBlues", getDelta(privateDict, "OtherBlues", null));
+!         font.addValueToPrivateDict("FamilyBlues", getDelta(privateDict, "FamilyBlues", null));
+!         font.addValueToPrivateDict("FamilyOtherBlues", getDelta(privateDict, "FamilyOtherBlues", null));
+!         font.addValueToPrivateDict("BlueScale", getNumber(privateDict, "BlueScale", Double.valueOf(0.039625)));
+!         font.addValueToPrivateDict("BlueShift", getNumber(privateDict, "BlueShift", Integer.valueOf(7)));
+!         font.addValueToPrivateDict("BlueFuzz", getNumber(privateDict, "BlueFuzz", Integer.valueOf(1)));
+!         font.addValueToPrivateDict("StdHW", getNumber(privateDict, "StdHW", null));
+!         font.addValueToPrivateDict("StdVW", getNumber(privateDict, "StdVW", null));
+!         font.addValueToPrivateDict("StemSnapH", getDelta(privateDict, "StemSnapH", null));
+!         font.addValueToPrivateDict("StemSnapV", getDelta(privateDict, "StemSnapV", null));
+!         font.addValueToPrivateDict("ForceBold", getBoolean(privateDict, "ForceBold", false));
+!         font.addValueToPrivateDict("LanguageGroup", getNumber(privateDict, "LanguageGroup", Integer.valueOf(0)));
+!         font.addValueToPrivateDict("ExpansionFactor", getNumber(privateDict, "ExpansionFactor", Double.valueOf(0.06)));
+!         font.addValueToPrivateDict("initialRandomSeed", getNumber(privateDict, "initialRandomSeed", Integer.valueOf(0)));
+!         font.addValueToPrivateDict("defaultWidthX", getNumber(privateDict, "defaultWidthX", Integer.valueOf(0)));
+!         font.addValueToPrivateDict("nominalWidthX", getNumber(privateDict, "nominalWidthX", Integer.valueOf(0)));
+          return font;
+      }
+  
+--- 364,474 ----
+              encoding = readEncoding(input, gids);
+          }
+          font.setEncoding(encoding);
+!         
+! 
+!         if (rosEntry != null) {
+! 
+!         	// ---- It is a CIDKeyed Font, The Private Dictionary isn't in the Top Dict But in the Font Dict
+!         	// ---- Font Dict can be accessed by the FDArray and FDSelect
+!         	DictData.Entry fdArrayEntry = topDict.getEntry("FDArray");
+!         	if (fdArrayEntry == null) {
+!         		throw new IOException("FDArray is missing for a CIDKeyed Font.");
+!         	}
+! 
+!         	int fontDictOffset = fdArrayEntry.getNumber(0).intValue();
+!         	input.setPosition(fontDictOffset);
+!         	IndexData fdIndex = readIndexData(input);
+! 
+!             List<Map<String, Object>> privateDictionaries = new LinkedList<Map<String, Object>>();
+!             List<Map<String, Object>> fontDictionaries = new LinkedList<Map<String, Object>>();
+!     		CFFFontROS fontRos = (CFFFontROS)font;
+! 
+!         	for (int i = 0; i < fdIndex.count; ++i) {
+!         		byte[] b = fdIndex.getBytes(i);
+!         		CFFDataInput fontDictInput = new CFFDataInput(b);
+!         		DictData fontDictData = readDictData(fontDictInput);
+! 
+!         		Map<String, Object> fontDictMap = new LinkedHashMap<String, Object>();
+!         		fontDictMap.put("FontName", getString(fontDictData, "FontName"));
+!         		fontDictMap.put("FontType", getNumber(fontDictData, "FontType", 0));
+!         		fontDictMap.put("FontBBox", getDelta(fontDictData, "FontBBox", null));
+!         		fontDictMap.put("FontMatrix", getDelta(fontDictData, "FontMatrix", null));
+!         		// TODO OD-PDFA-4 : Add here other keys
+!         		fontDictionaries.add(fontDictMap);
+!         		
+!         		DictData.Entry privateEntry = fontDictData.getEntry("Private");
+!         		// --- Font DICT is invalid without "Private" entry
+!         		if ( privateEntry == null) {
+!         			throw new IOException("Missing Private Dictionary");
+!         		}
+! 
+!     	        int privateOffset = privateEntry.getNumber(1).intValue();
+!     	        input.setPosition(privateOffset);
+!     	        int privateSize = privateEntry.getNumber(0).intValue();
+!     	        CFFDataInput privateDictData = new CFFDataInput(input.readBytes(privateSize));
+!     	        DictData privateDict = readDictData(privateDictData);
+! 
+!     	        Map<String, Object> privDict = new LinkedHashMap<String, Object>();
+!     	        privDict.put("BlueValues", getDelta(privateDict, "BlueValues", null));
+!     	        privDict.put("OtherBlues", getDelta(privateDict, "OtherBlues", null));
+!     	        privDict.put("FamilyBlues", getDelta(privateDict, "FamilyBlues", null));
+!     	        privDict.put("FamilyOtherBlues", getDelta(privateDict, "FamilyOtherBlues", null));
+!     	        privDict.put("BlueScale", getNumber(privateDict, "BlueScale", Double.valueOf(0.039625)));
+!     	        privDict.put("BlueShift", getNumber(privateDict, "BlueShift", Integer.valueOf(7)));
+!     	        privDict.put("BlueFuzz", getNumber(privateDict, "BlueFuzz", Integer.valueOf(1)));
+!     	        privDict.put("StdHW", getNumber(privateDict, "StdHW", null));
+!     	        privDict.put("StdVW", getNumber(privateDict, "StdVW", null));
+!     	        privDict.put("StemSnapH", getDelta(privateDict, "StemSnapH", null));
+!     	        privDict.put("StemSnapV", getDelta(privateDict, "StemSnapV", null));
+!     	        privDict.put("ForceBold", getBoolean(privateDict, "ForceBold", false));
+!     	        privDict.put("LanguageGroup", getNumber(privateDict, "LanguageGroup", Integer.valueOf(0)));
+!     	        privDict.put("ExpansionFactor", getNumber(privateDict, "ExpansionFactor", Double.valueOf(0.06)));
+!     	        privDict.put("initialRandomSeed", getNumber(privateDict, "initialRandomSeed", Integer.valueOf(0)));
+!     	        privDict.put("defaultWidthX", getNumber(privateDict, "defaultWidthX", Integer.valueOf(0)));
+!     	        privDict.put("nominalWidthX", getNumber(privateDict, "nominalWidthX", Integer.valueOf(0)));
+! 
+!     	        privateDictionaries.add(privDict);
+!         	}
+! 
+!         	fontRos.setFontDict(fontDictionaries);
+!         	fontRos.setPrivDict(privateDictionaries);
+!         	
+!         	DictData.Entry fdSelectEntry = topDict.getEntry("FDSelect");
+!         	int fdSelectPos = fdSelectEntry.getNumber(0).intValue();
+!         	input.setPosition(fdSelectPos);
+!         	CIDKeyedFDSelect fdSelect = readFDSelect(input, charStringsIndex.count, fontRos);
+! 
+! 	        font.addValueToPrivateDict("defaultWidthX", Integer.valueOf(1000));
+! 	        font.addValueToPrivateDict("nominalWidthX", Integer.valueOf(0));
+!         	
+!         	fontRos.setFdSelect(fdSelect);
+! 
+!         } else {
+! 	        DictData.Entry privateEntry = topDict.getEntry("Private");
+! 	        int privateOffset = privateEntry.getNumber(1).intValue();
+! 	        input.setPosition(privateOffset);
+! 	        int privateSize = privateEntry.getNumber(0).intValue();
+! 	        CFFDataInput privateDictData = new CFFDataInput(input.readBytes(privateSize));
+! 	        DictData privateDict = readDictData(privateDictData);
+! 	        font.addValueToPrivateDict("BlueValues", getDelta(privateDict, "BlueValues", null));
+! 	        font.addValueToPrivateDict("OtherBlues", getDelta(privateDict, "OtherBlues", null));
+! 	        font.addValueToPrivateDict("FamilyBlues", getDelta(privateDict, "FamilyBlues", null));
+! 	        font.addValueToPrivateDict("FamilyOtherBlues", getDelta(privateDict, "FamilyOtherBlues", null));
+! 	        font.addValueToPrivateDict("BlueScale", getNumber(privateDict, "BlueScale", Double.valueOf(0.039625)));
+! 	        font.addValueToPrivateDict("BlueShift", getNumber(privateDict, "BlueShift", Integer.valueOf(7)));
+! 	        font.addValueToPrivateDict("BlueFuzz", getNumber(privateDict, "BlueFuzz", Integer.valueOf(1)));
+! 	        font.addValueToPrivateDict("StdHW", getNumber(privateDict, "StdHW", null));
+! 	        font.addValueToPrivateDict("StdVW", getNumber(privateDict, "StdVW", null));
+! 	        font.addValueToPrivateDict("StemSnapH", getDelta(privateDict, "StemSnapH", null));
+! 	        font.addValueToPrivateDict("StemSnapV", getDelta(privateDict, "StemSnapV", null));
+! 	        font.addValueToPrivateDict("ForceBold", getBoolean(privateDict, "ForceBold", false));
+! 	        font.addValueToPrivateDict("LanguageGroup", getNumber(privateDict, "LanguageGroup", Integer.valueOf(0)));
+! 	        font.addValueToPrivateDict("ExpansionFactor", getNumber(privateDict, "ExpansionFactor", Double.valueOf(0.06)));
+! 	        font.addValueToPrivateDict("initialRandomSeed", getNumber(privateDict, "initialRandomSeed", Integer.valueOf(0)));
+! 	        font.addValueToPrivateDict("defaultWidthX", getNumber(privateDict, "defaultWidthX", Integer.valueOf(0)));
+! 	        font.addValueToPrivateDict("nominalWidthX", getNumber(privateDict, "nominalWidthX", Integer.valueOf(0)));
+!         }
+! 
+          return font;
+      }
+  
+***************
+*** 495,500 ****
+--- 594,779 ----
+          }
+      }
+  
++     /**
++      * Read the FDSelect Data according to the format.
++      * @param dataInput
++      * @param nGlyphs
++      * @param ros
++      * @return
++      * @throws IOException
++      */
++     private CIDKeyedFDSelect readFDSelect(CFFDataInput dataInput, int nGlyphs, CFFFontROS ros)
++     throws IOException
++ 	{
++ 		int format = dataInput.readCard8();
++ 		if (format == 0)
++ 		{
++ 		    return readFormat0FDSelect(dataInput, format, nGlyphs, ros);
++ 		} 
++ 		else if (format == 3)
++ 		{
++ 		    return readFormat3FDSelect(dataInput, format, nGlyphs, ros);
++ 		} 
++ 		else
++ 		{
++ 		    throw new IllegalArgumentException();
++ 		}
++ 	}
++ 
++     /**
++      * Read the Format 0 of the FDSelect data structure.
++      * @param dataInput
++      * @param format
++      * @param nGlyphs
++      * @param ros
++      * @return
++      * @throws IOException
++      */
++     private Format0FDSelect readFormat0FDSelect(CFFDataInput dataInput, int format, int nGlyphs, CFFFontROS ros) throws IOException
++     {
++     	Format0FDSelect fdselect = new Format0FDSelect(ros);
++     	fdselect.format = format;
++         fdselect.fds = new int[nGlyphs];
++         for (int i = 0; i < fdselect.fds.length; i++)
++         {
++         	fdselect.fds[i] = dataInput.readCard8();
++ 
++         }
++         return fdselect;
++     }
++ 
++     /**
++      * Read the Format 3 of the FDSelect data structure.
++      * 
++      * @param dataInput
++      * @param format
++      * @param nGlyphs
++      * @param ros
++      * @return
++      * @throws IOException
++      */
++     private Format3FDSelect readFormat3FDSelect(CFFDataInput dataInput, int format, int nGlyphs, CFFFontROS ros) throws IOException
++     {
++     	Format3FDSelect fdselect = new Format3FDSelect(ros);
++     	fdselect.format = format;
++     	fdselect.nbRanges = dataInput.readCard16();
++ 
++     	fdselect.range3 = new Range3[fdselect.nbRanges];
++         for (int i = 0; i < fdselect.nbRanges; i++)
++         {
++         	Range3 r3 = new Range3();
++         	r3.first = dataInput.readCard16();
++         	r3.fd = dataInput.readCard8();
++         	fdselect.range3[i] = r3;
++ 
++         }
++ 
++         fdselect.sentinel = dataInput.readCard16();
++         return fdselect;
++     }
++     
++     /**
++      *  Container of a Format 3 FDSelect data (see "The Compact Font Format Specification" chapter "FDSelect" ) 
++      */
++     private static class Format3FDSelect extends CIDKeyedFDSelect {
++         private int format;
++         private int nbRanges;
++         private Range3[] range3;
++         private int sentinel;
++ 
++         private Format3FDSelect(CFFFontROS _owner) {
++ 			super(_owner);
++ 		}
++ 
++ 		/* (non-Javadoc)
++ 		 * @see org.apache.fontbox.cff.CIDKeyedFDSelect#getFd(int)
++ 		 */
++ 		@Override
++ 		public int getFd(int glyph) {
++ 			for (int i = 0 ; i < nbRanges; ++i) {
++ 				if (range3[i].first >= glyph) {
++ 					if (i + 1 < nbRanges ) {
++ 						if (range3[i+1].first > glyph ) {
++ 							return range3[i].fd;
++ 						} else {
++ 							// go to next range
++ 						}
++ 					} else {
++ 						// last range reach, the sentinel must be greater than glyph
++ 						if (sentinel > glyph) {
++ 							return range3[i].fd;
++ 						}  else {
++ 							return -1;
++ 						}
++ 					}
++ 				}
++ 			}
++ 			return 0;
++ 		}
++ 
++ 		@Override
++         public String toString()
++         {
++             return getClass().getName() + "[format=" + format + " nbRanges=" + nbRanges + ", range3="
++                     + Arrays.toString(range3) + " sentinel=" + sentinel + "]";
++         }
++     }
++ 
++     /**
++      * Structure of a Range3 element
++      */
++     private static class Range3 {
++     	private int first;
++     	private int fd;
++     	
++     	@Override
++         public String toString() {
++     		return getClass().getName() + "[first=" + first + ", fd=" + fd + "]";
++     	}
++     }
++     
++     /**
++      *  Container of a Format 0 FDSelect data (see "The Compact Font Format Specification" chapter "FDSelect" ) 
++      */
++     private static class Format0FDSelect extends CIDKeyedFDSelect {
++         private int format;
++         private int[] fds;
++ 
++         private Format0FDSelect(CFFFontROS _owner) {
++ 			super(_owner);
++ 		}
++ 
++ 		/* (non-Javadoc)
++ 		 * @see org.apache.fontbox.cff.CIDKeyedFDSelect#getFd(int)
++ 		 */
++ 		@Override
++ 		public int getFd(int glyph) {
++ 			// ---- search the position of the given glyph
++ 			for (Mapping mapping: this.owner.getMappings()) {
++ 				if (mapping.getSID() == glyph) {
++ 					int index = 0;
++ 					Map<String, byte[]> charString = this.owner.getCharStringsDict();
++ 					Set<String> keys = charString.keySet();
++ 					for (String str : keys) {
++ 						if (mapping.getName().equals(str)) {
++ 							return fds[index];
++ 						}
++ 						++index;
++ 					}
++ 				}
++ 			}
++ 
++ 			return -1;
++ 		}
++ 
++ 		@Override
++         public String toString()
++         {
++             return getClass().getName() + "[format=" + format + ", fds="
++                     + Arrays.toString(fds) + "]";
++         }
++     }
++     
+      private CFFCharset readCharset(CFFDataInput dataInput, int nGlyphs)
+              throws IOException
+      {
+***************
+*** 507,512 ****
+--- 786,795 ----
+          {
+              return readFormat1Charset(dataInput, format, nGlyphs);
+          } 
++         else if (format == 2)
++         {
++             return readFormat2Charset(dataInput, format, nGlyphs);
++         }
+          else
+          {
+              throw new IllegalArgumentException();
+***************
+*** 551,556 ****
+--- 834,864 ----
+          }
+          return charset;
+      }
++     
++     private Format2Charset readFormat2Charset(CFFDataInput dataInput, int format,
++             int nGlyphs) throws IOException
++     {
++     	Format2Charset charset = new Format2Charset();
++         charset.format = format;
++         charset.range = new Format2Charset.Range2[0];
++         for (int i = 0; i < nGlyphs - 1;)
++         {
++         	Format2Charset.Range2[] newRange = new Format2Charset.Range2[charset.range.length + 1];
++             System.arraycopy(charset.range, 0, newRange, 0,
++                     charset.range.length);
++             charset.range = newRange;
++             Format2Charset.Range2 range = new Format2Charset.Range2();
++             range.first = dataInput.readSID();
++             range.nLeft = dataInput.readCard16();
++             charset.range[charset.range.length - 1] = range;
++             for (int j = 0; j < 1 + range.nLeft; j++)
++             {
++                 charset.register(range.first + j, readString(range.first + j));
++             }
++             i += 1 + range.nLeft;
++         }
++         return charset;
++     }
+  
+      /**
+       * Inner class holding the header of a CFF font. 
+***************
+*** 861,864 ****
+--- 1169,1204 ----
+              }
+          }
+      }
++ 
++     /**
++      * Inner class representing a Format2 charset. 
++      */
++     private static class Format2Charset extends EmbeddedCharset
++     {
++         private int format;
++         private Range2[] range;
++ 
++         @Override
++         public String toString()
++         {
++             return getClass().getName() + "[format=" + format + ", range="
++                     + Arrays.toString(range) + "]";
++         }
++ 
++         /**
++          * Inner class representing a range of a charset. 
++          */
++         private static class Range2
++         {
++             private int first;
++             private int nLeft;
++ 
++             @Override
++             public String toString()
++             {
++                 return getClass().getName() + "[first=" + first + ", nLeft="
++                         + nLeft + "]";
++             }
++         }
++     }
+  }
+\ Pas de fin de ligne à la fin du fichier.
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CharStringRenderer.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CharStringRenderer.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CharStringRenderer.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CharStringRenderer.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 23,179 ****
+  
+  /**
+   * This class represents a renderer for a charstring.
+!  * @author Villu Ruusmann
+!  * @version $Revision: 1.0 $
+   */
+  public class CharStringRenderer extends CharStringHandler
+  {
+! 
+!     private GeneralPath path = null;
+!     private Point2D sidebearingPoint = null;
+!     private Point2D referencePoint = null;
+!     private int width = 0;
+! 
+!     /**
+!      * Renders the given sequence and returns the result as a GeneralPath.
+!      * @param sequence the given charstring sequence
+!      * @return the rendered GeneralPath 
+!      */
+!     public GeneralPath render(List<Object> sequence)
+!     {
+!         path = new GeneralPath();
+!         sidebearingPoint = new Point2D.Float(0, 0);
+!         referencePoint = null;
+!         setWidth(0);
+!         handleSequence(sequence);
+!         return path;
+!     }
+! 
+!     /**
+!      * {@inheritDoc}
+!      */
+!     public void handleCommand(List<Integer> numbers, CharStringCommand command)
+!     {
+!         String name = CharStringCommand.TYPE1_VOCABULARY.get(command.getKey());
+! 
+!         if ("vmoveto".equals(name))
+!         {
+!             rmoveTo(Integer.valueOf(0), numbers.get(0));
+!         } 
+!         else if ("rlineto".equals(name))
+!         {
+!             rlineTo(numbers.get(0), numbers.get(1));
+!         } 
+!         else if ("hlineto".equals(name))
+!         {
+!             rlineTo(numbers.get(0), Integer.valueOf(0));
+!         } 
+!         else if ("vlineto".equals(name))
+!         {
+!             rlineTo(Integer.valueOf(0), numbers.get(0));
+!         } 
+!         else if ("rrcurveto".equals(name))
+!         {
+!             rrcurveTo(numbers.get(0), numbers.get(1), numbers.get(2), numbers
+!                     .get(3), numbers.get(4), numbers.get(5));
+!         } 
+!         else if ("closepath".equals(name))
+!         {
+!             closePath();
+!         } 
+!         else if ("sbw".equals(name))
+!         {
+!             pointSb(numbers.get(0), numbers.get(1));
+!             setWidth(numbers.get(2).intValue());
+!         } 
+!         else if ("hsbw".equals(name))
+!         {
+!             pointSb(numbers.get(0), Integer.valueOf(0));
+!             setWidth(numbers.get(1).intValue());
+!         } 
+!         else if ("rmoveto".equals(name))
+!         {
+!             rmoveTo(numbers.get(0), numbers.get(1));
+!         } 
+!         else if ("hmoveto".equals(name))
+!         {
+!             rmoveTo(numbers.get(0), Integer.valueOf(0));
+!         } 
+!         else if ("vhcurveto".equals(name))
+!         {
+!             rrcurveTo(Integer.valueOf(0), numbers.get(0), numbers.get(1),
+!                     numbers.get(2), numbers.get(3), Integer.valueOf(0));
+!         } 
+!         else if ("hvcurveto".equals(name))
+!         {
+!             rrcurveTo(numbers.get(0), Integer.valueOf(0), numbers.get(1),
+!                     numbers.get(2), Integer.valueOf(0), numbers.get(3));
+!         }
+!     }
+! 
+!     private void rmoveTo(Number dx, Number dy)
+!     {
+!         Point2D point = referencePoint;
+!         if (point == null)
+!         {
+!             point = sidebearingPoint;
+!         }
+!         referencePoint = null;
+!         path.moveTo((float)(point.getX() + dx.doubleValue()),
+!                     (float)(point.getY() + dy.doubleValue()));
+!     }
+! 
+!     private void rlineTo(Number dx, Number dy)
+!     {
+!         Point2D point = path.getCurrentPoint();
+!         path.lineTo((float)(point.getX() + dx.doubleValue()),
+!                     (float)(point.getY() + dy.doubleValue()));
+!     }
+! 
+!     private void rrcurveTo(Number dx1, Number dy1, Number dx2, Number dy2,
+!             Number dx3, Number dy3)
+!     {
+!         Point2D point = path.getCurrentPoint();
+!         float x1 = (float) point.getX() + dx1.floatValue();
+!         float y1 = (float) point.getY() + dy1.floatValue();
+!         float x2 = x1 + dx2.floatValue();
+!         float y2 = y1 + dy2.floatValue();
+!         float x3 = x2 + dx3.floatValue();
+!         float y3 = y2 + dy3.floatValue();
+!         path.curveTo(x1, y1, x2, y2, x3, y3);
+!     }
+! 
+!     private void closePath()
+!     {
+!         referencePoint = path.getCurrentPoint();
+!         path.closePath();
+!     }
+! 
+!     private void pointSb(Number x, Number y)
+!     {
+!         sidebearingPoint = new Point2D.Float(x.floatValue(), y.floatValue());
+!     }
+! 
+!     /**
+!      * Returns the bounds of the renderer path.
+!      * @return the bounds as Rectangle2D
+!      */
+!     public Rectangle2D getBounds()
+!     {
+!         return path.getBounds2D();
+!     }
+! 
+!     /**
+!      * Returns the width of the current command.
+!      * @return the width
+!      */
+!     public int getWidth()
+!     {
+!         return width;
+!     }
+! 
+!     private void setWidth(int width)
+!     {
+!         this.width = width;
+!     }
+  }
+\ Pas de fin de ligne à la fin du fichier.
+--- 23,341 ----
+  
+  /**
+   * This class represents a renderer for a charstring.
+!  * @author Villu Russmann
+!  * @version $Revision: 1.2 $
+   */
+  public class CharStringRenderer extends CharStringHandler
+  {
+! 	// TODO CharStringRenderer as abstract Class with two inherited classes according to the Charsstring type....
+! 	private boolean isCharstringType1 = true;
+! 	private boolean isFirstCommand = true;
+! 
+! 	private GeneralPath path = null;
+! 	private Point2D sidebearingPoint = null;
+! 	private Point2D referencePoint = null;
+! 	private int width = 0;
+! 
+! 	public CharStringRenderer() {
+! 		isCharstringType1 = true;
+! 	}
+! 
+! 	public CharStringRenderer(boolean isType1) {
+! 		isCharstringType1 = isType1;
+! 	}
+! 
+! 	/**
+! 	 * Renders the given sequence and returns the result as a GeneralPath.
+! 	 * @param sequence the given charstring sequence
+! 	 * @return the rendered GeneralPath 
+! 	 */
+! 	public GeneralPath render(List<Object> sequence)
+! 	{
+! 		path = new GeneralPath();
+! 		sidebearingPoint = new Point2D.Float(0, 0);
+! 		referencePoint = null;
+! 		setWidth(0);
+! 		handleSequence(sequence);
+! 		return path;
+! 	}
+! 
+! 	/**
+! 	 * {@inheritDoc}
+! 	 */
+! 	public void handleCommand(List<Integer> numbers, CharStringCommand command)
+! 	{
+! 		if (isCharstringType1) {
+! 			handleCommandType1(numbers, command);
+! 		} else {
+! 			handleCommandType2(numbers, command);
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param numbers
+! 	 * @param command
+! 	 */
+! 	private void handleCommandType2(List<Integer> numbers, CharStringCommand command) {
+! 		String name = CharStringCommand.TYPE2_VOCABULARY.get(command.getKey());
+! 
+! 		if ("vmoveto".equals(name)) //
+! 		{
+! 			if (isFirstCommand && numbers.size() == 2) {
+! 				setWidth(numbers.get(0));
+! 				rmoveTo(Integer.valueOf(0), numbers.get(1));	 
+! 			} else {
+! 				rmoveTo(Integer.valueOf(0), numbers.get(0));
+! 			}
+! 		} 
+! 		else if ("rlineto".equals(name)) //
+! 		{
+! 			if (isFirstCommand && numbers.size() == 3) {
+! 				setWidth(numbers.get(0));
+! 				rlineTo(numbers.get(1), numbers.get(2));
+! 			} else {
+! 				rlineTo(numbers.get(0), numbers.get(1));
+! 			}
+! 		} 
+! 		else if ("hlineto".equals(name))//
+! 		{
+! 			if (isFirstCommand && numbers.size() == 2) {
+! 				setWidth(numbers.get(0));	
+! 				rlineTo(numbers.get(1), Integer.valueOf(0));	
+! 			} else {
+! 				rlineTo(numbers.get(0), Integer.valueOf(0));
+! 			}
+! 		} 
+! 		else if ("vlineto".equals(name))//
+! 		{
+! 			if (isFirstCommand && numbers.size() == 2) {
+! 				setWidth(numbers.get(0));
+! 				rlineTo(Integer.valueOf(0), numbers.get(1));
+! 			} else {
+! 				rlineTo(Integer.valueOf(0), numbers.get(0));
+! 			}
+! 		} 
+! 		else if ("rrcurveto".equals(name))//
+! 		{
+! 			if (isFirstCommand && numbers.size() == 7) {
+! 				setWidth(numbers.get(0));
+! 				rrcurveTo(numbers.get(1), numbers.get(2), numbers.get(3), numbers
+! 						.get(4), numbers.get(5), numbers.get(6));
+! 			} else {
+! 				rrcurveTo(numbers.get(0), numbers.get(1), numbers.get(2), numbers
+! 						.get(3), numbers.get(4), numbers.get(5));
+! 			}
+! 		}
+! 		else if ("closepath".equals(name))
+! 		{
+! 			closePath();
+! 		} 
+! 		else if ("rmoveto".equals(name))//
+! 		{
+! 			if (isFirstCommand && numbers.size() == 3) {
+! 				setWidth(numbers.get(0));
+! 				rmoveTo(numbers.get(1), numbers.get(2));
+! 			} else {
+! 				rmoveTo(numbers.get(0), numbers.get(1));
+! 			}
+! 		} 
+! 		else if ("hmoveto".equals(name)) //
+! 		{
+! 			if (isFirstCommand && numbers.size() == 2) {
+! 				setWidth(numbers.get(0));
+! 				rmoveTo(numbers.get(1), Integer.valueOf(0));
+! 			} else { 
+! 				rmoveTo(numbers.get(0), Integer.valueOf(0));
+! 			}        	
+! 		} 
+! 		else if ("vhcurveto".equals(name))
+! 		{
+! 			if (isFirstCommand && numbers.size() == 5) {
+! 				setWidth(numbers.get(0));
+! 				rrcurveTo(Integer.valueOf(0), numbers.get(1), numbers.get(2),
+! 						numbers.get(3), numbers.get(4), Integer.valueOf(0));
+! 			} else {
+! 				rrcurveTo(Integer.valueOf(0), numbers.get(0), numbers.get(1),
+! 						numbers.get(2), numbers.get(3), Integer.valueOf(0));
+! 			}
+! 
+! 		} 
+! 		else if ("hvcurveto".equals(name))
+! 		{
+! 			if (isFirstCommand && numbers.size() == 5) {
+! 				setWidth(numbers.get(0));            
+! 				rrcurveTo(numbers.get(1), Integer.valueOf(0), numbers.get(2),
+! 						numbers.get(3), Integer.valueOf(0), numbers.get(4));
+! 			} else {
+! 				rrcurveTo(numbers.get(0), Integer.valueOf(0), numbers.get(1),
+! 						numbers.get(2), Integer.valueOf(0), numbers.get(3));
+! 			}
+! 		}
+! 		else if ("hstem".equals(name)) {
+! 			if (numbers.size() % 2 == 1 ) {
+! 				setWidth(numbers.get(0));
+! 			}
+! 		}
+! 		else if ("vstem".equals(name)) {
+! 			if (numbers.size() % 2 == 1 ) {
+! 				setWidth(numbers.get(0));
+! 			}	
+! 		}
+! 		else if ("hstemhm".equals(name)) {
+! 			if (numbers.size() % 2 == 1 ) {
+! 				setWidth(numbers.get(0));
+! 			}
+! 		}
+! 		else if ("hstemhm".equals(name)) {
+! 			if (numbers.size() % 2 == 1) {
+! 				setWidth(numbers.get(0));
+! 			}
+! 		}
+! 		else if ("cntrmask".equals(name)) {
+! 			if (numbers.size() == 1 ) {
+! 				setWidth(numbers.get(0));
+! 			}
+! 		}
+! 		else if ("hintmask".equals(name)) {
+! 			if (numbers.size() == 1 ) {
+! 				setWidth(numbers.get(0));
+! 			}
+! 		}else if ("endchar".equals(name)) {
+! 			if (numbers.size() == 1 ) {
+! 				setWidth(numbers.get(0));
+! 			}
+! 		}
+! 
+! 		if (isFirstCommand) {  isFirstCommand = false; }
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param numbers
+! 	 * @param command
+! 	 */
+! 	private void handleCommandType1(List<Integer> numbers, CharStringCommand command) {
+! 		String name = CharStringCommand.TYPE1_VOCABULARY.get(command.getKey());
+! 
+! 		if ("vmoveto".equals(name))
+! 		{
+! 			rmoveTo(Integer.valueOf(0), numbers.get(0));
+! 		} 
+! 		else if ("rlineto".equals(name))
+! 		{
+! 			rlineTo(numbers.get(0), numbers.get(1));
+! 		} 
+! 		else if ("hlineto".equals(name))
+! 		{
+! 			rlineTo(numbers.get(0), Integer.valueOf(0));
+! 		} 
+! 		else if ("vlineto".equals(name))
+! 		{
+! 			rlineTo(Integer.valueOf(0), numbers.get(0));
+! 		} 
+! 		else if ("rrcurveto".equals(name))
+! 		{
+! 			rrcurveTo(numbers.get(0), numbers.get(1), numbers.get(2), numbers
+! 					.get(3), numbers.get(4), numbers.get(5));
+! 		} 
+! 		else if ("closepath".equals(name))
+! 		{
+! 			closePath();
+! 		} 
+! 		else if ("sbw".equals(name))
+! 		{
+! 			pointSb(numbers.get(0), numbers.get(1));
+! 			setWidth(numbers.get(2).intValue());
+! 		} 
+! 		else if ("hsbw".equals(name))
+! 		{
+! 			pointSb(numbers.get(0), Integer.valueOf(0));
+! 			setWidth(numbers.get(1).intValue());
+! 		} 
+! 		else if ("rmoveto".equals(name))
+! 		{
+! 			rmoveTo(numbers.get(0), numbers.get(1));
+! 		} 
+! 		else if ("hmoveto".equals(name))
+! 		{
+! 			rmoveTo(numbers.get(0), Integer.valueOf(0));
+! 		} 
+! 		else if ("vhcurveto".equals(name))
+! 		{
+! 			rrcurveTo(Integer.valueOf(0), numbers.get(0), numbers.get(1),
+! 					numbers.get(2), numbers.get(3), Integer.valueOf(0));
+! 		} 
+! 		else if ("hvcurveto".equals(name))
+! 		{
+! 			rrcurveTo(numbers.get(0), Integer.valueOf(0), numbers.get(1),
+! 					numbers.get(2), Integer.valueOf(0), numbers.get(3));
+! 		}
+! 	}
+! 
+! 	private void rmoveTo(Number dx, Number dy)
+! 	{
+! 		Point2D point = referencePoint;
+! 		if (point == null)
+! 		{
+! 			point = sidebearingPoint;
+! 		}
+! 		referencePoint = null;
+! 		path.moveTo((float)(point.getX() + dx.doubleValue()),
+! 				(float)(point.getY() + dy.doubleValue()));
+! 	}
+! 
+! 	private void rlineTo(Number dx, Number dy)
+! 	{
+! 		Point2D point = path.getCurrentPoint();
+! 		path.lineTo((float)(point.getX() + dx.doubleValue()),
+! 				(float)(point.getY() + dy.doubleValue()));
+! 	}
+! 
+! 	private void rrcurveTo(Number dx1, Number dy1, Number dx2, Number dy2,
+! 			Number dx3, Number dy3)
+! 	{
+! 		Point2D point = path.getCurrentPoint();
+! 		float x1 = (float) point.getX() + dx1.floatValue();
+! 		float y1 = (float) point.getY() + dy1.floatValue();
+! 		float x2 = x1 + dx2.floatValue();
+! 		float y2 = y1 + dy2.floatValue();
+! 		float x3 = x2 + dx3.floatValue();
+! 		float y3 = y2 + dy3.floatValue();
+! 		path.curveTo(x1, y1, x2, y2, x3, y3);
+! 	}
+! 
+! 	private void closePath()
+! 	{
+! 		referencePoint = path.getCurrentPoint();
+! 		path.closePath();
+! 	}
+! 
+! 	private void pointSb(Number x, Number y)
+! 	{
+! 		sidebearingPoint = new Point2D.Float(x.floatValue(), y.floatValue());
+! 	}
+! 
+! 	/**
+! 	 * Returns the bounds of the renderer path.
+! 	 * @return the bounds as Rectangle2D
+! 	 */
+! 	 public Rectangle2D getBounds()
+! 	{
+! 		 return path.getBounds2D();
+! 	}
+! 
+! 	 /**
+! 	  * Returns the width of the current command.
+! 	  * @return the width
+! 	  */
+! 	 public int getWidth()
+! 	 {
+! 		 return width;
+! 	 }
+! 
+! 	 private void setWidth(int width)
+! 	 {
+! 		 this.width = width;
+! 	 }
+  }
+\ Pas de fin de ligne à la fin du fichier.
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CIDKeyedFDSelect.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CIDKeyedFDSelect.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cff/CIDKeyedFDSelect.java	1970-01-01 01:00:00.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cff/CIDKeyedFDSelect.java	2010-06-03 17:21:28.000000000 +0200
+***************
+*** 0 ****
+--- 1,17 ----
++ package org.apache.fontbox.cff;
++ 
++ public abstract class CIDKeyedFDSelect {
++ 	
++ 	protected CFFFontROS owner = null;
++ 	
++ 	public CIDKeyedFDSelect(CFFFontROS _owner) {
++ 		this.owner = _owner;
++ 	}
++ 	/**
++ 	 * Returns the Font DICT index for the given glyph identifier
++ 	 *  
++ 	 * @param glyph
++ 	 * @return -1 if the glyph isn't define, otherwise the FD index value
++ 	 */
++ 	public abstract int getFd(int glyph);
++ }
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cmap/CMap.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cmap/CMap.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cmap/CMap.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cmap/CMap.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 36,41 ****
+--- 36,43 ----
+      private Map<Integer,String> singleByteMappings = new HashMap<Integer,String>();
+      private Map<Integer,String> doubleByteMappings = new HashMap<Integer,String>();
+  
++     private Map<String, Object> cmapEntries = new HashMap<String, Object>();
++     
+      /**
+       * Creates a new instance of CMap.
+       */
+***************
+*** 191,194 ****
+--- 193,211 ----
+          }
+          return false;
+       }
++    
++ 
++ 	/**
++ 	 * @return the cmapEntries
++ 	 */
++ 	public Object getCmapEntry(String name) {
++ 		return cmapEntries.get(name);
++ 	}
++ 
++ 	/**
++ 	 * @param cmapEntries the cmapEntries to set
++ 	 */
++ 	public void addCMapEntry(String name, Object value) {
++ 		this.cmapEntries.put(name, value);
++ 	}
+  }
+\ Pas de fin de ligne à la fin du fichier.
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cmap/CMapParser.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cmap/CMapParser.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/cmap/CMapParser.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/cmap/CMapParser.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 203,208 ****
+--- 203,213 ----
+                          }
+                      }
+                  }
++             } else {
++             	if (previousToken != null && previousToken instanceof LiteralName) {
++             		String name = ((LiteralName)previousToken).name;
++             		result.addCMapEntry(name, token instanceof LiteralName ? ((LiteralName)token).name : token);
++             	}
+              }
+              previousToken = token;
+          }
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/encoding/MacRomanEncoding.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/encoding/MacRomanEncoding.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/encoding/MacRomanEncoding.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/encoding/MacRomanEncoding.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 116,122 ****
+          addCharacterEncoding( 072, "colon" );
+          addCharacterEncoding( 054, "comma" );
+          addCharacterEncoding( 0251, "copyright" );
+!         addCharacterEncoding( 0333, "currency1" );
+          addCharacterEncoding( 0144, "d" );
+          addCharacterEncoding( 0240, "dagger" );
+          addCharacterEncoding( 0340, "daggerdbl" );
+--- 116,122 ----
+          addCharacterEncoding( 072, "colon" );
+          addCharacterEncoding( 054, "comma" );
+          addCharacterEncoding( 0251, "copyright" );
+!         addCharacterEncoding( 0333, "currency" );
+          addCharacterEncoding( 0144, "d" );
+          addCharacterEncoding( 0240, "dagger" );
+          addCharacterEncoding( 0340, "daggerdbl" );
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/AbstractTTFParser.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/AbstractTTFParser.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/AbstractTTFParser.java	1970-01-01 01:00:00.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/AbstractTTFParser.java	2010-06-03 17:21:28.000000000 +0200
+***************
+*** 0 ****
+--- 1,145 ----
++ package org.apache.fontbox.ttf;
++ 
++ import java.io.File;
++ import java.io.IOException;
++ import java.io.InputStream;
++ 
++ abstract class AbstractTTFParser {
++ 	protected boolean isEmbedded = false;
++ 
++ 	public AbstractTTFParser(boolean isEmbedded) {
++ 		this.isEmbedded = isEmbedded;
++ 	}
++ 	
++     /**
++      * Parse a file and get a true type font.
++      * @param ttfFile The TTF file.
++      * @return A true type font.
++      * @throws IOException If there is an error parsing the true type font.
++      */
++     public TrueTypeFont parseTTF( String ttfFile ) throws IOException
++     {
++         RAFDataStream raf = new RAFDataStream( ttfFile, "r" );
++         return parseTTF( raf );
++     }
++     
++     /**
++      * Parse a file and get a true type font.
++      * @param ttfFile The TTF file.
++      * @return A true type font.
++      * @throws IOException If there is an error parsing the true type font.
++      */
++     public TrueTypeFont parseTTF( File ttfFile ) throws IOException
++     {
++         RAFDataStream raf = new RAFDataStream( ttfFile, "r" );
++         return parseTTF( raf );
++     }
++     
++     /**
++      * Parse a file and get a true type font.
++      * @param ttfData The TTF data to parse.
++      * @return A true type font.
++      * @throws IOException If there is an error parsing the true type font.
++      */
++     public TrueTypeFont parseTTF( InputStream ttfData ) throws IOException
++     {
++         return parseTTF( new MemoryTTFDataStream( ttfData ));
++     }
++     
++     /**
++      * Parse a file and get a true type font.
++      * @param raf The TTF file.
++      * @return A true type font.
++      * @throws IOException If there is an error parsing the true type font.
++      */
++     public TrueTypeFont parseTTF( TTFDataStream raf ) throws IOException
++     {
++         TrueTypeFont font = new TrueTypeFont( raf );
++         font.setVersion( raf.read32Fixed() );
++         int numberOfTables = raf.readUnsignedShort();
++         int searchRange = raf.readUnsignedShort();
++         int entrySelector = raf.readUnsignedShort();
++         int rangeShift = raf.readUnsignedShort();
++         for( int i=0; i<numberOfTables; i++ )
++         {
++             TTFTable table = readTableDirectory( raf );   
++             font.addTable( table );
++         }
++ 
++         //need to initialize a couple tables in a certain order
++         parseTables(font, raf);
++ 
++         return font;
++     }
++ 
++     protected abstract void parseTables(TrueTypeFont font, TTFDataStream raf)
++     throws IOException ;
++ 
++     private TTFTable readTableDirectory( TTFDataStream raf ) throws IOException
++     {
++         TTFTable retval = null;
++         String tag = raf.readString( 4 );
++         if( tag.equals( CMAPTable.TAG ) )
++         {
++             retval = new CMAPTable();
++         }
++         else if( tag.equals( GlyphTable.TAG ) )
++         {
++             retval = new GlyphTable();
++         }
++         else if( tag.equals( HeaderTable.TAG ) )
++         {
++             retval = new HeaderTable();
++         }
++         else if( tag.equals( HorizontalHeaderTable.TAG ) )
++         {
++             retval = new HorizontalHeaderTable();
++         }
++         else if( tag.equals( HorizontalMetricsTable.TAG ) )
++         {
++             retval = new HorizontalMetricsTable();
++         }
++         else if( tag.equals( IndexToLocationTable.TAG ) )
++         {
++             retval = new IndexToLocationTable();
++         }
++         else if( tag.equals( MaximumProfileTable.TAG ) )
++         {
++             retval = new MaximumProfileTable();
++         }
++         else if( tag.equals( NamingTable.TAG ) )
++         {
++             retval = new NamingTable();
++         }
++         else if( tag.equals( OS2WindowsMetricsTable.TAG ) )
++         {
++             retval = new OS2WindowsMetricsTable();
++         }
++         else if( tag.equals( PostScriptTable.TAG ) )
++         {
++             retval = new PostScriptTable();
++         }
++         else if( tag.equals( GlyphTable.TAG ) )
++         {
++             retval = new GlyphTable();
++         }
++         else if( tag.equals( GlyphTable.TAG ) )
++         {
++             retval = new GlyphTable();
++         }
++         else if( tag.equals( DigitalSignatureTable.TAG ) )
++         {
++             retval = new DigitalSignatureTable();
++         }
++         else
++         {
++             //unknown table type but read it anyway.
++             retval = new TTFTable();
++         }
++         retval.setTag( tag );
++         retval.setCheckSum( raf.readUnsignedInt() );
++         retval.setOffset( raf.readUnsignedInt() );
++         retval.setLength( raf.readUnsignedInt() );
++         return retval;
++     }
++ }
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/CIDFontType2Parser.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/CIDFontType2Parser.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/CIDFontType2Parser.java	1970-01-01 01:00:00.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/CIDFontType2Parser.java	2010-06-03 17:21:28.000000000 +0200
+***************
+*** 0 ****
+--- 1,119 ----
++ /*
++  * Licensed to the Apache Software Foundation (ASF) under one or more
++  * contributor license agreements.  See the NOTICE file distributed with
++  * this work for additional information regarding copyright ownership.
++  * The ASF licenses this file to You under the Apache License, Version 2.0
++  * (the "License"); you may not use this file except in compliance with
++  * the License.  You may obtain a copy of the License at
++  *
++  *      http://www.apache.org/licenses/LICENSE-2.0
++  *
++  * Unless required by applicable law or agreed to in writing, software
++  * distributed under the License is distributed on an "AS IS" BASIS,
++  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++  * See the License for the specific language governing permissions and
++  * limitations under the License.
++  */
++ package org.apache.fontbox.ttf;
++ 
++ import java.io.IOException;
++ import java.util.ArrayList;
++ import java.util.Iterator;
++ import java.util.List;
++ 
++ 
++ public class CIDFontType2Parser extends AbstractTTFParser
++ {   
++ 	public CIDFontType2Parser() {
++ 		super(false);
++ 	}
++ 
++ 	public CIDFontType2Parser(boolean isEmbedded) {
++ 		super(isEmbedded);
++ 	}
++ 
++ 	protected void parseTables(TrueTypeFont font, TTFDataStream raf) 
++ 	throws IOException {
++ 		List<TTFTable> initialized = new ArrayList<TTFTable>();
++ 		HeaderTable head = font.getHeader();
++ 		if (head == null) {
++ 			throw new IOException("head is mandatory");
++ 		}
++ 		raf.seek( head.getOffset() );
++ 		head.initData( font, raf );
++ 		initialized.add( head );
++ 
++ 		HorizontalHeaderTable hh = font.getHorizontalHeader();
++ 		if (hh == null) {
++ 			throw new IOException("hhead is mandatory");
++ 		}
++ 		raf.seek( hh.getOffset() );
++ 		hh.initData( font, raf );
++ 		initialized.add( hh );
++ 
++ 		MaximumProfileTable maxp = font.getMaximumProfile();
++ 		if (maxp != null) {
++ 			raf.seek( maxp.getOffset() );
++ 			maxp.initData( font, raf );
++ 			initialized.add( maxp );
++ 		} else {
++ 			throw new IOException("maxp is mandatory");
++ 		}
++ 
++ 		PostScriptTable post = font.getPostScript();
++ 		if (post != null) {
++ 			raf.seek( post.getOffset() );
++ 			post.initData( font, raf );
++ 			initialized.add( post );
++ 		} else if ( !isEmbedded ) {
++ 			// in an embedded font this table is optional
++ 			throw new IOException("post is mandatory");
++ 		}
++ 
++ 		IndexToLocationTable loc = font.getIndexToLocation();
++ 		if (loc == null) {
++ 			throw new IOException("loca is mandatory");
++ 		}
++ 		raf.seek( loc.getOffset() );
++ 		loc.initData( font, raf );
++ 		initialized.add( loc );
++ 
++ 		boolean cvt = false, prep = false, fpgm = false;
++ 		Iterator<TTFTable> iter = font.getTables().iterator();
++ 		while( iter.hasNext() )
++ 		{
++ 			TTFTable table = iter.next();
++ 			if( !initialized.contains( table ) )
++ 			{
++ 				raf.seek( table.getOffset() );
++ 				table.initData( font, raf );
++ 			}
++ 			if (table.getTag().startsWith("cvt")) {
++ 				cvt = true;
++ 			} else if ("prep".equals(table.getTag())) {
++ 				prep = true;
++ 			} else if ("fpgm".equals(table.getTag())) {
++ 				fpgm = true;
++ 			}
++ 		}   
++ 
++ 		// check others mandatory tables
++ 		if ( font.getGlyph() == null ){
++ 			throw new IOException("glyf is mandatory");
++ 		}
++ 		if ( font.getNaming() == null && !isEmbedded ){
++ 			throw new IOException("name is mandatory");
++ 		}
++ 		if ( font.getHorizontalMetrics() == null ){
++ 			throw new IOException("hmtx is mandatory");
++ 		}
++ 
++ 		if (isEmbedded) {
++ 			// in a embedded truetype font prep, cvt_ and fpgm tables 
++ 			// are mandatory
++ 			if (!fpgm) throw new IOException("fpgm is mandatory");
++ 			if (!prep) throw new IOException("prep is mandatory");
++ 			if (!cvt) throw new IOException("cvt_ is mandatory");
++ 		}
++ 	}
++ }
+\ Pas de fin de ligne à la fin du fichier.
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/CMAPEncodingEntry.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/CMAPEncodingEntry.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/CMAPEncodingEntry.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/CMAPEncodingEntry.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 17,22 ****
+--- 17,24 ----
+  package org.apache.fontbox.ttf;
+  
+  import java.io.IOException;
++ import java.util.HashMap;
++ import java.util.Map;
+  
+  /**
+   * An encoding entry for a cmap.
+***************
+*** 27,205 ****
+  public class CMAPEncodingEntry
+  {
+  
+!     private int platformId;
+!     private int platformEncodingId;
+!     private long subTableOffset;
+!     private int[] glyphIdToCharacterCode;
+!     /**
+!      * This will read the required data from the stream.
+!      * 
+!      * @param ttf The font that is being read.
+!      * @param data The stream to read the data from.
+!      * @throws IOException If there is an error reading the data.
+!      */
+!     public void initData( TrueTypeFont ttf, TTFDataStream data ) throws IOException
+!     {
+!         platformId = data.readUnsignedShort();
+!         platformEncodingId = data.readUnsignedShort();
+!         subTableOffset = data.readUnsignedInt();
+!     }
+!     
+!     /**
+!      * This will read the required data from the stream.
+!      * 
+!      * @param ttf The font that is being read.
+!      * @param data The stream to read the data from.
+!      * @throws IOException If there is an error reading the data.
+!      */
+!     public void initSubtable( TrueTypeFont ttf, TTFDataStream data ) throws IOException
+!     {
+!         data.seek( ttf.getCMAP().getOffset() + subTableOffset );
+!         int subtableFormat = data.readUnsignedShort();
+!         int length = data.readUnsignedShort();
+!         int version = data.readUnsignedShort();
+!         int numGlyphs = ttf.getMaximumProfile().getNumGlyphs();
+!         if( subtableFormat == 0 )
+!         {
+!             byte[] glyphMapping = data.read( 256 );
+!             glyphIdToCharacterCode = new int[256];
+!             for( int i=0;i<glyphMapping.length; i++ )
+!             {
+!                 glyphIdToCharacterCode[i]=(glyphMapping[i]+256)%256;
+!             }
+!         }
+!         else if( subtableFormat == 2 )
+!         {
+!             int[] subHeaderKeys = new int[256];
+!             for( int i=0; i<256; i++)
+!             {
+!                 subHeaderKeys[i] = data.readUnsignedShort();
+!             }
+!             int firstCode = data.readUnsignedShort();
+!             int entryCount = data.readUnsignedShort();
+!             short idDelta = data.readSignedShort();
+!             int idRangeOffset = data.readUnsignedShort();
+!             //BJL
+!             //HMM the TTF spec is not very clear about what is suppose to
+!             //happen here.  If you know please submit a patch or point
+!             //me to some better documentation.
+!             throw new IOException( "Not yet implemented:" + subtableFormat );
+!         }
+!         else if( subtableFormat == 4 )
+!         {
+!             int segCountX2 = data.readUnsignedShort();
+!             int segCount = segCountX2/2;
+!             int searchRange = data.readUnsignedShort();
+!             int entrySelector = data.readUnsignedShort();
+!             int rangeShift = data.readUnsignedShort();
+!             int[] endCount = data.readUnsignedShortArray( segCount );
+!             int reservedPad = data.readUnsignedShort();
+!             int[] startCount = data.readUnsignedShortArray( segCount );
+!             int[] idDelta = data.readUnsignedShortArray( segCount );
+!             int[] idRangeOffset = data.readUnsignedShortArray( segCount );
+!             
+!             //this is the final result
+!             //key=glyphId, value is character codes
+!             glyphIdToCharacterCode = new int[numGlyphs];
+!             
+!             long currentPosition = data.getCurrentPosition();
+!             
+!             for( int i=0; i<segCount; i++ )
+!             {
+!                 int start = startCount[i];
+!                 int end = endCount[i];
+!                 int delta = idDelta[i];
+!                 int rangeOffset = idRangeOffset[i];
+!                 if( start != 65535 && end != 65535 )
+!                 {
+!                     for( int j=start; j<=end; j++ )
+!                     {
+!                         if( rangeOffset == 0 )
+!                         {
+!                             glyphIdToCharacterCode[ ((j+delta)%65536) ]=j;
+!                         }
+!                         else
+!                         {
+!                             long glyphOffset = currentPosition +
+!                                 ((rangeOffset/2) + //idRangeOffset[i]/2 
+!                                 (j-start) + //(c - startCount[i])                                   
+!                                 (i-segCount))*2; //&idRangeOffset[i]); 
+!                             data.seek( glyphOffset );
+!                             int glyphIndex = data.readUnsignedShort();
+!                             if( glyphIndex != 0 )
+!                             {
+!                                 glyphIndex += delta;
+!                                 glyphIndex = glyphIndex % 65536;
+!                                 if( glyphIdToCharacterCode[glyphIndex] == 0 )
+!                                 {
+!                                     glyphIdToCharacterCode[glyphIndex] = j;
+!                                 }
+!                             }
+!                             
+!                         }
+!                     }
+!                 }
+!             }
+!         }
+!         else if( subtableFormat == 6 )
+!         {
+!             int firstCode = data.readUnsignedShort();
+!             int entryCount = data.readUnsignedShort();
+!             glyphIdToCharacterCode = new int[numGlyphs];
+!             int[] glyphIdArray = data.readUnsignedShortArray( entryCount );
+!             for( int i=0; i<entryCount; i++)
+!             {
+!                 glyphIdToCharacterCode[glyphIdArray[i]] = firstCode+i;
+!             }
+!         }
+!         else
+!         {
+!             throw new IOException( "Unknown cmap format:" + subtableFormat );
+!         }
+!     }
+!     
+! 
+!     /**
+!      * @return Returns the glyphIdToCharacterCode.
+!      */
+!     public int[] getGlyphIdToCharacterCode()
+!     {
+!         return glyphIdToCharacterCode;
+!     }
+!     /**
+!      * @param glyphIdToCharacterCodeValue The glyphIdToCharacterCode to set.
+!      */
+!     public void setGlyphIdToCharacterCode(int[] glyphIdToCharacterCodeValue)
+!     {
+!         this.glyphIdToCharacterCode = glyphIdToCharacterCodeValue;
+!     }
+!     
+!     /**
+!      * @return Returns the platformEncodingId.
+!      */
+!     public int getPlatformEncodingId()
+!     {
+!         return platformEncodingId;
+!     }
+!     /**
+!      * @param platformEncodingIdValue The platformEncodingId to set.
+!      */
+!     public void setPlatformEncodingId(int platformEncodingIdValue)
+!     {
+!         this.platformEncodingId = platformEncodingIdValue;
+!     }
+!     /**
+!      * @return Returns the platformId.
+!      */
+!     public int getPlatformId()
+!     {
+!         return platformId;
+!     }
+!     /**
+!      * @param platformIdValue The platformId to set.
+!      */
+!     public void setPlatformId(int platformIdValue)
+!     {
+!         this.platformId = platformIdValue;
+!     }
+! }
+--- 29,580 ----
+  public class CMAPEncodingEntry
+  {
+  
+! 	private int platformId;
+! 	private int platformEncodingId;
+! 	private long subTableOffset;
+! 
+! 	private int[] glyphIdToCharacterCode;
+! 	private Map<Integer, Integer> characterCodeToGlyphId = new HashMap<Integer, Integer>();
+! 
+! 	/**
+! 	 * This will read the required data from the stream.
+! 	 * 
+! 	 * @param ttf The font that is being read.
+! 	 * @param data The stream to read the data from.
+! 	 * @throws IOException If there is an error reading the data.
+! 	 */
+! 	public void initData( TrueTypeFont ttf, TTFDataStream data ) throws IOException
+! 	{
+! 		platformId = data.readUnsignedShort();
+! 		platformEncodingId = data.readUnsignedShort();
+! 		subTableOffset = data.readUnsignedInt();
+! 	}
+! 
+! 	/**
+! 	 * This will read the required data from the stream.
+! 	 * 
+! 	 * @param ttf The font that is being read.
+! 	 * @param data The stream to read the data from.
+! 	 * @throws IOException If there is an error reading the data.
+! 	 */
+! 	public void initSubtable( TrueTypeFont ttf, TTFDataStream data ) throws IOException
+! 	{
+! 		data.seek( ttf.getCMAP().getOffset() + subTableOffset );
+! 		int subtableFormat = data.readUnsignedShort();
+! 		long length;
+! 		long version;
+! 		int numGlyphs;
+! 		if (subtableFormat < 8) {
+! 			length = data.readUnsignedShort();
+! 			version = data.readUnsignedShort();
+! 			numGlyphs = ttf.getMaximumProfile().getNumGlyphs();
+! 		} else {
+! 			// read an other UnsignedShort to read a Fixed32
+! 			data.readUnsignedShort();
+! 			length = data.readUnsignedInt();
+! 			version = data.readUnsignedInt();
+! 			numGlyphs = ttf.getMaximumProfile().getNumGlyphs();			
+! 		}
+! 
+! 		switch (subtableFormat) {
+! 		case 0:
+! 			processSubtype0(ttf, data);
+! 			break;
+! 		case 2:
+! 			processSubtype2(ttf, data, numGlyphs);
+! 			break;
+! 		case 4:
+! 			processSubtype4(ttf, data, numGlyphs);
+! 			break;
+! 		case 6:
+! 			processSubtype6(ttf, data, numGlyphs);
+! 			break;
+! 		case 8:
+! 			processSubtype8(ttf, data, numGlyphs);
+! 			break;
+! 		case 10:
+! 			processSubtype10(ttf, data, numGlyphs);
+! 			break;
+! 		case 12:
+! 			processSubtype12(ttf, data, numGlyphs);
+! 			break;
+! 		case 13:
+! 			processSubtype13(ttf, data, numGlyphs);	
+! 			break;
+! 		case 14:
+! 			processSubtype14(ttf, data, numGlyphs);
+! 			break;
+! 		default:
+! 			throw new IOException( "Unknown cmap format:" + subtableFormat );	
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype8( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		// --- is32 is a 65536 BITS array ( = 8192 BYTES) 
+! 		int[] is32 = data.readUnsignedByteArray(8192);
+! 		long nbGroups = data.readUnsignedInt();
+! 
+! 		// --- nbGroups shouldn't be greater than 65536
+! 		if (nbGroups > 65536) {
+! 			throw new IOException("CMap ( Subtype8 ) is invalid");
+! 		}
+! 
+! 		glyphIdToCharacterCode = new int[numGlyphs];
+! 		// -- Read all sub header
+! 		for (long i = 0; i <= nbGroups ; ++i ) 
+! 		{
+! 			long firstCode = data.readUnsignedInt();
+! 			long endCode = data.readUnsignedInt();
+! 			long startGlyph = data.readUnsignedInt();
+! 
+! 			// -- process simple validation
+! 			if (firstCode > endCode || 0 > firstCode) {
+! 				throw new IOException("Range invalid");
+! 			}
+! 
+! 			for (long j = firstCode; j <= endCode; ++j) {
+! 				// -- Convert the Character code in decimal
+! 				if (j > Integer.MAX_VALUE) {
+! 					throw new IOException("[Sub Format 8] Invalid Character code");
+! 				}
+! 
+! 				int currentCharCode;
+! 				if ( (is32[ (int)j / 8 ] & (1 << ((int)j % 8 ))) == 0) {
+! 					currentCharCode = (int)j;
+! 				} else {
+! 					// the character code uses a 32bits format 
+! 					// convert it in decimal : see http://www.unicode.org/faq//utf_bom.html#utf16-4
+! 					long LEAD_OFFSET = 0xD800 - (0x10000 >> 10);
+! 				    long SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
+! 				    long lead = LEAD_OFFSET + (j >> 10);
+! 				    long trail = 0xDC00 + (j & 0x3FF);
+! 
+! 				    long codepoint = (lead << 10) + trail + SURROGATE_OFFSET;
+! 				    if (codepoint > Integer.MAX_VALUE) {
+! 						throw new IOException("[Sub Format 8] Invalid Character code");
+! 					}
+! 				    currentCharCode = (int)codepoint;
+! 				}
+! 
+! 				long glyphIndex = startGlyph + (j-firstCode);
+! 				if (glyphIndex > numGlyphs || glyphIndex > Integer.MAX_VALUE) {
+! 					throw new IOException("CMap contains an invalid glyph index");
+! 				}
+! 
+! 				glyphIdToCharacterCode[(int)glyphIndex] = currentCharCode;
+! 				characterCodeToGlyphId.put(currentCharCode, (int)glyphIndex);
+! 			}
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype10( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		long startCode = data.readUnsignedInt();
+! 		long numChars = data.readUnsignedInt();
+! 		if (numChars > Integer.MAX_VALUE) {
+! 			throw new IOException("Invalid number of Characters");
+! 		}
+! 
+! 		if ( startCode < 0 || startCode > 0x0010FFFF 
+! 				|| (startCode + numChars) > 0x0010FFFF
+! 				|| ((startCode + numChars) >= 0x0000D800 && (startCode + numChars) <= 0x0000DFFF)) {
+! 			throw new IOException("Invalid Characters codes");
+! 		}
+! 
+! 		glyphIdToCharacterCode = new int[numGlyphs];
+! 		int[] glyphs = data.readUnsignedShortArray((int)numChars);
+! 		for (int i = 0; i < numChars; ++i) {
+! 			int glyphIndex = glyphs[i];
+! 			if (glyphIndex > numGlyphs) {
+! 				throw new IOException("Invalid GlyphId");	
+! 			}
+! 			this.glyphIdToCharacterCode[glyphIndex] = (int)(startCode+i);
+! 			this.characterCodeToGlyphId.put((int)(startCode+i), glyphIndex);
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype12( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		long nbGroups = data.readUnsignedInt();
+! 		glyphIdToCharacterCode = new int[numGlyphs];
+! 		for (long i = 0; i <= nbGroups ; ++i ) 
+! 		{
+! 			long firstCode = data.readUnsignedInt();
+! 			long endCode = data.readUnsignedInt();
+! 			long startGlyph = data.readUnsignedInt();
+! 
+! 			if ( firstCode < 0 || firstCode > 0x0010FFFF 
+! 					|| ( firstCode >= 0x0000D800 && firstCode <= 0x0000DFFF ) ) {
+! 				throw new IOException("Invalid Characters codes");
+! 			}
+! 			
+! 			if ( endCode > 0 && (endCode < firstCode || endCode > 0x0010FFFF 
+! 					|| ( endCode >= 0x0000D800 && endCode <= 0x0000DFFF ) ) ) {
+! 				throw new IOException("Invalid Characters codes");
+! 			}
+! 			
+! 			for (long j = 0; j <= (endCode - firstCode); ++j) {
+! 
+! 				if ( (firstCode + j) > Integer.MAX_VALUE ) {
+! 					throw new IOException("Character Code greater than Integer.MAX_VALUE");					
+! 				}
+! 				
+! 				long glyphIndex = (startGlyph + j);
+! 				if (glyphIndex > numGlyphs || glyphIndex > Integer.MAX_VALUE) {
+! 					throw new IOException("CMap contains an invalid glyph index");
+! 				}
+! 				glyphIdToCharacterCode[(int)glyphIndex] = (int)(firstCode + j);
+! 				characterCodeToGlyphId.put((int)(firstCode + j), (int)glyphIndex);
+! 			}
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype13( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		long nbGroups = data.readUnsignedInt();
+! 		for (long i = 0; i <= nbGroups ; ++i ) 
+! 		{
+! 			long firstCode = data.readUnsignedInt();
+! 			long endCode = data.readUnsignedInt();
+! 			long glyphId = data.readUnsignedInt();
+! 
+! 			if (glyphId > numGlyphs) {
+! 				throw new IOException("CMap contains an invalid glyph index");	
+! 			}
+! 			
+! 			if ( firstCode < 0 || firstCode > 0x0010FFFF 
+! 					|| ( firstCode >= 0x0000D800 && firstCode <= 0x0000DFFF ) ) {
+! 				throw new IOException("Invalid Characters codes");
+! 			}
+! 			
+! 			if ( endCode > 0 && (endCode < firstCode || endCode > 0x0010FFFF 
+! 					|| ( endCode >= 0x0000D800 && endCode <= 0x0000DFFF )) ) {
+! 				throw new IOException("Invalid Characters codes");
+! 			}
+! 			
+! 			for (long j = 0; j <= (endCode - firstCode); ++j) {
+! 
+! 				if ( (firstCode + j) > Integer.MAX_VALUE ) {
+! 					throw new IOException("Character Code greater than Integer.MAX_VALUE");					
+! 				}
+! 				glyphIdToCharacterCode[(int)glyphId] = (int)(firstCode + j);
+! 				characterCodeToGlyphId.put((int)(firstCode + j), (int)glyphId);
+! 			}
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype14( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		throw new IOException("CMap subtype 14 not yet implemented");
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype6( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		int firstCode = data.readUnsignedShort();
+! 		int entryCount = data.readUnsignedShort();
+! 		glyphIdToCharacterCode = new int[numGlyphs];
+! 		int[] glyphIdArray = data.readUnsignedShortArray( entryCount );
+! 		for( int i=0; i<entryCount; i++)
+! 		{
+! 			glyphIdToCharacterCode[glyphIdArray[i]] = firstCode+i;
+! 			characterCodeToGlyphId.put((firstCode+i), glyphIdArray[i]);
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype4( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		int segCountX2 = data.readUnsignedShort();
+! 		int segCount = segCountX2/2;
+! 		int searchRange = data.readUnsignedShort();
+! 		int entrySelector = data.readUnsignedShort();
+! 		int rangeShift = data.readUnsignedShort();
+! 		int[] endCount = data.readUnsignedShortArray( segCount );
+! 		int reservedPad = data.readUnsignedShort();
+! 		int[] startCount = data.readUnsignedShortArray( segCount );
+! 		int[] idDelta = data.readUnsignedShortArray( segCount );
+! 		int[] idRangeOffset = data.readUnsignedShortArray( segCount );
+! 
+! 		//this is the final result
+! 		//key=glyphId, value is character codes
+! 		glyphIdToCharacterCode = new int[numGlyphs];
+! 
+! 		long currentPosition = data.getCurrentPosition();
+! 
+! 		for( int i=0; i<segCount; i++ )
+! 		{
+! 			int start = startCount[i];
+! 			int end = endCount[i];
+! 			int delta = idDelta[i];
+! 			int rangeOffset = idRangeOffset[i];
+! 			if( start != 65535 && end != 65535 )
+! 			{
+! 				for( int j=start; j<=end; j++ )
+! 				{
+! 					if( rangeOffset == 0 )
+! 					{
+! 						glyphIdToCharacterCode[ ((j+delta)%65536) ]=j;
+! 						characterCodeToGlyphId.put(j, ((j+delta)%65536));
+! 					}
+! 					else
+! 					{
+! 						long glyphOffset = currentPosition +
+! 						((rangeOffset/2) + //idRangeOffset[i]/2 
+! 								(j-start) + //(c - startCount[i])                                   
+! 								(i-segCount))*2; //&idRangeOffset[i]); 
+! 								data.seek( glyphOffset );
+! 								int glyphIndex = data.readUnsignedShort();
+! 								if( glyphIndex != 0 )
+! 								{
+! 									glyphIndex += delta;
+! 									glyphIndex = glyphIndex % 65536;
+! 									if( glyphIdToCharacterCode[glyphIndex] == 0 )
+! 									{
+! 										glyphIdToCharacterCode[glyphIndex] = j;
+! 										characterCodeToGlyphId.put(j, glyphIndex);
+! 									}
+! 								}
+! 
+! 					}
+! 				}
+! 			}
+! 		}
+! 	}
+! 	
+! 	/**
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @param numGlyphs
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype2( TrueTypeFont ttf, TTFDataStream data, int numGlyphs ) 
+! 	throws IOException {
+! 		int[] subHeaderKeys = new int[256];
+! 		// ---- keep the Max Index of the SubHeader array to know its length
+! 		int maxSubHeaderIndex = 0;
+! 		for( int i=0; i<256; i++)
+! 		{
+! 			subHeaderKeys[i] = data.readUnsignedShort();
+! 			maxSubHeaderIndex = Math.max(maxSubHeaderIndex, (int)(subHeaderKeys[i]/8));
+! 		}
+! 
+! 		// ---- Read all SubHeaders to avoid useless seek on DataSource
+! 		SubHeader[] subHeaders = new SubHeader[maxSubHeaderIndex + 1]; 
+! 		for (int i = 0; i <= maxSubHeaderIndex ; ++i ) 
+! 		{
+! 			int firstCode = data.readUnsignedShort();
+! 			int entryCount = data.readUnsignedShort();
+! 			short idDelta = data.readSignedShort();
+! 			int idRangeOffset = data.readUnsignedShort();
+! 			subHeaders[i] = new SubHeader(firstCode, entryCount, idDelta, idRangeOffset);
+! 		}
+! 
+! 		long startGlyphIndexOffset = data.getCurrentPosition();
+! 		glyphIdToCharacterCode = new int[numGlyphs];
+! 		for ( int i = 0; i <= maxSubHeaderIndex ; ++i )
+! 		{
+! 			SubHeader sh = subHeaders[i];
+! 			int firstCode = sh.getFirstCode();
+! 			for ( int j = 0 ; j < sh.getEntryCount() ; ++j)
+! 			{
+! 				// ---- compute the Character Code
+! 				int charCode = ( i * 8 );
+! 				charCode = (charCode << 8 ) + (firstCode + j);
+! 
+! 				// ---- Go to the CharacterCOde position in the Sub Array 
+! 				// 		of the glyphIndexArray 
+! 				// 		glyphIndexArray contains Unsigned Short so add (j * 2) bytes 
+! 				//      at the index position
+! 				data.seek(startGlyphIndexOffset + sh.getIdRangeOffset() + (j*2));
+! 				int p = data.readUnsignedShort();
+! 				// ---- compute the glyphIndex 
+! 				p = p + sh.getIdDelta() % 65536;
+! 
+! 				glyphIdToCharacterCode[p] = charCode;
+! 				characterCodeToGlyphId.put(charCode, p);
+! 			}
+! 		}
+! 	}
+! 	
+! 	/**
+! 	 * Initialize the CMapEntry when it is a subtype 0
+! 	 * 
+! 	 * @param ttf
+! 	 * @param data
+! 	 * @throws IOException
+! 	 */
+! 	protected void processSubtype0( TrueTypeFont ttf, TTFDataStream data ) 
+! 	throws IOException {
+! 		byte[] glyphMapping = data.read( 256 );
+! 		glyphIdToCharacterCode = new int[256];
+! 		for( int i=0;i < glyphMapping.length; i++ )
+! 		{
+! 			int glyphIndex = (glyphMapping[i]+256)%256;
+! 			glyphIdToCharacterCode[glyphIndex]=i;
+! 			characterCodeToGlyphId.put(i, glyphIndex);
+! 		}
+! 	}
+! 
+! 	/**
+! 	 * @return Returns the glyphIdToCharacterCode.
+! 	 */
+! 	public int[] getGlyphIdToCharacterCode()
+! 	{
+! 		return glyphIdToCharacterCode;
+! 	}
+! 	/**
+! 	 * @param glyphIdToCharacterCodeValue The glyphIdToCharacterCode to set.
+! 	 */
+! 	public void setGlyphIdToCharacterCode(int[] glyphIdToCharacterCodeValue)
+! 	{
+! 		this.glyphIdToCharacterCode = glyphIdToCharacterCodeValue;
+! 	}
+! 
+! 	/**
+! 	 * @return Returns the platformEncodingId.
+! 	 */
+! 	public int getPlatformEncodingId()
+! 	{
+! 		return platformEncodingId;
+! 	}
+! 	/**
+! 	 * @param platformEncodingIdValue The platformEncodingId to set.
+! 	 */
+! 	public void setPlatformEncodingId(int platformEncodingIdValue)
+! 	{
+! 		this.platformEncodingId = platformEncodingIdValue;
+! 	}
+! 	/**
+! 	 * @return Returns the platformId.
+! 	 */
+! 	public int getPlatformId()
+! 	{
+! 		return platformId;
+! 	}
+! 	/**
+! 	 * @param platformIdValue The platformId to set.
+! 	 */
+! 	public void setPlatformId(int platformIdValue)
+! 	{
+! 		this.platformId = platformIdValue;
+! 	}
+! 
+! 	/**
+! 	 * Returns the GlyphId linked with the given character code. 
+! 	 * @param characterCode
+! 	 * @return
+! 	 */
+! 	public int getGlyphId(int characterCode) {
+! 		if (this.characterCodeToGlyphId.containsKey(characterCode)) {
+! 			return this.characterCodeToGlyphId.get(characterCode);
+! 		} else {
+! 			return 0;
+! 		}
+! 	}
+! 
+! 
+! 	/**
+! 	 * Class used to manage CMap - Format 2
+! 	 */
+! 	private class SubHeader {
+! 
+! 		private int firstCode;
+! 		private int entryCount;
+! 		/**
+! 		 * used to compute the GlyphIndex :
+! 		 * P = glyphIndexArray.SubArray[pos]
+! 		 * GlyphIndex = P + idDelta % 65536
+! 		 */
+! 		private short idDelta;
+! 		/**
+! 		 * Number of bytes to skip to reach the firstCode in the 
+! 		 * glyphIndexArray 
+! 		 */
+! 		private int idRangeOffset;
+! 
+! 		private SubHeader(int firstCode, int entryCount, short idDelta, int idRangeOffset) {
+! 			this.firstCode = firstCode;
+! 			this.entryCount = entryCount;
+! 			this.idDelta = idDelta;
+! 			this.idRangeOffset = idRangeOffset;
+! 		}
+! 
+! 		/**
+! 		 * @return the firstCode
+! 		 */
+! 		private int getFirstCode() {
+! 			return firstCode;
+! 		}
+! 
+! 		/**
+! 		 * @return the entryCount
+! 		 */
+! 		private int getEntryCount() {
+! 			return entryCount;
+! 		}
+! 
+! 		/**
+! 		 * @return the idDelta
+! 		 */
+! 		private short getIdDelta() {
+! 			return idDelta;
+! 		}
+! 
+! 		/**
+! 		 * @return the idRangeOffset
+! 		 */
+! 		private int getIdRangeOffset() {
+! 			return idRangeOffset;
+! 		}
+! 	}
+! }
+\ Pas de fin de ligne à la fin du fichier.
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/GlyphTable.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/GlyphTable.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/GlyphTable.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/GlyphTable.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 44,54 ****
+      {
+          MaximumProfileTable maxp = ttf.getMaximumProfile();
+          IndexToLocationTable loc = ttf.getIndexToLocation();
+-         PostScriptTable post = ttf.getPostScript();
+          long[] offsets = loc.getOffsets();
+          int numGlyphs = maxp.getNumGlyphs();
+          glyphs = new GlyphData[numGlyphs];
+-         String[] glyphNames = post.getGlyphNames(); 
+          for( int i=0; i<numGlyphs-1; i++ )
+          {
+              GlyphData glyph = new GlyphData();
+--- 44,52 ----
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/TTFDataStream.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/TTFDataStream.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/TTFDataStream.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/TTFDataStream.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 126,131 ****
+--- 126,148 ----
+       * Read an unsigned short array.
+       * 
+       * @param length The length of the array to read.
++      * @return An unsigned byte array.
++      * @throws IOException If there is an error reading the data.
++      */
++     public int[] readUnsignedByteArray( int length ) throws IOException
++     {
++         int[] array = new int[ length ];
++         for( int i=0; i<length; i++ )
++         {
++             array[i] = read();
++         }
++         return array;
++     }
++     
++     /**
++      * Read an unsigned short array.
++      * 
++      * @param length The length of the array to read.
+       * @return An unsigned short array.
+       * @throws IOException If there is an error reading the data.
+       */
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/TTFParser.java pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/TTFParser.java
+*** pdfbox-1.1.0/fontbox/src/main/java/org/apache/fontbox/ttf/TTFParser.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/fontbox/src/main/java/org/apache/fontbox/ttf/TTFParser.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 16,28 ****
+   */
+  package org.apache.fontbox.ttf;
+  
+- import java.io.File;
+  import java.io.IOException;
+- import java.io.InputStream;
+- 
+- import java.util.ArrayList;
+- import java.util.Iterator;
+- import java.util.List;
+  
+  /**
+   * A true type font file parser.
+--- 16,22 ----
+***************
+*** 30,217 ****
+   * @author Ben Litchfield (ben@benlitchfield.com)
+   * @version $Revision: 1.2 $
+   */
+! public class TTFParser
+  {   
+!     /**
+!      * A simple command line program to test parsing of a TTF file. <br/>
+!      * usage: java org.pdfbox.ttf.TTFParser &lt;ttf-file&gt;
+!      * 
+!      * @param args The command line arguments.
+!      * 
+!      * @throws IOException If there is an error while parsing the font file.
+!      */
+!     public static void main( String[] args ) throws IOException
+!     {
+!         if( args.length != 1 )
+!         {
+!             System.err.println( "usage: java org.pdfbox.ttf.TTFParser <ttf-file>" );
+!             System.exit( -1 );
+!         }
+!         TTFParser parser = new TTFParser();
+!         TrueTypeFont font = parser.parseTTF( args[0] );
+!         System.out.println( "Font:" + font );
+!     }
+!     
+!     /**
+!      * Parse a file and get a true type font.
+!      * @param ttfFile The TTF file.
+!      * @return A true type font.
+!      * @throws IOException If there is an error parsing the true type font.
+!      */
+!     public TrueTypeFont parseTTF( String ttfFile ) throws IOException
+!     {
+!         RAFDataStream raf = new RAFDataStream( ttfFile, "r" );
+!         return parseTTF( raf );
+!     }
+!     
+!     /**
+!      * Parse a file and get a true type font.
+!      * @param ttfFile The TTF file.
+!      * @return A true type font.
+!      * @throws IOException If there is an error parsing the true type font.
+!      */
+!     public TrueTypeFont parseTTF( File ttfFile ) throws IOException
+!     {
+!         RAFDataStream raf = new RAFDataStream( ttfFile, "r" );
+!         return parseTTF( raf );
+!     }
+!     
+!     /**
+!      * Parse a file and get a true type font.
+!      * @param ttfData The TTF data to parse.
+!      * @return A true type font.
+!      * @throws IOException If there is an error parsing the true type font.
+!      */
+!     public TrueTypeFont parseTTF( InputStream ttfData ) throws IOException
+!     {
+!         return parseTTF( new MemoryTTFDataStream( ttfData ));
+!     }
+!     
+!     /**
+!      * Parse a file and get a true type font.
+!      * @param raf The TTF file.
+!      * @return A true type font.
+!      * @throws IOException If there is an error parsing the true type font.
+!      */
+!     public TrueTypeFont parseTTF( TTFDataStream raf ) throws IOException
+!     {
+!         TrueTypeFont font = new TrueTypeFont( raf );
+!         font.setVersion( raf.read32Fixed() );
+!         int numberOfTables = raf.readUnsignedShort();
+!         int searchRange = raf.readUnsignedShort();
+!         int entrySelector = raf.readUnsignedShort();
+!         int rangeShift = raf.readUnsignedShort();
+!         for( int i=0; i<numberOfTables; i++ )
+!         {
+!             TTFTable table = readTableDirectory( raf );   
+!             font.addTable( table );
+!         }
+!         List<TTFTable> initialized = new ArrayList<TTFTable>();
+!         //need to initialize a couple tables in a certain order
+!         HeaderTable head = font.getHeader();
+!         raf.seek( head.getOffset() );
+!         head.initData( font, raf );
+!         initialized.add( head );
+!         
+!         
+!         HorizontalHeaderTable hh = font.getHorizontalHeader();
+!         raf.seek( hh.getOffset() );
+!         hh.initData( font, raf );
+!         initialized.add( hh );
+!         
+!         MaximumProfileTable maxp = font.getMaximumProfile();
+!         raf.seek( maxp.getOffset() );
+!         maxp.initData( font, raf );
+!         initialized.add( maxp );
+!         
+!         PostScriptTable post = font.getPostScript();
+!         raf.seek( post.getOffset() );
+!         post.initData( font, raf );
+!         initialized.add( post );
+!         
+!         IndexToLocationTable loc = font.getIndexToLocation();
+!         raf.seek( loc.getOffset() );
+!         loc.initData( font, raf );
+!         initialized.add( loc );
+!         
+!         Iterator<TTFTable> iter = font.getTables().iterator();
+!         while( iter.hasNext() )
+!         {
+!             TTFTable table = iter.next();
+!             if( !initialized.contains( table ) )
+!             {
+!                 raf.seek( table.getOffset() );
+!                 table.initData( font, raf );
+!             }
+!         }
+!         return font;
+!     }
+!     
+!     private TTFTable readTableDirectory( TTFDataStream raf ) throws IOException
+!     {
+!         TTFTable retval = null;
+!         String tag = raf.readString( 4 );
+!         if( tag.equals( CMAPTable.TAG ) )
+!         {
+!             retval = new CMAPTable();
+!         }
+!         else if( tag.equals( GlyphTable.TAG ) )
+!         {
+!             retval = new GlyphTable();
+!         }
+!         else if( tag.equals( HeaderTable.TAG ) )
+!         {
+!             retval = new HeaderTable();
+!         }
+!         else if( tag.equals( HorizontalHeaderTable.TAG ) )
+!         {
+!             retval = new HorizontalHeaderTable();
+!         }
+!         else if( tag.equals( HorizontalMetricsTable.TAG ) )
+!         {
+!             retval = new HorizontalMetricsTable();
+!         }
+!         else if( tag.equals( IndexToLocationTable.TAG ) )
+!         {
+!             retval = new IndexToLocationTable();
+!         }
+!         else if( tag.equals( MaximumProfileTable.TAG ) )
+!         {
+!             retval = new MaximumProfileTable();
+!         }
+!         else if( tag.equals( NamingTable.TAG ) )
+!         {
+!             retval = new NamingTable();
+!         }
+!         else if( tag.equals( OS2WindowsMetricsTable.TAG ) )
+!         {
+!             retval = new OS2WindowsMetricsTable();
+!         }
+!         else if( tag.equals( PostScriptTable.TAG ) )
+!         {
+!             retval = new PostScriptTable();
+!         }
+!         else if( tag.equals( GlyphTable.TAG ) )
+!         {
+!             retval = new GlyphTable();
+!         }
+!         else if( tag.equals( GlyphTable.TAG ) )
+!         {
+!             retval = new GlyphTable();
+!         }
+!         else if( tag.equals( DigitalSignatureTable.TAG ) )
+!         {
+!             retval = new DigitalSignatureTable();
+!         }
+!         else
+!         {
+!             //unknown table type but read it anyway.
+!             retval = new TTFTable();
+!         }
+!         retval.setTag( tag );
+!         retval.setCheckSum( raf.readUnsignedInt() );
+!         retval.setOffset( raf.readUnsignedInt() );
+!         retval.setLength( raf.readUnsignedInt() );
+!         return retval;
+!     }
+  }
+\ Pas de fin de ligne à la fin du fichier.
+--- 24,68 ----
+   * @author Ben Litchfield (ben@benlitchfield.com)
+   * @version $Revision: 1.2 $
+   */
+! public class TTFParser extends CIDFontType2Parser
+  {   
+! 	public TTFParser() {
+! 		super(false);
+! 	}
+! 
+! 	public TTFParser(boolean isEmbedded) {
+! 		super(isEmbedded);
+! 	}
+! 
+! 	/**
+! 	 * A simple command line program to test parsing of a TTF file. <br/>
+! 	 * usage: java org.pdfbox.ttf.TTFParser &lt;ttf-file&gt;
+! 	 * 
+! 	 * @param args The command line arguments.
+! 	 * 
+! 	 * @throws IOException If there is an error while parsing the font file.
+! 	 */
+! 	public static void main( String[] args ) throws IOException
+! 	{
+! 		if( args.length != 1 )
+! 		{
+! 			System.err.println( "usage: java org.pdfbox.ttf.TTFParser <ttf-file>" );
+! 			System.exit( -1 );
+! 		}
+! 		TTFParser parser = new TTFParser();
+! 		TrueTypeFont font = parser.parseTTF( args[0] );
+! 		System.out.println( "Font:" + font );
+! 	}
+! 
+! 
+! 	protected void parseTables(TrueTypeFont font, TTFDataStream raf) 
+! 	throws IOException {
+! 		super.parseTables(font, raf);
+! 
+! 		// check others mandatory tables
+! 		if ( font.getCMAP() == null ){
+! 			throw new IOException("cmap is mandatory");
+! 		}
+! 
+! 	}
+  }
+\ Pas de fin de ligne à la fin du fichier.
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/jempbox/pom.xml pdfbox-reactor/jempbox/pom.xml
+*** pdfbox-1.1.0/jempbox/pom.xml	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/jempbox/pom.xml	2010-06-03 17:37:47.000000000 +0200
+***************
+*** 24,30 ****
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0</version>
+      <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+  
+--- 24,30 ----
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0-awl-3</version>
+      <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+  
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaIptc4xmpCore.java pdfbox-reactor/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaIptc4xmpCore.java
+*** pdfbox-1.1.0/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaIptc4xmpCore.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaIptc4xmpCore.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 23,30 ****
+  /**
+   * Define XMP properties used with IPTC specification.
+   * 
+!  * @author $Author: benlitchfield $
+!  * @version $Revision: 1.3 $
+   */
+  public class XMPSchemaIptc4xmpCore extends XMPSchema
+  {
+--- 23,30 ----
+  /**
+   * Define XMP properties used with IPTC specification.
+   * 
+!  * @author $Author: fr19900 $
+!  * @version $Revision: 1.2 $
+   */
+  public class XMPSchemaIptc4xmpCore extends XMPSchema
+  {
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaPhotoshop.java pdfbox-reactor/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaPhotoshop.java
+*** pdfbox-1.1.0/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaPhotoshop.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/jempbox/src/main/java/org/apache/jempbox/xmp/XMPSchemaPhotoshop.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 23,29 ****
+  /**
+   * Define XMP properties used with Adobe Photoshop documents.
+   * 
+!  * @author $Author: benlitchfield $
+   * @version $Revision: 1.2 $
+   */
+  public class XMPSchemaPhotoshop extends XMPSchema
+--- 23,29 ----
+  /**
+   * Define XMP properties used with Adobe Photoshop documents.
+   * 
+!  * @author $Author: fr19900 $
+   * @version $Revision: 1.2 $
+   */
+  public class XMPSchemaPhotoshop extends XMPSchema
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/jempbox/src/test/java/org/apache/jempbox/xmp/AllTests.java pdfbox-reactor/jempbox/src/test/java/org/apache/jempbox/xmp/AllTests.java
+*** pdfbox-1.1.0/jempbox/src/test/java/org/apache/jempbox/xmp/AllTests.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/jempbox/src/test/java/org/apache/jempbox/xmp/AllTests.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 22,29 ****
+  /**
+   * Suite for all tests in test.jempbox.xmp.
+   * 
+!  * @author $Author: coezbek $
+!  * @version $Revision: 1.1 $ ($Date: 2006/12/30 17:27:46 $)
+   * 
+   */
+  public class AllTests
+--- 22,29 ----
+  /**
+   * Suite for all tests in test.jempbox.xmp.
+   * 
+!  * @author $Author: fr19900 $
+!  * @version $Revision: 1.2 $ ($Date: 2010/06/03 15:16:05 $)
+   * 
+   */
+  public class AllTests
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/jempbox/src/test/java/org/apache/jempbox/xmp/XMPSchemaTest.java pdfbox-reactor/jempbox/src/test/java/org/apache/jempbox/xmp/XMPSchemaTest.java
+*** pdfbox-1.1.0/jempbox/src/test/java/org/apache/jempbox/xmp/XMPSchemaTest.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/jempbox/src/test/java/org/apache/jempbox/xmp/XMPSchemaTest.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 35,42 ****
+  /**
+   * Tests for the XMPSchema class.
+   * 
+!  * @author $Author: benlitchfield $
+!  * @version $Revision: 1.2 $ ($Date: 2007/02/28 02:30:30 $)
+   * 
+   */
+  public class XMPSchemaTest extends TestCase
+--- 35,42 ----
+  /**
+   * Tests for the XMPSchema class.
+   * 
+!  * @author $Author: fr19900 $
+!  * @version $Revision: 1.2 $ ($Date: 2010/06/03 15:16:05 $)
+   * 
+   */
+  public class XMPSchemaTest extends TestCase
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/parent/pom.xml pdfbox-reactor/parent/pom.xml
+*** pdfbox-1.1.0/parent/pom.xml	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/parent/pom.xml	2010-06-03 17:37:47.000000000 +0200
+***************
+*** 28,34 ****
+  
+    <groupId>org.apache.pdfbox</groupId>
+    <artifactId>pdfbox-parent</artifactId>
+!   <version>1.1.0</version>
+    <packaging>pom</packaging>
+  
+    <name>PDFBox parent</name>
+--- 28,34 ----
+  
+    <groupId>org.apache.pdfbox</groupId>
+    <artifactId>pdfbox-parent</artifactId>
+!   <version>1.1.0-awl-3</version>
+    <packaging>pom</packaging>
+  
+    <name>PDFBox parent</name>
+
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/build.xml pdfbox-reactor/pdfbox/build.xml
+*** pdfbox-1.1.0/pdfbox/build.xml	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/build.xml	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 196,201 ****
+--- 196,202 ----
+              </patternset>
+              <mapper type="flatten"/>
+          </unjar>
++     	<!--
+          <unjar src="${adobefiles.additional.jar}" dest="${dest.dir}/Resources/cmap">
+              <patternset>
+                  <include name="ac15/CMap/*"/>
+***************
+*** 213,218 ****
+--- 214,220 ----
+          <unjar src="${adobefiles.removed.jar}" dest="${dest.dir}/Resources/cmap">
+              <mapper type="flatten"/>
+          </unjar>
++         -->
+          <unjar src="${adobefiles.jar}" dest="${dest.dir}/Resources/afm">
+              <patternset>
+                  <include name="com/adobe/pdf/pcfi/afm/*"/>
+***************
+*** 358,363 ****
+--- 360,366 ----
+      <target name="downloadfile" unless="exist" depends="testexist">
+          <dirname property="destdir" file="${destfile}"/>
+          <mkdir dir="${destdir}"/>
++     	<setproxy proxyhost="localhost" proxyport="8118"/>
+          <get src="${sourcefile}" dest="${destfile}"/>
+      </target>
+  
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/pom.xml pdfbox-reactor/pdfbox/pom.xml
+*** pdfbox-1.1.0/pdfbox/pom.xml	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/pom.xml	2010-06-03 17:37:47.000000000 +0200
+***************
+*** 23,29 ****
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0</version>
+      <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+  
+--- 23,29 ----
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0-awl-3</version>
+      <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+  
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/encoding/MacRomanEncoding.java pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/encoding/MacRomanEncoding.java
+*** pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/encoding/MacRomanEncoding.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/encoding/MacRomanEncoding.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 119,125 ****
+          addCharacterEncoding( 072, COSName.getPDFName( "colon" ) );
+          addCharacterEncoding( 054, COSName.getPDFName( "comma" ) );
+          addCharacterEncoding( 0251, COSName.getPDFName( "copyright" ) );
+!         addCharacterEncoding( 0333, COSName.getPDFName( "currency1" ) );
+          addCharacterEncoding( 0144, COSName.getPDFName( "d" ) );
+          addCharacterEncoding( 0240, COSName.getPDFName( "dagger" ) );
+          addCharacterEncoding( 0340, COSName.getPDFName( "daggerdbl" ) );
+--- 119,125 ----
+          addCharacterEncoding( 072, COSName.getPDFName( "colon" ) );
+          addCharacterEncoding( 054, COSName.getPDFName( "comma" ) );
+          addCharacterEncoding( 0251, COSName.getPDFName( "copyright" ) );
+!         addCharacterEncoding( 0333, COSName.getPDFName( "currency" ) );
+          addCharacterEncoding( 0144, COSName.getPDFName( "d" ) );
+          addCharacterEncoding( 0240, COSName.getPDFName( "dagger" ) );
+          addCharacterEncoding( 0340, COSName.getPDFName( "daggerdbl" ) );
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/encoding/PdfDocEncoding.java pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/encoding/PdfDocEncoding.java
+*** pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/encoding/PdfDocEncoding.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/encoding/PdfDocEncoding.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 127,133 ****
+          addCharacterEncoding( 072, COSName.getPDFName( "colon" ) );
+          addCharacterEncoding( 054, COSName.getPDFName( "comma" ) );
+          addCharacterEncoding( 0251, COSName.getPDFName( "copyright" ) );
+!         addCharacterEncoding( 0244, COSName.getPDFName( "currency1" ) );
+          addCharacterEncoding( 0144, COSName.getPDFName( "d" ) );
+          addCharacterEncoding( 0201, COSName.getPDFName( "dagger" ) );
+          addCharacterEncoding( 0202, COSName.getPDFName( "daggerdbl" ) );
+--- 127,133 ----
+          addCharacterEncoding( 072, COSName.getPDFName( "colon" ) );
+          addCharacterEncoding( 054, COSName.getPDFName( "comma" ) );
+          addCharacterEncoding( 0251, COSName.getPDFName( "copyright" ) );
+!         addCharacterEncoding( 0244, COSName.getPDFName( "currency" ) );
+          addCharacterEncoding( 0144, COSName.getPDFName( "d" ) );
+          addCharacterEncoding( 0201, COSName.getPDFName( "dagger" ) );
+          addCharacterEncoding( 0202, COSName.getPDFName( "daggerdbl" ) );
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/encoding/StandardEncoding.java pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/encoding/StandardEncoding.java
+*** pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/encoding/StandardEncoding.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/encoding/StandardEncoding.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 86,92 ****
+          addCharacterEncoding( 0303, COSName.getPDFName( "circumflex" ) );
+          addCharacterEncoding( 0072, COSName.getPDFName( "colon" ) );
+          addCharacterEncoding( 0054, COSName.getPDFName( "comma" ) );
+!         addCharacterEncoding( 0250, COSName.getPDFName( "currency1" ) );
+          addCharacterEncoding( 0144, COSName.getPDFName( "d" ) );
+          addCharacterEncoding( 0262, COSName.getPDFName( "dagger" ) );
+          addCharacterEncoding( 0263, COSName.getPDFName( "daggerdbl" ) );
+--- 86,92 ----
+          addCharacterEncoding( 0303, COSName.getPDFName( "circumflex" ) );
+          addCharacterEncoding( 0072, COSName.getPDFName( "colon" ) );
+          addCharacterEncoding( 0054, COSName.getPDFName( "comma" ) );
+!         addCharacterEncoding( 0250, COSName.getPDFName( "currency" ) );
+          addCharacterEncoding( 0144, COSName.getPDFName( "d" ) );
+          addCharacterEncoding( 0262, COSName.getPDFName( "dagger" ) );
+          addCharacterEncoding( 0263, COSName.getPDFName( "daggerdbl" ) );
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/pdfparser/PDFStreamParser.java pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/pdfparser/PDFStreamParser.java
+*** pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/pdfparser/PDFStreamParser.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/pdfparser/PDFStreamParser.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 45,387 ****
+   */
+  public class PDFStreamParser extends BaseParser
+  {
+!     private List<Object> streamObjects = new ArrayList<Object>( 100 );
+!     private RandomAccess file;
+!     private PDFOperator lastBIToken = null;
+! 
+!     /**
+!      * Constructor that takes a stream to parse.
+!      *
+!      * @param stream The stream to read data from.
+!      * @param raf The random access file.
+!      *
+!      * @throws IOException If there is an error reading from the stream.
+!      */
+!     public PDFStreamParser( InputStream stream, RandomAccess raf ) throws IOException
+!     {
+!         super( stream );
+!         file = raf;
+!     }
+! 
+!     /**
+!      * Constructor.
+!      *
+!      * @param stream The stream to parse.
+!      *
+!      * @throws IOException If there is an error initializing the stream.
+!      */
+!     public PDFStreamParser( PDStream stream ) throws IOException
+!     {
+!        this( stream.createInputStream(), stream.getStream().getScratchFile() );
+!     }
+! 
+!     /**
+!      * Constructor.
+!      *
+!      * @param stream The stream to parse.
+!      *
+!      * @throws IOException If there is an error initializing the stream.
+!      */
+!     public PDFStreamParser( COSStream stream ) throws IOException
+!     {
+!        this( stream.getUnfilteredStream(), stream.getScratchFile() );
+!     }
+! 
+!     /**
+!      * This will parse the tokens in the stream.  This will close the
+!      * stream when it is finished parsing.
+!      *
+!      * @throws IOException If there is an error while parsing the stream.
+!      */
+!     public void parse() throws IOException
+      {
+!         try
+          {
+!             Object token = null;
+!             while( (token = parseNextToken()) != null )
+!             {
+!                 streamObjects.add( token );
+!                 //logger().fine( "parsed=" + token );
+!             }
+          }
+!         finally
+          {
+!             pdfSource.close();
+          }
+      }
+! 
+!     /**
+!      * This will get the tokens that were parsed from the stream.
+!      *
+!      * @return All of the tokens in the stream.
+!      */
+!     public List<Object> getTokens()
+!     {
+!         return streamObjects;
+!     }
+! 
+!     /**
+!      * This will parse the next token in the stream.
+!      *
+!      * @return The next token in the stream or null if there are no more tokens in the stream.
+!      *
+!      * @throws IOException If an io error occurs while parsing the stream.
+!      */
+!     private Object parseNextToken() throws IOException
+      {
+!         Object retval = null;
+  
+!         skipSpaces();
+!         int nextByte = pdfSource.peek();
+!         if( ((byte)nextByte) == -1 )
+          {
+!             return null;
+          }
+!         char c = (char)nextByte;
+!         switch(c)
+!         {
+!             case '<':
+!             {
+!                 int leftBracket = pdfSource.read();//pull off first left bracket
+!                 c = (char)pdfSource.peek(); //check for second left bracket
+!                 pdfSource.unread( leftBracket ); //put back first bracket
+!                 if(c == '<')
+!                 {
+! 
+!                     COSDictionary pod = parseCOSDictionary();
+!                     skipSpaces();
+!                     if((char)pdfSource.peek() == 's')
+!                     {
+!                         retval = parseCOSStream( pod, file );
+!                     }
+!                     else
+!                     {
+!                         retval = pod;
+!                     }
+!                 }
+!                 else
+!                 {
+!                     retval = parseCOSString();
+!                 }
+!                 break;
+!             }
+!             case '[': // array
+!             {
+!                 retval = parseCOSArray();
+!                 break;
+!             }
+!             case '(': // string
+!                 retval = parseCOSString();
+!                 break;
+!             case '/':   // name
+!                 retval = parseCOSName();
+!                 break;
+!             case 'n':   // null
+!             {
+!                 String nullString = readString();
+!                 if( nullString.equals( "null") )
+!                 {
+!                     retval = COSNull.NULL;
+!                 }
+!                 else
+!                 {
+!                     retval = PDFOperator.getOperator( nullString );
+!                 }
+!                 break;
+!             }
+!             case 't':
+!             case 'f':
+!             {
+!                 String next = readString();
+!                 if( next.equals( "true" ) )
+!                 {
+!                     retval = COSBoolean.TRUE;
+!                     break;
+!                 }
+!                 else if( next.equals( "false" ) )
+!                 {
+!                     retval = COSBoolean.FALSE;
+!                 }
+!                 else
+!                 {
+!                     retval = PDFOperator.getOperator( next );
+!                 }
+!                 break;
+!             }
+!             case 'R':
+!             {
+!                 String line = readString();
+!                 if( line.equals( "R" ) )
+!                 {
+!                     retval = new COSObject( null );
+!                 }
+!                 else
+!                 {
+!                     retval = PDFOperator.getOperator( line );
+!                 }
+!                 break;
+!             }
+!             case '0':
+!             case '1':
+!             case '2':
+!             case '3':
+!             case '4':
+!             case '5':
+!             case '6':
+!             case '7':
+!             case '8':
+!             case '9':
+!             case '-':
+!             case '+':
+!             case '.':
+!             {
+!                 /* We will be filling buf with the rest of the number.  Only
+!                  * allow 1 "." and "-" and "+" at start of number. */
+!                 StringBuffer buf = new StringBuffer();
+!                 buf.append( c );
+!                 pdfSource.read();
+! 
+!                 boolean dotNotRead = (c != '.');
+!                 while( Character.isDigit(( c = (char)pdfSource.peek()) ) || (dotNotRead && (c == '.')) )
+!                 {
+!                     buf.append( c );
+!                     pdfSource.read();
+! 
+!                     if (dotNotRead && (c == '.'))
+!                     {
+!                         dotNotRead = false;
+!                     }
+!                 }
+!                 retval = COSNumber.get( buf.toString() );
+!                 break;
+!             }
+!             case 'B':
+!             {
+!                 String next = readString();
+!                 retval = PDFOperator.getOperator( next );
+! 
+!                 if( next.equals( "BI" ) )
+!                 {
+!                     lastBIToken = (PDFOperator)retval;
+!                     COSDictionary imageParams = new COSDictionary();
+!                     lastBIToken.setImageParameters( new ImageParameters( imageParams ) );
+!                     Object nextToken = null;
+!                     while( (nextToken = parseNextToken()) instanceof COSName )
+!                     {
+!                         Object value = parseNextToken();
+!                         imageParams.setItem( (COSName)nextToken, (COSBase)value );
+!                     }
+!                     //final token will be the image data, maybe??
+!                     PDFOperator imageData = (PDFOperator)nextToken;
+!                     lastBIToken.setImageData( imageData.getImageData() );
+!                 }
+!                 break;
+!             }
+!             case 'I':
+!             {
+!                 //ImageParameters imageParams = lastBIToken.getImageParameters();
+! 
+!                 //int expectedBytes = (int)Math.ceil(imageParams.getHeight() * imageParams.getWidth() *
+!                 //                    (imageParams.getBitsPerComponent()/8) );
+!                 //Special case for ID operator
+!                 String id = "" + (char)pdfSource.read() + (char)pdfSource.read();
+!                 if( !id.equals( "ID" ) )
+!                 {
+!                     throw new IOException( "Error: Expected operator 'ID' actual='" + id + "'" );
+!                 }
+!                 ByteArrayOutputStream imageData = new ByteArrayOutputStream();
+!                 //boolean foundEnd = false;
+!                 if( this.isWhitespace() )
+!                 {
+!                     //pull off the whitespace character
+!                     pdfSource.read();
+!                 }
+!                 int twoBytesAgo = 0;
+!                 int lastByte = pdfSource.read();
+!                 int currentByte = pdfSource.read();
+!                 int count = 0;
+!                 //PDF spec is kinda unclear about this.  Should a whitespace
+!                 //always appear before EI? Not sure, I found a PDF
+!                 //(UnderstandingWebSphereClassLoaders.pdf) which has EI as part
+!                 //of the image data and will stop parsing prematurely if there is
+!                 //not a check for <whitespace>EI<whitespace>.
+!                 while( !(isWhitespace( twoBytesAgo ) &&
+!                          lastByte == 'E' &&
+!                          currentByte == 'I' &&
+!                          isWhitespace() //&&
+!                          //amyuni2_05d__pdf1_3_acro4x.pdf has image data that
+!                          //is compressed, so expectedBytes is useless here.
+!                          //count >= expectedBytes
+!                          ) &&
+!                        !pdfSource.isEOF() )
+!                 {
+!                     imageData.write( lastByte );
+!                     twoBytesAgo = lastByte;
+!                     lastByte = currentByte;
+!                     currentByte = pdfSource.read();
+!                     count++;
+!                 }
+!                 pdfSource.unread( 'I' ); //unread the EI operator
+!                 pdfSource.unread( 'E' );
+!                 retval = PDFOperator.getOperator( "ID" );
+!                 ((PDFOperator)retval).setImageData( imageData.toByteArray() );
+!                 break;
+!             }
+!             case ']':
+!             {
+!                 // some ']' around without its previous '['
+!                 // this means a PDF is somewhat corrupt but we will continue to parse.
+!                 pdfSource.read();
+!                 retval = COSNull.NULL;  // must be a better solution than null...
+!                 break;
+!             }
+!             default:
+!             {
+!                 //we must be an operator
+!                 String operator = readOperator();
+!                 if( operator.trim().length() == 0 )
+!                 {
+!                     //we have a corrupt stream, stop reading here
+!                     retval = null;
+!                 }
+!                 else
+!                 {
+!                     retval = PDFOperator.getOperator( operator );
+!                 }
+!             }
+  
+          }
+  
+-         return retval;
+      }
+  
+!     /**
+!      * This will read an operator from the stream.
+!      *
+!      * @return The operator that was read from the stream.
+!      *
+!      * @throws IOException If there is an error reading from the stream.
+!      */
+!     protected String readOperator() throws IOException
+      {
+!         skipSpaces();
+  
+!         //average string size is around 2 and the normal string buffer size is
+!         //about 16 so lets save some space.
+!         StringBuffer buffer = new StringBuffer(4);
+!         while(
+!             !isWhitespace() &&
+!             !isClosing() &&
+!             !pdfSource.isEOF() &&
+!             pdfSource.peek() != (int)'[' &&
+!             pdfSource.peek() != (int)'<' &&
+!             pdfSource.peek() != (int)'(' &&
+!             pdfSource.peek() != (int)'/' &&
+!             (pdfSource.peek() < (int)'0' ||
+!              pdfSource.peek() > (int)'9' ) )
+!         {
+!             buffer.append( (char)pdfSource.read() );
+!         }
+!         return buffer.toString();
+      }
+  }
+--- 45,394 ----
+   */
+  public class PDFStreamParser extends BaseParser
+  {
+!   private List<Object> streamObjects = new ArrayList<Object>( 100 );
+!   private RandomAccess file;
+!   private PDFOperator lastBIToken = null;
+! 
+!   /**
+!    * Constructor that takes a stream to parse.
+!    *
+!    * @param stream The stream to read data from.
+!    * @param raf The random access file.
+!    *
+!    * @throws IOException If there is an error reading from the stream.
+!    */
+!   public PDFStreamParser( InputStream stream, RandomAccess raf ) throws IOException
+!   {
+!     super( stream );
+!     file = raf;
+!   }
+! 
+!   /**
+!    * Constructor.
+!    *
+!    * @param stream The stream to parse.
+!    *
+!    * @throws IOException If there is an error initializing the stream.
+!    */
+!   public PDFStreamParser( PDStream stream ) throws IOException
+!   {
+!     this( stream.createInputStream(), stream.getStream().getScratchFile() );
+!   }
+! 
+!   /**
+!    * Constructor.
+!    *
+!    * @param stream The stream to parse.
+!    *
+!    * @throws IOException If there is an error initializing the stream.
+!    */
+!   public PDFStreamParser( COSStream stream ) throws IOException
+!   {
+!     this( stream.getUnfilteredStream(), stream.getScratchFile() );
+!   }
+! 
+!   /**
+!    * This will parse the tokens in the stream.  This will close the
+!    * stream when it is finished parsing.
+!    *
+!    * @throws IOException If there is an error while parsing the stream.
+!    */
+!   public void parse() throws IOException
+!   {
+!     try
+      {
+!       Object token = null;
+!       while( (token = parseNextToken()) != null )
+!       {
+!         streamObjects.add( token );
+!         //logger().fine( "parsed=" + token );
+!       }
+!     }
+!     finally
+!     {
+!       pdfSource.close();
+!     }
+!   }
+! 
+!   /**
+!    * This will get the tokens that were parsed from the stream.
+!    *
+!    * @return All of the tokens in the stream.
+!    */
+!   public List<Object> getTokens()
+!   {
+!     return streamObjects;
+!   }
+! 
+!   /**
+!    * This will parse the next token in the stream.
+!    *
+!    * @return The next token in the stream or null if there are no more tokens in the stream.
+!    *
+!    * @throws IOException If an io error occurs while parsing the stream.
+!    */
+!   private Object parseNextToken() throws IOException
+!   {
+!     Object retval = null;
+! 
+!     skipSpaces();
+!     int nextByte = pdfSource.peek();
+!     if( ((byte)nextByte) == -1 )
+!     {
+!       return null;
+!     }
+!     char c = (char)nextByte;
+!     switch(c)
+!     {
+!     case '<':
+!     {
+!       int leftBracket = pdfSource.read();//pull off first left bracket
+!       c = (char)pdfSource.peek(); //check for second left bracket
+!       pdfSource.unread( leftBracket ); //put back first bracket
+!       if(c == '<')
+!       {
+! 
+!         COSDictionary pod = parseCOSDictionary();
+!         skipSpaces();
+!         if((char)pdfSource.peek() == 's')
+          {
+!           retval = parseCOSStream( pod, file );
+          }
+!         else
+          {
+!           retval = pod;
+          }
++       }
++       else
++       {
++         retval = parseCOSString();
++       }
++       break;
+      }
+!     case '[': // array
+!     {
+!       retval = parseCOSArray();
+!       break;
+!     }
+!     case '(': // string
+!       retval = parseCOSString();
+!       break;
+!     case '/':   // name
+!       retval = parseCOSName();
+!       break;
+!     case 'n':   // null
+!     {
+!       String nullString = readString();
+!       if( nullString.equals( "null") )
+!       {
+!         retval = COSNull.NULL;
+!       }
+!       else
+!       {
+!         retval = PDFOperator.getOperator( nullString );
+!       }
+!       break;
+!     }
+!     case 't':
+!     case 'f':
+!     {
+!       String next = readString();
+!       if( next.equals( "true" ) )
+!       {
+!         retval = COSBoolean.TRUE;
+!         break;
+!       }
+!       else if( next.equals( "false" ) )
+!       {
+!         retval = COSBoolean.FALSE;
+!       }
+!       else
+!       {
+!         retval = PDFOperator.getOperator( next );
+!       }
+!       break;
+!     }
+!     case 'R':
+!     {
+!       String line = readString();
+!       if( line.equals( "R" ) )
+!       {
+!         retval = new COSObject( null );
+!       }
+!       else
+!       {
+!         retval = PDFOperator.getOperator( line );
+!       }
+!       break;
+!     }
+!     case '0':
+!     case '1':
+!     case '2':
+!     case '3':
+!     case '4':
+!     case '5':
+!     case '6':
+!     case '7':
+!     case '8':
+!     case '9':
+!     case '-':
+!     case '+':
+!     case '.':
+      {
+!       /* We will be filling buf with the rest of the number.  Only
+!        * allow 1 "." and "-" and "+" at start of number. */
+!       StringBuffer buf = new StringBuffer();
+!       buf.append( c );
+!       pdfSource.read();
+! 
+!       boolean dotNotRead = (c != '.');
+!       while( Character.isDigit(( c = (char)pdfSource.peek()) ) || (dotNotRead && (c == '.')) )
+!       {
+!         buf.append( c );
+!         pdfSource.read();
+  
+!         if (dotNotRead && (c == '.'))
+          {
+!           dotNotRead = false;
+          }
+!       }
+!       retval = COSNumber.get( buf.toString() );
+!       break;
+!     }
+!     case 'B':
+!     {
+!       String next = readString();
+!       retval = PDFOperator.getOperator( next );
+  
++       if( next.equals( "BI" ) )
++       {
++         lastBIToken = (PDFOperator)retval;
++         COSDictionary imageParams = new COSDictionary();
++         lastBIToken.setImageParameters( new ImageParameters( imageParams ) );
++         Object nextToken = null;
++         while( (nextToken = parseNextToken()) instanceof COSName )
++         {
++           Object value = parseNextToken();
++           imageParams.setItem( (COSName)nextToken, (COSBase)value );
+          }
++         //final token will be the image data, maybe??
++             PDFOperator imageData = (PDFOperator)nextToken;
++             lastBIToken.setImageData( imageData.getImageData() );
++       }
++       break;
++     }
++     case 'I':
++     {
++       //ImageParameters imageParams = lastBIToken.getImageParameters();
++ 
++       //int expectedBytes = (int)Math.ceil(imageParams.getHeight() * imageParams.getWidth() *
++       //                    (imageParams.getBitsPerComponent()/8) );
++       //Special case for ID operator
++       String id = "" + (char)pdfSource.read() + (char)pdfSource.read();
++       if( !id.equals( "ID" ) )
++       {
++         throw new IOException( "Error: Expected operator 'ID' actual='" + id + "'" );
++       }
++       ByteArrayOutputStream imageData = new ByteArrayOutputStream();
++       //boolean foundEnd = false;
++       if( this.isWhitespace() )
++       {
++         //pull off the whitespace character
++         pdfSource.read();
++       }
++       int twoBytesAgo = 0;
++       int lastByte = pdfSource.read();
++       int currentByte = pdfSource.read();
++       int count = 0;
++       //PDF spec is kinda unclear about this.  Should a whitespace
++       //always appear before EI? Not sure, I found a PDF
++       //(UnderstandingWebSphereClassLoaders.pdf) which has EI as part
++       //of the image data and will stop parsing prematurely if there is
++       //not a check for <whitespace>EI<whitespace>.
++       while( !(isWhitespace( twoBytesAgo ) &&
++           lastByte == 'E' &&
++           currentByte == 'I' &&
++           isWhitespace() //&&
++           //amyuni2_05d__pdf1_3_acro4x.pdf has image data that
++           //is compressed, so expectedBytes is useless here.
++           //count >= expectedBytes
++       ) &&
++       !pdfSource.isEOF() )
++       {
++         imageData.write( lastByte );
++         twoBytesAgo = lastByte;
++         lastByte = currentByte;
++         currentByte = pdfSource.read();
++         count++;
++       }
++       pdfSource.unread( 'I' ); //unread the EI operator
++       pdfSource.unread( 'E' );
++       retval = PDFOperator.getOperator( "ID" );
++       ((PDFOperator)retval).setImageData( imageData.toByteArray() );
++       break;
++     }
++     case ']':
++     {
++       // some ']' around without its previous '['
++       // this means a PDF is somewhat corrupt but we will continue to parse.
++       pdfSource.read();
++       retval = COSNull.NULL;  // must be a better solution than null...
++       break;
++     }
++     default:
++     {
++       //we must be an operator
++       String operator = readOperator();
++       if( operator.trim().length() == 0 )
++       {
++         //we have a corrupt stream, stop reading here
++         retval = null;
++       }
++       else
++       {
++         retval = PDFOperator.getOperator( operator );
++       }
++     }
+  
+      }
+  
+!     return retval;
+!   }
+! 
+!   /**
+!    * This will read an operator from the stream.
+!    *
+!    * @return The operator that was read from the stream.
+!    *
+!    * @throws IOException If there is an error reading from the stream.
+!    */
+!   protected String readOperator() throws IOException
+!   {
+!     skipSpaces();
+! 
+!     //average string size is around 2 and the normal string buffer size is
+!     //about 16 so lets save some space.
+!     StringBuffer buffer = new StringBuffer(4);
+!     while(
+!         !isWhitespace() &&
+!         !isClosing() &&
+!         !pdfSource.isEOF() &&
+!         pdfSource.peek() != (int)'[' &&
+!         pdfSource.peek() != (int)'<' &&
+!         pdfSource.peek() != (int)'(' &&
+!         pdfSource.peek() != (int)'/' &&
+!         (pdfSource.peek() < (int)'0' ||
+!             pdfSource.peek() > (int)'9' ) )
+      {
+!       char currentChar = (char)pdfSource.read();
+!       int nextChar = (int)pdfSource.peek();
+  
+!       buffer.append( currentChar );
+!       // Type3 Glyph description has operators with a number in the name 
+!       if (currentChar == 'd' && (nextChar == '0' || nextChar == '1') ) {
+!         buffer.append( (char)pdfSource.read() );
+!       }
+      }
++     return buffer.toString();
++   }
+  }
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/util/PDFStreamEngine.java pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/util/PDFStreamEngine.java
+*** pdfbox-1.1.0/pdfbox/src/main/java/org/apache/pdfbox/util/PDFStreamEngine.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/src/main/java/org/apache/pdfbox/util/PDFStreamEngine.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 60,90 ****
+      /**
+       * Log instance.
+       */
+!     private static final Log log = LogFactory.getLog(PDFStreamEngine.class);
+  
+      /**
+       * The PDF operators that are ignored by this engine.
+       */
+!     private final Set<String> unsupportedOperators = new HashSet<String>();
+      
+!     private static final byte[] SPACE_BYTES = { (byte)32 };
+  
+!     private PDGraphicsState graphicsState = null;
+  
+!     private Matrix textMatrix = null;
+!     private Matrix textLineMatrix = null;
+!     private Stack graphicsStack = new Stack();
+  
+!     private Map operators = new HashMap();
+  
+!     private Stack streamResourcesStack = new Stack();
+  
+!     private PDPage page;
+  
+!     private Map documentFontCache = new HashMap();
+      
+!     private int validCharCnt;
+!     private int totalCharCnt;
+      
+      /**
+       * This is a simple internal class used by the Stream engine to handle the
+--- 60,90 ----
+      /**
+       * Log instance.
+       */
+!     protected static final Log log = LogFactory.getLog(PDFStreamEngine.class);
+  
+      /**
+       * The PDF operators that are ignored by this engine.
+       */
+!     protected final Set<String> unsupportedOperators = new HashSet<String>();
+      
+!     protected static final byte[] SPACE_BYTES = { (byte)32 };
+  
+!     protected PDGraphicsState graphicsState = null;
+  
+!     protected Matrix textMatrix = null;
+!     protected Matrix textLineMatrix = null;
+!     protected Stack graphicsStack = new Stack();
+  
+!     protected Map operators = new HashMap();
+  
+!     protected Stack streamResourcesStack = new Stack();
+  
+!     protected PDPage page;
+  
+!     protected Map documentFontCache = new HashMap();
+      
+!     protected int validCharCnt;
+!     protected int totalCharCnt;
+      
+      /**
+       * This is a simple internal class used by the Stream engine to handle the
+***************
+*** 198,204 ****
+       */
+      public void processStream( PDPage aPage, PDResources resources, COSStream cosStream ) throws IOException
+      {
+!         graphicsState = new PDGraphicsState(aPage.findCropBox());
+          textMatrix = null;
+          textLineMatrix = null;
+          graphicsStack.clear();
+--- 198,204 ----
+       */
+      public void processStream( PDPage aPage, PDResources resources, COSStream cosStream ) throws IOException
+      {
+!         graphicsState = new PDGraphicsState();
+          textMatrix = null;
+          textLineMatrix = null;
+          graphicsStack.clear();
+***************
+*** 218,224 ****
+       */
+      public void processSubStream( PDPage aPage, PDResources resources, COSStream cosStream ) throws IOException
+      {
+!         page = aPage;
+          if( resources != null )
+          {
+              StreamResources sr = new StreamResources();
+--- 218,224 ----
+       */
+      public void processSubStream( PDPage aPage, PDResources resources, COSStream cosStream ) throws IOException
+      {
+!         if (aPage!=null) page = aPage;
+          if( resources != null )
+          {
+              StreamResources sr = new StreamResources();
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripper.java pdfbox-reactor/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripper.java
+*** pdfbox-1.1.0/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripper.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripper.java	1970-01-01 01:00:00.000000000 +0100
+***************
+*** 1,426 ****
+- /*
+-  * Licensed to the Apache Software Foundation (ASF) under one or more
+-  * contributor license agreements.  See the NOTICE file distributed with
+-  * this work for additional information regarding copyright ownership.
+-  * The ASF licenses this file to You under the Apache License, Version 2.0
+-  * (the "License"); you may not use this file except in compliance with
+-  * the License.  You may obtain a copy of the License at
+-  *
+-  *      http://www.apache.org/licenses/LICENSE-2.0
+-  *
+-  * Unless required by applicable law or agreed to in writing, software
+-  * distributed under the License is distributed on an "AS IS" BASIS,
+-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-  * See the License for the specific language governing permissions and
+-  * limitations under the License.
+-  */
+- package org.apache.pdfbox.util;
+- 
+- import java.io.File;
+- import java.io.FileInputStream;
+- import java.io.FilenameFilter;
+- import java.io.FileOutputStream;
+- import java.io.IOException;
+- import java.io.InputStreamReader;
+- import java.io.LineNumberReader;
+- import java.io.OutputStream;
+- import java.io.OutputStreamWriter;
+- import java.io.Writer;
+- 
+- import junit.framework.Test;
+- import junit.framework.TestCase;
+- import junit.framework.TestSuite;
+- 
+- import org.apache.commons.logging.Log;
+- import org.apache.commons.logging.LogFactory;
+- import org.apache.pdfbox.pdmodel.PDDocument;
+- 
+- 
+- /**
+-  * Test suite for PDFTextStripper.
+-  *
+-  * FILE SET VALIDATION
+-  *
+-  * This test suite is designed to test PDFTextStripper using a set of PDF
+-  * files and known good output for each.  The default mode of testAll()
+-  * is to process each *.pdf file in "src/test/resources/input".  An output
+-  * file is created in "target/test-output" with the same name as the PDF file,
+-  * plus an additional ".txt" suffix.  
+-  *
+-  * The output file is then tested against a known good result file from
+-  * the input directory (again, with the same name as the tested PDF file,
+-  * but with the additional ".txt" suffix).  The process is performed both
+-  * with and without sorting enabled.  The sorted files have a "-sorted.txt" 
+-  * suffix. 
+-  *
+-  * So for the file "src/test/resources/input/hello.pdf", an output file will
+-  * be generated named "target/test-output/hello.pdf.txt".  Then that file
+-  * will be compared to the known good file
+-  * "src/test/resources/input/hello.pdf.txt", if it exists.
+-  * 
+-  * To support testing with files that are not officially distributed 
+-  * with PDFBox, this test will also look in the "target/test-input-ext"
+-  * directory.
+-  *
+-  * Any errors are logged, and at the end of processing all *.pdf files, if
+-  * there were any errors, the test fails.  The logging is at INFO, as the
+-  * general goal is overall validation, and on failure, the indication of
+-  * which file or files failed.
+-  *
+-  * When processing new PDF files, you may use testAll() to generate output,
+-  * verify the output manually, then move the output file to the test input
+-  * directory to use as the basis for future validations.
+-  *
+-  * SINGLE FILE VALIDATION
+-  *
+-  * To further research individual failures, the org.apache.pdfbox.util.TextStripper.file
+-  * system property may be set with the name of a single file in the "test/input"
+-  * directory.  In this mode, testAll() will evaluate only that file, and will
+-  * do so with DEBUG level logging.  You can set this property from ant by
+-  * defining "file", as in:
+-  *
+-  *    ant testextract -Dfile=hello.pdf
+-  *
+-  * @author Robert Dickinson (bob@brutesquadlabs.com)
+-  * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
+-  * @version $Revision: 1.19 $
+-  */
+- public class TestTextStripper extends TestCase
+- {
+- 
+-     /**
+-      * Logger instance.
+-      */
+-     private static final Log log = LogFactory.getLog(TestTextStripper.class);
+- 
+-     private boolean bFail = false;
+-     private PDFTextStripper stripper = null;
+-     private final String encoding = "UTF-16LE";
+- 
+-     /**
+-      * Test class constructor.
+-      *
+-      * @param name The name of the test class.
+-      *
+-      * @throws IOException If there is an error creating the test.
+-      */
+-     public TestTextStripper( String name ) throws IOException
+-     {
+-         super( name );
+-         stripper = new PDFTextStripper(encoding);
+-         stripper.setLineSeparator("\n");
+-     }
+- 
+-     /**
+-      * Test suite setup.
+-      */
+-     public void setUp()
+-     {
+-         // If you want to test a single file using DEBUG logging, from an IDE,
+-         // you can do something like this:
+-         //
+-         // System.setProperty("org.apache.pdfbox.util.TextStripper.file", "FVS318Ref.pdf");
+-     }
+- 
+-     /**
+-      * Determine whether two strings are equal, where two null strings are
+-      * considered equal.
+-      *
+-      * @param expected Expected string
+-      * @param actual Actual String
+-      * @return <code>true</code> is the strings are both null,
+-      * or if their contents are the same, otherwise <code>false</code>.
+-      */
+-     private boolean stringsEqual(String expected, String actual)
+-     {
+-         boolean equals = true;
+-         if( (expected == null) && (actual == null) )
+-         {
+-             return true;
+-         }
+-         else if( expected != null && actual != null )
+-         {
+-             expected = expected.trim();
+-             actual = actual.trim();
+-             char[] expectedArray = expected.toCharArray();
+-             char[] actualArray = actual.toCharArray();
+-             int expectedIndex = 0;
+-             int actualIndex = 0;
+-             while( expectedIndex<expectedArray.length && actualIndex<actualArray.length )
+-             {
+-                 if( expectedArray[expectedIndex] != actualArray[actualIndex] )
+-                 {
+-                     equals = false;
+-                     log.warn("Lines differ at index"
+-                      + " expected:" + expectedIndex + "-" + (int)expectedArray[expectedIndex]
+-                      + " actual:" + actualIndex + "-" + (int)actualArray[actualIndex] );
+-                     break;
+-                 }
+-                 expectedIndex = skipWhitespace( expectedArray, expectedIndex );
+-                 actualIndex = skipWhitespace( actualArray, actualIndex );
+-                 expectedIndex++;
+-                 actualIndex++;
+-             }
+-             if( equals )
+-             {
+-                 if( expectedIndex != expectedArray.length )
+-                 {
+-                     equals = false;
+-                     log.warn("Expected line is longer at:" + expectedIndex );
+-                 }
+-                 if( actualIndex != actualArray.length )
+-                 {
+-                     equals = false;
+-                     log.warn("Actual line is longer at:" + actualIndex );
+-                 }
+-             }
+-         }
+-         else if( ( expected == null && actual != null && actual.trim().equals( "" ) ) ||
+-             ( actual == null && expected != null && expected.trim().equals( "" ) ) )
+-         {
+-             //basically there are some cases where pdfbox will put an extra line
+-             //at the end of the file, who cares, this is not enough to report
+-             // a failure
+-             equals = true;
+-         }
+-         else
+-         {
+-             equals = false;
+-         }
+-         return equals;
+-     }
+- 
+-     /**
+-      * If the current index is whitespace then skip any subsequent whitespace.
+-      */
+-     private int skipWhitespace( char[] array, int index )
+-     {
+-         //if we are at a space character then skip all space
+-         //characters, but when all done rollback 1 because stringsEqual
+-         //will roll forward 1
+-         if( array[index] == ' ' || array[index] > 256 )
+-         {
+-             while( index < array.length && (array[index] == ' ' || array[index] > 256))
+-             {
+-                 index++;
+-             }
+-             index--;
+-         }
+-         return index;
+-     }
+- 
+-     /**
+-      * Validate text extraction on a single file.
+-      *
+-      * @param inFile The PDF file to validate
+-      * @param outDir The directory to store the output in
+-      * @param bLogResult Whether to log the extracted text
+-      * @param bSort Whether or not the extracted text is sorted
+-      * @throws Exception when there is an exception
+-      */
+-     public void doTestFile(File inFile, File outDir, boolean bLogResult, boolean bSort)
+-     throws Exception
+-     {
+-         if(bSort)
+-         {
+-             log.info("Preparing to parse " + inFile.getName() + " for sorted test");
+-         }
+-         else
+-         {
+-             log.info("Preparing to parse " + inFile.getName() + " for standard test");
+-         }
+- 
+-         OutputStream os = null;
+-         Writer writer = null;
+-         PDDocument document = null;
+-         try
+-         {
+-             if (!outDir.exists()) 
+-             {
+-                 if (!outDir.mkdirs()) 
+-                 {
+-                     throw (new Exception("Error creating " + outDir.getAbsolutePath() + " directory"));
+-                 }
+-             }
+-             
+-             document = PDDocument.load(inFile);
+-             File outFile = null;
+-             File expectedFile = null;
+- 
+-             if(bSort)
+-             {
+-                 outFile = new File(outDir,  inFile.getName() + "-sorted.txt");
+-                 expectedFile = new File(inFile.getParentFile(), inFile.getName() + "-sorted.txt");
+-             }
+-             else
+-             {
+-                 outFile = new File(outDir, inFile.getName() + ".txt");
+-                 expectedFile = new File(inFile.getParentFile(), inFile.getName() + ".txt");
+-             }
+- 
+-             os = new FileOutputStream(outFile);
+-             os.write( 0xFF );
+-             os.write( 0xFE );
+-             writer = new OutputStreamWriter(os,encoding);
+- 
+-             //Allows for sorted tests 
+-             stripper.setSortByPosition(bSort);
+-             stripper.writeText(document, writer);
+- 
+- 
+-             if (bLogResult)
+-             {
+-                 log.info("Text for " + inFile.getName() + ":");
+-                 log.info(stripper.getText(document));
+-             }
+- 
+-             if (!expectedFile.exists())
+-             {
+-                 this.bFail = true;
+-                 log.error(
+-                         "FAILURE: Input verification file: " + expectedFile.getAbsolutePath() +
+-                 " did not exist");
+-                 return;
+-             }
+- 
+-             LineNumberReader expectedReader =
+-                 new LineNumberReader(new InputStreamReader(new FileInputStream(expectedFile), encoding));
+-             LineNumberReader actualReader =
+-                 new LineNumberReader(new InputStreamReader(new FileInputStream(outFile), encoding));
+- 
+-             while (true)
+-             {
+-                 String expectedLine = expectedReader.readLine();
+-                 while( expectedLine != null && expectedLine.trim().length() == 0 )
+-                 {
+-                     expectedLine = expectedReader.readLine();
+-                 }
+-                 String actualLine = actualReader.readLine();
+-                 while( actualLine != null && actualLine.trim().length() == 0 )
+-                 {
+-                     actualLine = actualReader.readLine();
+-                 }
+-                 if (!stringsEqual(expectedLine, actualLine))
+-                 {
+-                     // PDFBOX-568: testextract failure on Linux and Mac OS X
+-                     // Don't flag a test failure that we already know about.
+-                     // TODO: Remove this check once PDFBOX-568 is fixed.
+-                     if (!"sample_fonts_solidconvertor.pdf".equals(inFile.getName())) 
+-                     {
+-                         this.bFail = true;
+-                     }
+- 
+-                     log.error("FAILURE: Line mismatch for file " + inFile.getName() +
+-                             " at expected line: " + expectedReader.getLineNumber() +
+-                             " at actual line: " + actualReader.getLineNumber());
+-                     log.error("  expected line was: \"" + expectedLine + "\"");
+-                     log.error("  actual line was:   \"" + actualLine + "\"");
+- 
+-                     //lets report all lines, even though this might produce some verbose logging
+-                     //break;
+-                 }
+- 
+-                 if( expectedLine == null || actualLine==null)
+-                 {
+-                     break;
+-                 }
+-             }
+-         }
+-         finally
+-         {
+-             if( writer != null )
+-             {
+-                 writer.close();
+-             }
+-             if( os != null )
+-             {
+-                 os.close();
+-             }
+-             if( document != null )
+-             {
+-                 document.close();
+-             }
+-         }
+-     }
+- 
+-     /**
+-      * Process each file in the specified directory.
+-      * @param inDir Input directory search for PDF files in.
+-      * @param outDir Output directory where the temp files will be created.
+-      */
+-     private void doTestDir(File inDir, File outDir) throws Exception 
+-     {
+-         File[] testFiles = inDir.listFiles(new FilenameFilter() 
+-         {
+-             public boolean accept(File dir, String name) 
+-             {
+-                 return (name.endsWith(".pdf"));
+-             }
+-         });
+- 
+-         for (int n = 0; n < testFiles.length; n++) 
+-         {
+-             //Test without sorting
+-             doTestFile(testFiles[n], outDir, false, false);
+-             //Test with sorting
+-             doTestFile(testFiles[n], outDir, false, true);
+-         }
+-     }
+-     
+-     /**
+-      * Test to validate text extraction of file set.
+-      *
+-      * @throws Exception when there is an exception
+-      */
+-     public void testExtract()
+-     throws Exception
+-     {
+-         String filename = System.getProperty("org.apache.pdfbox.util.TextStripper.file");
+-         File inDir = new File("src/test/resources/input");
+-         File outDir = new File("target/test-output");
+-         File inDirExt = new File("target/test-input-ext");
+-         File outDirExt = new File("target/test-output-ext");
+- 
+-             if ((filename == null) || (filename.length() == 0)) 
+-             {
+-                 doTestDir(inDir, outDir);
+-                 if (inDirExt.exists())
+-                 {
+-                     doTestDir(inDirExt, outDirExt);
+-                 }
+-             }
+-             else 
+-             {
+-                 //Test without sorting
+-                 doTestFile(new File(inDir, filename), outDir, true, false);
+-                 //Test with sorting
+-                 doTestFile(new File(inDir, filename), outDir, true, true);
+-             }
+- 
+-             if (this.bFail)
+-             {
+-                 fail("One or more failures, see test log for details");
+-             }
+-     }
+- 
+-     /**
+-      * Set the tests in the suite for this test class.
+-      *
+-      * @return the Suite.
+-      */
+-     public static Test suite()
+-     {
+-         return new TestSuite( TestTextStripper.class );
+-     }
+- 
+-     /**
+-      * Command line execution.
+-      *
+-      * @param args Command line arguments.
+-      */
+-     public static void main( String[] args )
+-     {
+-         String[] arg = {TestTextStripper.class.getName() };
+-         junit.textui.TestRunner.main( arg );
+-     }
+- }
+--- 0 ----
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripperPerformance.java pdfbox-reactor/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripperPerformance.java
+*** pdfbox-1.1.0/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripperPerformance.java	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pdfbox/src/test/java/org/apache/pdfbox/util/TestTextStripperPerformance.java	2010-06-03 17:16:05.000000000 +0200
+***************
+*** 16,21 ****
+--- 16,22 ----
+   */
+  package org.apache.pdfbox.util;
+  
++ import java.io.ByteArrayOutputStream;
+  import java.io.File;
+  import java.io.FilenameFilter;
+  import java.io.FileOutputStream;
+***************
+*** 75,82 ****
+          {
+              document = PDDocument.load(file);
+  
+!             File outFile = new File(file.getParentFile().getParentFile(), "output/" + file.getName() + ".txt");
+!             os = new FileOutputStream(outFile);
+              writer = new OutputStreamWriter(os);
+  
+              stripper.writeText(document, writer);
+--- 76,82 ----
+          {
+              document = PDDocument.load(file);
+  
+!             os = new ByteArrayOutputStream();
+              writer = new OutputStreamWriter(os);
+  
+              stripper.writeText(document, writer);
+diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pom.xml pdfbox-reactor/pom.xml
+*** pdfbox-1.1.0/pom.xml	2010-03-25 17:30:12.000000000 +0100
+--- pdfbox-reactor/pom.xml	2010-06-03 17:37:47.000000000 +0200
+***************
+*** 23,29 ****
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0</version>
+      <relativePath>parent/pom.xml</relativePath>
+    </parent>
+  
+--- 23,29 ----
+    <parent>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-parent</artifactId>
+!     <version>1.1.0-awl-3</version>
+      <relativePath>parent/pom.xml</relativePath>
+    </parent>
+  
