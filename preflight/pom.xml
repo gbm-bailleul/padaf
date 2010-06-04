@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.padaf</groupId>
 	<artifactId>preflight</artifactId>
-	<version>0.4.2-SNAPSHOT</version>
+	<version>0.4.2</version>
 
 	<name>PDF/A Validation</name>
 
@@ -33,7 +33,7 @@
 	<parent>
 		<groupId>net.padaf</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.4.2-SNAPSHOT</version>
+		<version>0.4.2</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 
@@ -155,7 +155,7 @@
 		<dependency>
 			<groupId>net.padaf</groupId>
 			<artifactId>xmpbox</artifactId>
-			<version>0.4.2-SNAPSHOT</version>
+			<version>0.4.2</version>
 		</dependency>
 		<!-- TODO add or automatic ? -->
 		<dependency>
