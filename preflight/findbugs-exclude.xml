@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+	<!--  TODO en version finale virer ce bloc -->
+     <Match>
+       <Package name="net.padaf.preflight.javacc" />
+     </Match>
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc.stream" />
+     </Match>
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc.extractor" />
+     </Match>
+	<!--  TODO jusque ici -->
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc" />
+       <Bug pattern="NM_METHOD_NAMING_CONVENTION"/>
+     </Match>
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc.stream" />
+       <Bug pattern="NM_METHOD_NAMING_CONVENTION"/>
+     </Match>
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc.extractor" />
+       <Bug pattern="NM_METHOD_NAMING_CONVENTION"/>
+     </Match>
+     
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc" />
+       <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
+     </Match>
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc.stream" />
+       <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
+     </Match>
+
+     <Match>
+       <Package name="net.padaf.preflight.javacc.extractor" />
+       <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
+     </Match>
+     
+    
+</FindBugsFilter>
