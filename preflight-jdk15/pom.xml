@@ -17,12 +17,12 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.padaf</groupId>
-		<version>0.5.1</version>
+		<version>0.5.1-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.padaf</groupId>
 	<artifactId>preflight-jdk15</artifactId>
-	<version>0.5.1</version>
+	<version>0.5.1-SNAPSHOT</version>
 
 	<properties>
 		<compileSource>1.5</compileSource>
@@ -107,7 +107,7 @@
 		<dependency>
 			<groupId>net.padaf</groupId>
 			<artifactId>xmpbox-jdk15</artifactId>
-			<version>0.5.1</version>
+			<version>0.5.1-SNAPSHOT</version>
 		</dependency>
 		<!-- TODO add or automatic ? -->
 		<dependency>
