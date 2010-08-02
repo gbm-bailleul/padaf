@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.padaf</groupId>
 	<artifactId>preflight</artifactId>
-	<version>0.4.3-SNAPSHOT</version>
+	<version>0.5.1</version>
 
 	<name>PDF/A Validation</name>
 
@@ -33,13 +33,15 @@
 	<parent>
 		<groupId>net.padaf</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.4.3-SNAPSHOT</version>
+		<version>0.5.1</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 
 	<properties>
 		<compileSource>1.6</compileSource>
 		<javacPath>${user.javac6}</javacPath>
+		<pdfa.valid>${user.pdfa.valid}</pdfa.valid>
+		<pdfa.invalid>${user.pdfa.invalid}</pdfa.invalid>
 	</properties>
 
 	<build>
@@ -130,7 +132,7 @@
 			<plugin>
 				<groupId>net.padaf</groupId>
 				<artifactId>isartor-report</artifactId>
-				<version>1.0.1</version>
+				<version>1.0.2</version>
 				<configuration>
 					<isartorResult>${project.build.directory}/isartor_results.txt</isartorResult>
 				</configuration>
@@ -155,7 +157,7 @@
 		<dependency>
 			<groupId>net.padaf</groupId>
 			<artifactId>xmpbox</artifactId>
-			<version>0.4.3-SNAPSHOT</version>
+			<version>0.5.1</version>
 		</dependency>
 		<!-- TODO add or automatic ? -->
 		<dependency>
@@ -175,6 +177,11 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.12</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.pdfa</groupId>
+			<artifactId>isartor</artifactId>
+			<version>1.0-20080813</version>
 		</dependency>
 	</dependencies>
 

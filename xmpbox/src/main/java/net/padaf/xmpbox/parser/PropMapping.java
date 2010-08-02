@@ -24,79 +24,90 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents all properties known for a specific namespace
- * Type and attributes associated to each properties are saved
- * If a specific type well declared is used, this class map it to a basic type
- * @author Germain Costenobel
- *
- * Attribute management pre-implemented in order to give clues to make a attribute management system
+ * Represents all properties known for a specific namespace Type and attributes
+ * associated to each properties are saved If a specific type well declared is
+ * used, this class map it to a basic type
+ * 
+ * @author a183132
+ * 
+ *         Attribute management pre-implemented in order to give clues to make
+ *         an attribute management system
  */
 public class PropMapping {
-	
-	
+
 	private String namespace;
 	private Map<String, String> types;
 	private Map<String, List<String>> attributes;
-	
-		
-	public PropMapping(String namespace){
-		this.namespace=namespace;
-		types=new HashMap<String, String>();
-		attributes=new HashMap<String, List<String>>();
-		
+
+	/**
+	 * Build PropMapping for specified namespace
+	 * 
+	 * @param namespace
+	 *            namespace URI concerned by this PropMapping
+	 */
+	public PropMapping(String namespace) {
+		this.namespace = namespace;
+		types = new HashMap<String, String>();
+		attributes = new HashMap<String, List<String>>();
+
 	}
-	
+
 	/**
 	 * Give the NS URI associated to this Property Description
-	 * @return
+	 * 
+	 * @return the namespace URI concerned by this PropMapping
 	 */
-	public String getConcernedNamespace(){
+	public String getConcernedNamespace() {
 		return namespace;
 	}
-	
+
 	/**
-	 * Return an iterator on qualifiedName of all properties
-	 * @return
+	 * Get All Properties Name
+	 * 
+	 * @return a list of properties qualifiedName
 	 */
-	public List<String> getPropertiesName(){
+	public List<String> getPropertiesName() {
 		return new ArrayList<String>(types.keySet());
 	}
-	
+
 	/**
 	 * Add a new property, an attributes list can be given or can be null
+	 * 
 	 * @param name
+	 *            new property name
 	 * @param type
+	 *            Valuetype of the new property
 	 * @param attr
+	 *            A list of attribute (put null while attribute management is
+	 *            not implemented)
 	 */
-	public void addNewProperty(String name, String type, List<String> attr){
+	public void addNewProperty(String name, String type, List<String> attr) {
 		types.put(name, type);
-		if(attr!=null){
+		if (attr != null) {
 			attributes.put(name, attr);
 		}
 	}
-	
+
 	/**
 	 * Return a type of a property from its qualifiedName
+	 * 
 	 * @param name
-	 * @return
+	 *            The name of the property concerned
+	 * @return Type of property or null
 	 */
-	public String getPropertyType(String name){
+	public String getPropertyType(String name) {
 		return types.get(name);
 	}
-	
-	
+
 	/**
 	 * Return an unmodifiable list of property attributes from its qualifiedName
-	 * @param qualifiedName
-	 * @return
+	 * 
+	 * @param name
+	 *            LocalName of the property
+	 * @return List of all attributes declared for this property
 	 */
-	public List<String> getPropertyAttributes(String name){
+	public List<String> getPropertyAttributes(String name) {
 		return attributes.get(name);
 	}
-	
-	
-	 
-	 
-	
-	
+
 }

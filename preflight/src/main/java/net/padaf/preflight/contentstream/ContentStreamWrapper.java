@@ -21,8 +21,6 @@ package net.padaf.preflight.contentstream;
 import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_RESOURCES;
 import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_ENCODING_ERROR;
 import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_FONT_FILEX_INVALID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_GLYPH_MISSING;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_METRICS;
 import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_UNKNOWN_FONT_REF;
 import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_CONTENT_STREAM_INVALID_ARGUMENT;
 import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_CONTENT_STREAM_UNSUPPORTED_OP;
@@ -32,10 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.padaf.preflight.DocumentHandler;
+import net.padaf.preflight.ValidationConstants;
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult.ValidationError;
-import net.padaf.preflight.font.FontContainer;
-import net.padaf.preflight.font.FontContainer.State;
+import net.padaf.preflight.font.AbstractFontContainer;
+import net.padaf.preflight.font.GlyphException;
+import net.padaf.preflight.font.AbstractFontContainer.State;
 import net.padaf.preflight.utils.ContentStreamEngine;
 
 import org.apache.pdfbox.cos.COSArray;
@@ -167,6 +167,7 @@ public class ContentStreamWrapper extends ContentStreamEngine {
     checkColorOperators(operation);
     validRenderingIntent(operator, arguments);
     checkSetColorSpaceOperators(operator, arguments);
+    validNumberOfGraphicStates(operator);
   }
 
   /**
@@ -270,20 +271,26 @@ public class ContentStreamWrapper extends ContentStreamEngine {
     }
 
     // FontContainer fontContainer = documentHandler.retrieveFontContainer(font);
-    FontContainer fontContainer = documentHandler.getFont(font.getCOSObject());
-    if (fontContainer == null && renderingMode != 3) {
-      // ---- Font Must be embedded if the RenderingMode isn't 3
-      throwContentStreamException(font.getBaseFont() + " is unknown wasn't found by the FontHelperValdiator", ERROR_FONTS_UNKNOWN_FONT_REF);
-    } else if (renderingMode != 3 && !fontContainer.isFontProgramEmbedded()) {
-      throwContentStreamException(font.getBaseFont() + " isn't embedded and the rendering mode isn't 3", ERROR_FONTS_FONT_FILEX_INVALID);
-    } else if (renderingMode == 3 && fontContainer == null) {
-    	return;
-    } else if (fontContainer != null && !fontContainer.areWidthsConsistent()) {
-      throwContentStreamException(font.getBaseFont() + " metrics are inconsistent with the /Widths", ERROR_FONTS_METRICS);
-    } else if (fontContainer.areWidthsConsistent() && fontContainer.isFontProgramEmbedded() && fontContainer.isValid() != State.VALID ) {
+    AbstractFontContainer fontContainer = documentHandler.getFont(font.getCOSObject());
+
+    if (fontContainer != null && fontContainer.isValid() == State.INVALID) {
     	return;
     }
-
+    
+    if (renderingMode == 3 && (fontContainer == null || !fontContainer.isFontProgramEmbedded())) {
+    	// font not embedded and rendering mode is 3. Valid case and nothing to check
+    	return ;
+    }
+    
+    if (fontContainer == null) {
+        // ---- Font Must be embedded if the RenderingMode isn't 3
+    	throwContentStreamException(font.getBaseFont() + " is unknown wasn't found by the FontHelperValdiator", ERROR_FONTS_UNKNOWN_FONT_REF);	
+    }
+    
+    if (!fontContainer.isFontProgramEmbedded()) {
+      throwContentStreamException(font.getBaseFont() + " isn't embedded and the rendering mode isn't 3", ERROR_FONTS_FONT_FILEX_INVALID);
+    }
+    
     int codeLength = 1;
     for (int i = 0; i < string.length; i += codeLength) {
       // Decode the value to a Unicode character
@@ -308,10 +315,19 @@ public class ContentStreamWrapper extends ContentStreamEngine {
         cid += ((string[i + j] + 256) % 256);
       }
 
-      if (fontContainer != null && !fontContainer.isEmbeddedChar(cid)) {
-        // ---- Unable to decode a character, throw an exception
-        throwContentStreamException("The character code " + cid + " doesn't have glyph in the embedded font " + font.getBaseFont(), ERROR_FONTS_GLYPH_MISSING);
+      try {
+    	  fontContainer.checkCID(cid);
+      } catch (GlyphException e) {
+    	  throwContentStreamException(e.getMessage(), e.getErrorCode());  
       }
     }
+  }
+  
+  private void checkCIDBiggerThanMaxValue(int cid) throws ContentStreamException {
+	  if (cid > ValidationConstants.MAX_CID) {
+		  ContentStreamException exception = new ContentStreamException("CID " + cid + " bigger than " + ValidationConstants.MAX_CID);
+		  exception.setValidationError(ValidationConstants.ERROR_SYNTAX_CID_RANGE);
+		  throw exception;
+	  }
   }
 }

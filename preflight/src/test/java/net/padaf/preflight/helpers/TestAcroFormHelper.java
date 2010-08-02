@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.activation.FileDataSource;
@@ -32,6 +33,7 @@ import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidatorConfig;
 import net.padaf.preflight.ValidationResult.ValidationError;
 import net.padaf.preflight.helpers.AcroFormValidationHelper;
+import net.padaf.preflight.util.ByteArrayDataSource;
 import net.padaf.preflight.util.DocumentHandlerStub;
 import net.padaf.preflight.util.IsartorPdfProvider;
 import net.padaf.preflight.util.NOCatalogDocument;
@@ -42,13 +44,13 @@ import org.junit.Test;
 
 public class TestAcroFormHelper {
 
-  public static final String PDF_ACROFORM = "isartor-6-9-t02-fail-b.pdf";
+  public static final String PDF_ACROFORM = "/Isartor testsuite/PDFA-1b/6.9 Interactive Forms/isartor-6-9-t02-fail-b.pdf";
 
   @Test(expected = ValidationException.class)
   public void noCatalogEntry() throws ValidationException {
     PDDocument pddoc = null;
     try {
-      AcroFormValidationHelper helper = new AcroFormValidationHelper(PdfAValidatorFactory.pdfa1bStandardConfig);
+      AcroFormValidationHelper helper = new AcroFormValidationHelper(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
       DocumentHandlerStub hdl = new DocumentHandlerStub(null);
       pddoc = new NOCatalogDocument();
       hdl.setDocument(pddoc);
@@ -62,22 +64,22 @@ public class TestAcroFormHelper {
 
   @Test(expected = ValidationException.class)
   public void exploreFieldsFails() throws ValidationException {
-    File idoc = IsartorPdfProvider.getIsartorDocument(PDF_ACROFORM);
+    InputStream idoc = IsartorPdfProvider.getIsartorDocument(PDF_ACROFORM);
     if (idoc != null) {
       PDDocument pdDoc = null;
       try {
         pdDoc = PDDocument.load(idoc);
         DocumentHandlerStub handler = new DocumentHandlerStub(
-            new FileDataSource(idoc));
+            new ByteArrayDataSource(IsartorPdfProvider.getIsartorDocument(PDF_ACROFORM)));
         handler.setDocument(pdDoc);
-        DummyAcroFormHelper helper = new DummyAcroFormHelper(PdfAValidatorFactory.pdfa1bStandardConfig);
+        DummyAcroFormHelper helper = new DummyAcroFormHelper(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
         helper.innerValidate(handler);
       } catch (IOException e) {
         fail(e.getMessage());
       } finally {
         COSUtils.closeDocumentQuietly(pdDoc);
       }
-    }
+    } 
   }
 
   private class DummyAcroFormHelper extends AcroFormValidationHelper {

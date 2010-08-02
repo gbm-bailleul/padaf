@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import java.io.InputStream;
 
 import net.padaf.preflight.ValidationException;
-import net.padaf.preflight.font.Type1MetricHelper;
 
 import org.junit.Test;
 

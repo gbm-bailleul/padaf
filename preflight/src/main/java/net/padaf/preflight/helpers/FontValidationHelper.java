@@ -28,7 +28,7 @@ import net.padaf.preflight.ValidationResult.ValidationError;
 import net.padaf.preflight.font.FontValidator;
 import net.padaf.preflight.font.FontValidatorFactory;
 import net.padaf.preflight.font.Type3FontValidator;
-import net.padaf.preflight.font.FontContainer.State;
+import net.padaf.preflight.font.AbstractFontContainer.State;
 
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;

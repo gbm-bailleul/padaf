@@ -21,6 +21,7 @@ package net.padaf.preflight;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.activation.DataSource;
@@ -32,8 +33,8 @@ import net.padaf.preflight.javacc.ParseException;
 public abstract class AbstractValidator implements PdfAValidator {
 	protected ValidatorConfig config = null;
 
-	protected List<AbstractValidationHelper> priorHelpers = new ArrayList<AbstractValidationHelper>();
-	protected List<AbstractValidationHelper> standHelpers = new ArrayList<AbstractValidationHelper>();
+	protected Collection<AbstractValidationHelper> priorHelpers = new ArrayList<AbstractValidationHelper>();
+	protected Collection<AbstractValidationHelper> standHelpers = new ArrayList<AbstractValidationHelper>();
 
 	/**
 	 * 
@@ -43,12 +44,12 @@ public abstract class AbstractValidator implements PdfAValidator {
 	public AbstractValidator ( ValidatorConfig cfg ) throws ValidationException {
 	  config = cfg;
 
-	  List<Class<? extends AbstractValidationHelper>> ph = cfg.getPriorHelpers();
+	  Collection<Class<? extends AbstractValidationHelper>> ph = cfg.getPriorHelpers();
 	  for (Class<? extends AbstractValidationHelper> priorHlpCls : ph) {
 	    this.priorHelpers.add(instantiateHelper(priorHlpCls, cfg));
 	  }
 
-	  List<Class<? extends AbstractValidationHelper>> sh = cfg.getStandHelpers();
+	  Collection<Class<? extends AbstractValidationHelper>> sh = cfg.getStandHelpers();
 	  for (Class<? extends AbstractValidationHelper> standHlpCls : sh) {
 	    this.priorHelpers.add(instantiateHelper(standHlpCls, cfg));
 	  }

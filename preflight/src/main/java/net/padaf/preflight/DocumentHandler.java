@@ -23,7 +23,7 @@ import java.util.Map;
 
 import javax.activation.DataSource;
 
-import net.padaf.preflight.font.FontContainer;
+import net.padaf.preflight.font.AbstractFontContainer;
 import net.padaf.preflight.graphics.ICCProfileWrapper;
 import net.padaf.preflight.javacc.PDFParser;
 import net.padaf.preflight.javacc.extractor.ExtractorTokenManager;
@@ -41,7 +41,7 @@ public class DocumentHandler {
 	/**
 	 * Contains the list of font name embedded in the PDF document.
 	 */
-	protected Map<COSBase, FontContainer> embeddedFonts = new HashMap<COSBase, FontContainer>();
+	protected Map<COSBase, AbstractFontContainer> embeddedFonts = new HashMap<COSBase, AbstractFontContainer>();
 
 	/**
 	 * The javacc parser used to parse the document
@@ -163,7 +163,7 @@ public class DocumentHandler {
 	 * @param fKey
 	 * @param fc
 	 */
-	public void addFont(COSBase fKey, FontContainer fc) {
+	public void addFont(COSBase fKey, AbstractFontContainer fc) {
 		this.embeddedFonts.put(fKey, fc);
 	}
 
@@ -176,7 +176,7 @@ public class DocumentHandler {
 	 * @param fKey
 	 * @return
 	 */
-	public FontContainer getFont(COSBase fKey) {
+	public AbstractFontContainer getFont(COSBase fKey) {
 		return this.embeddedFonts.get(fKey);
 	}
 

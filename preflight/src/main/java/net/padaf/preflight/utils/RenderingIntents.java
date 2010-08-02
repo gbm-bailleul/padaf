@@ -18,11 +18,14 @@
  ******************************************************************************/
 package net.padaf.preflight.utils;
 
+import static net.padaf.preflight.ValidationConstants.RENDERING_INTENT_ABS_COLOR;
+import static net.padaf.preflight.ValidationConstants.RENDERING_INTENT_PERCEPTUAL;
+import static net.padaf.preflight.ValidationConstants.RENDERING_INTENT_REL_COLOR;
+import static net.padaf.preflight.ValidationConstants.RENDERING_INTENT_SATURATION;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static net.padaf.preflight.ValidationConstants.*;
 
 /**
  * This class contains a static list of RenderingIntent values to allow an easy

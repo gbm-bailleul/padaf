@@ -31,7 +31,7 @@ public class TestPageValidationHelper {
   @Test(expected = ValidationException.class)
   public void noCatalogEntry() throws Exception {
     PDDocument pdoc = new NOCatalogDocument();
-    PagesValidationHelper helper = new PagesValidationHelper(PdfAValidatorFactory.pdfa1bStandardConfig);
+    PagesValidationHelper helper = new PagesValidationHelper(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
     DocumentHandlerStub hdl = new DocumentHandlerStub(null);
     hdl.setDocument(pdoc);
     helper.innerValidate(hdl);

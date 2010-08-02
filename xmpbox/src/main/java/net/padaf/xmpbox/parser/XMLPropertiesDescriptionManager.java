@@ -35,105 +35,161 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 /**
- * Manage XML property description file 
- * Allow user to create XML property description description file
- * or retrieve List of PropertyDescription from an XML File
- * @author Germain Costenobel
- *
+ * Manage XML property description file Allow user to create XML property
+ * description description file or retrieve List of PropertyDescription from an
+ * XML File If file data are specified in class schema representation, building
+ * of Description schema (which must included in PDF/A Extension) will use these
+ * information.
+ * 
+ * @author a183132
+ * 
  */
 public class XMLPropertiesDescriptionManager {
 
-  protected List<PropertyDescription> propDescs;
-  protected XStream xstream;
+	protected List<PropertyDescription> propDescs;
+	protected XStream xstream;
 
-  public XMLPropertiesDescriptionManager(){
-    propDescs=new ArrayList<PropertyDescription>();
-    xstream = new XStream(new DomDriver());
-    xstream.alias("PropertiesDescriptions", List.class);
-    xstream.alias("PropertyDescription", PropertyDescription.class);
-  }
+	/**
+	 * Create new XMLPropertiesDescriptionManager
+	 */
+	public XMLPropertiesDescriptionManager() {
+		propDescs = new ArrayList<PropertyDescription>();
+		xstream = new XStream(new DomDriver());
+		xstream.alias("PropertiesDescriptions", List.class);
+		xstream.alias("PropertyDescription", PropertyDescription.class);
+	}
 
-  public void addPropertyDescription(String name, String description){
-    propDescs.add(new PropertyDescription(name, description));
-  }
+	/**
+	 * Add a description for the named property
+	 * 
+	 * @param name
+	 *            Name of property
+	 * @param description
+	 *            Description which will be used
+	 */
+	public void addPropertyDescription(String name, String description) {
+		propDescs.add(new PropertyDescription(name, description));
+	}
 
-  public void toXML(OutputStream os){
-    xstream.toXML(propDescs, os);
-  }
+	/**
+	 * Save as XML data, all information defined before to the OutputStream
+	 * 
+	 * @param os
+	 *            The stream where write data
+	 */
+	public void toXML(OutputStream os) {
+		xstream.toXML(propDescs, os);
+	}
 
-  public void loadListFromXML(Class<? extends XMPSchema> classSchem,String path) throws BuildPDFAExtensionSchemaDescriptionException{
-    InputStream fis = classSchem.getResourceAsStream(path);
-    if (fis == null) {
-      // resource not found
-      throw new BuildPDFAExtensionSchemaDescriptionException("Failed to find specified XML properties descriptions resource");
-    }
-    loadListFromXML(fis);
+	/**
+	 * Load Properties Description from a well-formed XML File
+	 * 
+	 * @param classSchem
+	 *            Description Schema where properties description are used
+	 * @param path
+	 *            Relative Path (file loading search in same class Schema
+	 *            representation folder)
+	 * @throws BuildPDFAExtensionSchemaDescriptionException
+	 *             When problems to get or treat data in XML description file
+	 */
+	public void loadListFromXML(Class<? extends XMPSchema> classSchem,
+			String path) throws BuildPDFAExtensionSchemaDescriptionException {
+		InputStream fis = classSchem.getResourceAsStream(path);
+		if (fis == null) {
+			// resource not found
+			throw new BuildPDFAExtensionSchemaDescriptionException(
+					"Failed to find specified XML properties descriptions resource");
+		}
+		loadListFromXML(fis);
 
-  }
+	}
 
+	/**
+	 * Load Properties Description from XML Stream
+	 * 
+	 * @param is
+	 *            Stream where read data
+	 * @throws BuildPDFAExtensionSchemaDescriptionException
+	 *             When problems to get or treat data in XML description file
+	 */
+	public void loadListFromXML(InputStream is)
+			throws BuildPDFAExtensionSchemaDescriptionException {
+		try {
+			Object o = xstream.fromXML(is);
+			if (o instanceof List<?>) {
+				if (((List<?>) o).get(0) != null) {
+					if (((List<?>) o).get(0) instanceof PropertyDescription) {
+						propDescs = (List<PropertyDescription>) o;
+					} else {
+						throw new BuildPDFAExtensionSchemaDescriptionException(
+								"Failed to get correct properties descriptions from specified XML stream");
+					}
+				} else {
+					throw new BuildPDFAExtensionSchemaDescriptionException(
+							"Failed to find a properties description into the specified XML stream");
+				}
 
-  public void loadListFromXML(InputStream is) throws BuildPDFAExtensionSchemaDescriptionException{
-    try{
-      Object o= xstream.fromXML(is);
-      if(o instanceof List<?>){
-        if(((List<?>) o).get(0)!=null){
-          if(((List<?>) o).get(0) instanceof PropertyDescription){
-            propDescs= (List<PropertyDescription>) o;
-          }else{
-            throw new BuildPDFAExtensionSchemaDescriptionException("Failed to get correct properties descriptions from specified XML stream");
-          }
-        }else{
-          throw new BuildPDFAExtensionSchemaDescriptionException("Failed to find a properties description into the specified XML stream");
-        }
+			}
 
-      }
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BuildPDFAExtensionSchemaDescriptionException(
+					"Failed to get correct properties descriptions from specified XML stream",
+					e.getCause());
+		} finally {
+			IOUtils.closeQuietly(is);
+		}
+	}
 
-    }
-    catch(Exception e){
-      e.printStackTrace();
-      throw new BuildPDFAExtensionSchemaDescriptionException("Failed to get correct properties descriptions from specified XML stream", e.getCause());
-    } finally {
-      IOUtils.closeQuietly(is);
-    }
-  }
+	/**
+	 * Get all Properties Descriptions defined
+	 * 
+	 * @return List of PropertyDescription
+	 */
+	public List<PropertyDescription> getPropertiesDescriptionList() {
+		return propDescs;
+	}
 
-  public List<PropertyDescription> getPropertiesDescriptionList(){
-    return propDescs;
-  }
+	/**
+	 * Sample of using to write/read information
+	 * 
+	 * @param args
+	 *            Not used
+	 * @throws BuildPDFAExtensionSchemaDescriptionException
+	 *             When errors during building/reading xml file
+	 */
+	public static void main(String[] args)
+			throws BuildPDFAExtensionSchemaDescriptionException {
+		XMLPropertiesDescriptionManager ptMaker = new XMLPropertiesDescriptionManager();
 
-  public static void main(String[] args) throws BuildPDFAExtensionSchemaDescriptionException {
-    XMLPropertiesDescriptionManager ptMaker=new XMLPropertiesDescriptionManager();
+		// add Descriptions
+		for (int i = 0; i < 3; i++) {
+			ptMaker.addPropertyDescription("name" + i, "description" + i);
 
-    //add Descriptions
-    for(int i=0; i<3; i++){
-      ptMaker.addPropertyDescription("name"+i, "description"+i);
+		}
 
-    }
+		// Display XML conversion
+		System.out.println("Display XML Result:");
+		ptMaker.toXML(System.out);
 
-    // Display XML conversion
-    System.out.println("Display XML Result:");
-    ptMaker.toXML(System.out);
+		// Sample to show how to build object from XML file
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ptMaker.toXML(bos);
+		IOUtils.closeQuietly(bos);
 
-
-    //Sample to show how to build object from XML file
-    ByteArrayOutputStream bos=new ByteArrayOutputStream();
-    ptMaker.toXML(bos);
-    IOUtils.closeQuietly(bos);
-
-    //emulate a new reading
-    InputStream is=new ByteArrayInputStream(bos.toByteArray());
-    ptMaker=new XMLPropertiesDescriptionManager();
-    ptMaker.loadListFromXML(is);
-    List<PropertyDescription> result= ptMaker.getPropertiesDescriptionList();
-    System.out.println();
-    System.out.println();
-    System.out.println("Result of XML Loading :");
-    for (PropertyDescription propertyDescription : result) {
-      System.out.println(propertyDescription.getPropertyName()+" :"+propertyDescription.getDescription());
-    }
-  }
-
-
-
+		// emulate a new reading
+		InputStream is = new ByteArrayInputStream(bos.toByteArray());
+		ptMaker = new XMLPropertiesDescriptionManager();
+		ptMaker.loadListFromXML(is);
+		List<PropertyDescription> result = ptMaker
+				.getPropertiesDescriptionList();
+		System.out.println();
+		System.out.println();
+		System.out.println("Result of XML Loading :");
+		for (PropertyDescription propertyDescription : result) {
+			System.out.println(propertyDescription.getPropertyName() + " :"
+					+ propertyDescription.getDescription());
+		}
+	}
 
 }

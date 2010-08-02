@@ -21,4 +21,6 @@ package net.padaf.xmpbox.parser;
 /**
  * List the basic types of xmp properties
  */
-public enum XmpPropertyType {Text,Date,Integer,Boolean,Real}
+public enum XmpPropertyType {
+	Text, Date, Integer, Boolean, Real
+}

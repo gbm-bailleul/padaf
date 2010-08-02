@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult.ValidationError;
-import net.padaf.preflight.font.FontContainer.State;
+import net.padaf.preflight.font.AbstractFontContainer.State;
 
 public interface FontValidator {
 

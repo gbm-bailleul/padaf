@@ -43,6 +43,7 @@ public class MyFontValidationHelper extends FontValidationHelper {
 	
 	public void validateFont(DocumentHandler handler, FontValidator fontVal,
 				List<ValidationError> result) throws ValidationException {
+		System.out.println("Override the validateFont method");
 		super.validateFont(handler, fontVal, result);
 		result.add(new ValidationError("UNCODEINCONNU"));
 	}

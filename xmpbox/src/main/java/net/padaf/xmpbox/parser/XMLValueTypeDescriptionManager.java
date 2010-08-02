@@ -37,123 +37,205 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 /**
- * Manage XML valuetype description file 
- * Allow user to create XML valuetype description file
- * or retrieve List of ValueTypeDescription from an XML File
+ * Manage XML valuetype description file Allow user to create XML valuetype
+ * description file or retrieve List of ValueTypeDescription from an XML File
  * 
- * @author Germain Costenobel
- *
+ * If file data are specified in class schema representation, building of
+ * Description schema (which must included in PDF/A Extension) will use these
+ * information.
+ * 
+ * @author a183132
+ * 
  */
 public class XMLValueTypeDescriptionManager {
 
+	protected List<ValueTypeDescription> vTypes;
+	protected XStream xstream;
 
-  protected List<ValueTypeDescription> vTypes;
-  protected XStream xstream;
+	/**
+	 * Create a new XMLValueTypeDescriptionManager
+	 */
+	public XMLValueTypeDescriptionManager() {
+		vTypes = new ArrayList<ValueTypeDescription>();
+		xstream = new XStream(new DomDriver());
+		xstream.alias("ValueTypesDescriptions", List.class);
+		xstream.alias("ValueTypeDescription", ValueTypeDescription.class);
+		xstream.alias("FieldDescription", FieldDescription.class);
+	}
 
-  public XMLValueTypeDescriptionManager(){
-    vTypes=new ArrayList<ValueTypeDescription>();
-    xstream = new XStream(new DomDriver());
-    xstream.alias("ValueTypesDescriptions", List.class);
-    xstream.alias("ValueTypeDescription", ValueTypeDescription.class);
-    xstream.alias("FieldDescription", FieldDescription.class);
-  }
+	/**
+	 * Add a new Value Type description without any fields
+	 * 
+	 * @param type
+	 *            Type of the Value Type
+	 * @param nsURI
+	 *            namespace URI of the Value Type
+	 * @param prefix
+	 *            prefix of the Value Type
+	 * @param description
+	 *            Description of the Value Type
+	 */
+	public void addValueTypeDescription(String type, String nsURI,
+			String prefix, String description) {
+		vTypes.add(new ValueTypeDescription(type, nsURI, prefix, description));
+	}
 
-  public void addValueTypeDescription(String type, String nsURI, String prefix, String description){
-    vTypes.add(new ValueTypeDescription(type, nsURI, prefix, description));
-  }
+	/**
+	 * /** Add a new Value Type description with fields
+	 * 
+	 * @param type
+	 *            Type of the Value Type
+	 * @param nsURI
+	 *            namespace URI of the Value Type
+	 * @param prefix
+	 *            prefix of the Value Type
+	 * @param description
+	 *            Description of the Value Type
+	 * @param fields
+	 *            List of FieldDescription
+	 */
+	public void addValueTypeDescription(String type, String nsURI,
+			String prefix, String description, List<FieldDescription> fields) {
+		vTypes.add(new ValueTypeDescription(type, nsURI, prefix, description,
+				fields));
+	}
 
-  public void addValueTypeDescription(String type, String nsURI, String prefix, String description, List<FieldDescription> fields){
-    vTypes.add(new ValueTypeDescription(type, nsURI, prefix, description, fields));
-  }
+	/**
+	 * Save as XML data, all information defined before to the OutputStream
+	 * 
+	 * @param os
+	 *            The stream where write data
+	 */
+	public void toXML(OutputStream os) {
+		xstream.toXML(vTypes, os);
+	}
 
-  public void toXML(OutputStream os){
-    xstream.toXML(vTypes, os);
-  }
+	/**
+	 * Load Value Types Descriptions from a well-formed XML File
+	 * 
+	 * @param classSchem
+	 *            Description Schema where properties description are used
+	 * @param path
+	 *            Relative Path (file loading search in same class Schema
+	 *            representation folder)
+	 * @throws BuildPDFAExtensionSchemaDescriptionException
+	 *             When problems to get or treat data in XML description file
+	 */
+	public void loadListFromXML(Class<? extends XMPSchema> classSchem,
+			String path) throws BuildPDFAExtensionSchemaDescriptionException {
+		InputStream fis = classSchem.getResourceAsStream(path);
+		if (fis == null) {
+			throw new BuildPDFAExtensionSchemaDescriptionException(
+					"Failed to find specified XML valuetypes descriptions File");
+		}
+		loadListFromXML(fis);
+	}
 
-  public void loadListFromXML(Class<? extends XMPSchema> classSchem,String path) throws BuildPDFAExtensionSchemaDescriptionException{
-    InputStream fis = classSchem.getResourceAsStream(path);
-    if (fis==null) {
-      throw new BuildPDFAExtensionSchemaDescriptionException("Failed to find specified XML valuetypes descriptions File");
-    }
-    loadListFromXML(fis);
-  }
+	/**
+	 * Get all Value Types Descriptions defined
+	 * 
+	 * @return List of ValueTypeDescription
+	 */
+	public List<ValueTypeDescription> getValueTypesDescriptionList() {
+		return vTypes;
+	}
 
-  public List<ValueTypeDescription> getValueTypesDescriptionList(){
-    return vTypes;
-  }
+	/**
+	 * Load Value Types Descriptions from XML Stream
+	 * 
+	 * @param is
+	 *            Stream where read data
+	 * @throws BuildPDFAExtensionSchemaDescriptionException
+	 *             When problems to get or treat data in XML description file
+	 */
+	public void loadListFromXML(InputStream is)
+			throws BuildPDFAExtensionSchemaDescriptionException {
+		try {
+			Object o = xstream.fromXML(is);
+			if (o instanceof List<?>) {
+				if (((List<?>) o).get(0) != null) {
+					if (((List<?>) o).get(0) instanceof ValueTypeDescription) {
+						vTypes = (List<ValueTypeDescription>) o;
+					} else {
+						throw new BuildPDFAExtensionSchemaDescriptionException(
+								"Failed to get correct valuetypes descriptions from specified XML stream");
+					}
+				} else {
+					throw new BuildPDFAExtensionSchemaDescriptionException(
+							"Failed to find a valuetype description into the specified XML stream");
+				}
+			}
 
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BuildPDFAExtensionSchemaDescriptionException(
+					"Failed to get correct valuetypes descriptions from specified XML stream",
+					e.getCause());
+		} finally {
+			IOUtils.closeQuietly(is);
+		}
+	}
 
-  public void loadListFromXML(InputStream is) throws BuildPDFAExtensionSchemaDescriptionException{
-    try{
-      Object o= xstream.fromXML(is);
-      if(o instanceof List<?>){
-        if(((List<?>) o).get(0)!=null){
-          if(((List<?>) o).get(0) instanceof ValueTypeDescription){
-            vTypes= (List<ValueTypeDescription>) o;
-          }else{
-            throw new BuildPDFAExtensionSchemaDescriptionException("Failed to get correct valuetypes descriptions from specified XML stream");
-          }
-        }else{
-          throw new BuildPDFAExtensionSchemaDescriptionException("Failed to find a valuetype description into the specified XML stream");
-        }
-      }
+	/**
+	 * Sample of using to write/read information
+	 * 
+	 * @param args
+	 *            not used
+	 * @throws BuildPDFAExtensionSchemaDescriptionException
+	 *             When errors during building/reading xml file
+	 */
+	public static void main(String[] args)
+			throws BuildPDFAExtensionSchemaDescriptionException {
+		XMLValueTypeDescriptionManager vtMaker = new XMLValueTypeDescriptionManager();
 
-    }
-    catch(Exception e){
-      e.printStackTrace();
-      throw new BuildPDFAExtensionSchemaDescriptionException("Failed to get correct valuetypes descriptions from specified XML stream", e.getCause());
-    } finally {
-      IOUtils.closeQuietly(is);
-    }
-  }
+		// add Descriptions
+		for (int i = 0; i < 3; i++) {
+			vtMaker.addValueTypeDescription("testType" + i, "nsURI" + i,
+					"prefix" + i, "description" + i);
 
+		}
+		List<FieldDescription> fieldSample = new ArrayList<FieldDescription>();
+		for (int i = 0; i < 2; i++) {
+			fieldSample.add(new FieldDescription("fieldName" + i, "valueType"
+					+ i, "description" + i));
+		}
+		vtMaker.addValueTypeDescription("testTypeField",
+				"http://test.withfield.com/vt/", "prefTest",
+				" value type description", fieldSample);
 
-  public static void main(String[] args) throws BuildPDFAExtensionSchemaDescriptionException{
-    XMLValueTypeDescriptionManager vtMaker=new XMLValueTypeDescriptionManager();
+		// Display XML conversion
+		System.out.println("Display XML Result:");
+		vtMaker.toXML(System.out);
 
-    //add Descriptions
-    for(int i=0; i<3; i++){
-      vtMaker.addValueTypeDescription("testType"+i, "nsURI"+i, "prefix"+i, "description"+i);
+		// Sample to show how to build object from XML file
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		vtMaker.toXML(bos);
+		IOUtils.closeQuietly(bos);
 
-    }
-    List<FieldDescription> fieldSample=new ArrayList<FieldDescription>();
-    for(int i=0; i<2; i++){
-      fieldSample.add(new FieldDescription("fieldName"+i, "valueType"+i, "description"+i));
-    }
-    vtMaker.addValueTypeDescription("testTypeField", "http://test.withfield.com/vt/", "prefTest", " value type description", fieldSample);
+		// emulate a new reading
+		InputStream is = new ByteArrayInputStream(bos.toByteArray());
+		vtMaker = new XMLValueTypeDescriptionManager();
+		vtMaker.loadListFromXML(is);
+		List<ValueTypeDescription> result = vtMaker
+				.getValueTypesDescriptionList();
+		System.out.println();
+		System.out.println();
+		System.out.println("Result of XML Loading :");
+		for (ValueTypeDescription propertyDescription : result) {
+			System.out.println(propertyDescription.getType() + " :"
+					+ propertyDescription.getDescription());
+			if (propertyDescription.getFields() != null) {
+				Iterator<FieldDescription> fit = propertyDescription
+						.getFields().iterator();
+				FieldDescription field;
+				while (fit.hasNext()) {
+					field = fit.next();
+					System.out.println("Field " + field.getName() + " :"
+							+ field.getValueType());
+				}
+			}
+		}
 
-    // Display XML conversion
-    System.out.println("Display XML Result:");
-    vtMaker.toXML(System.out);
-
-
-    //Sample to show how to build object from XML file
-    ByteArrayOutputStream bos=new ByteArrayOutputStream();
-    vtMaker.toXML(bos);
-    IOUtils.closeQuietly(bos);
-
-    //emulate a new reading
-    InputStream is=new ByteArrayInputStream(bos.toByteArray());
-    vtMaker=new XMLValueTypeDescriptionManager();
-    vtMaker.loadListFromXML(is);
-    List<ValueTypeDescription> result= vtMaker.getValueTypesDescriptionList();
-    System.out.println();
-    System.out.println();
-    System.out.println("Result of XML Loading :");
-    for (ValueTypeDescription propertyDescription : result) {
-      System.out.println(propertyDescription.getType()+" :"+propertyDescription.getDescription());
-      if(propertyDescription.getFields()!=null){
-        Iterator<FieldDescription> fit=propertyDescription.getFields().iterator();
-        FieldDescription field;
-        while(fit.hasNext()){
-          field=fit.next();
-          System.out.println("Field "+field.getName()+" :"+field.getValueType());
-        }
-      }
-    }
-
-
-
-  }
+	}
 
 }

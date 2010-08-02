@@ -18,11 +18,20 @@
  ******************************************************************************/
 package net.padaf.preflight.font;
 
-import static net.padaf.preflight.ValidationConstants.*;
+import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_SUBTYPE;
+import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_TYPE;
+import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_DICTIONARY_INVALID;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_COMPOSITE;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_MMTYPE;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TRUETYPE;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE0;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE0C;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE1;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE1C;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE2;
+import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE3;
 import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationException;
-import net.padaf.preflight.font.CompositeFontValidator;
-import net.padaf.preflight.font.Type3FontValidator;
 
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;

@@ -19,14 +19,10 @@
 package net.padaf.xmpbox.schema;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.padaf.xmpbox.XMPMetadata;
-import net.padaf.xmpbox.schema.PDFAIdentificationSchema;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -36,27 +32,24 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class PDFAIdentificationTest extends AbstractXMPSchemaTest {
 
-	
-	  @Before
-	  public void initTempMetaData() throws Exception {
-	    metadata=new XMPMetadata();
-	    schema = metadata.createAndAddPFAIdentificationSchema();
-	    schemaClass = PDFAIdentificationSchema.class;
-	  }
+	@Before
+	public void initTempMetaData() throws Exception {
+		metadata = new XMPMetadata();
+		schema = metadata.createAndAddPFAIdentificationSchema();
+		schemaClass = PDFAIdentificationSchema.class;
+	}
 
-	  @Parameters
-	  public static Collection<Object[]> initializeParameters() throws Exception {
-	    List<Object[]> data = new ArrayList<Object[]>();
-	    data.add(wrapProperty("part","Integer",1));
-        data.add(wrapProperty("amd","Text","2005"));
-        data.add(wrapProperty("conformance","Text","B"));
- 	    return data;
-	  }
+	@Parameters
+	public static Collection<Object[]> initializeParameters() throws Exception {
+		List<Object[]> data = new ArrayList<Object[]>();
+		data.add(wrapProperty("part", "Integer", 1));
+		data.add(wrapProperty("amd", "Text", "2005"));
+		data.add(wrapProperty("conformance", "Text", "B"));
+		return data;
+	}
 
-	  
-	  public PDFAIdentificationTest(String property,String type,Object value) {
-	    super(property,type, value);
-	  }
-
+	public PDFAIdentificationTest(String property, String type, Object value) {
+		super(property, type, value);
+	}
 
 }

@@ -33,6 +33,11 @@ public interface ValidationConstants {
   static int MAX_NAME_SIZE = 127;
   static int MAX_STRING_LENGTH = 65535;
   static int MAX_INDIRECT_OBJ = 8388607;
+  static int MAX_CID = 65535;
+  static int MAX_GRAPHIC_STATES = 28;
+  static int MAX_DEVICE_N_LIMIT = 8;
+  static float MAX_POSITIVE_FLOAT = 32767f;
+  static float MAX_NEGATIVE_FLOAT = -32767f;
 
   static String TRAILER_DICTIONARY_KEY_ID = "ID";
   static String TRAILER_DICTIONARY_KEY_SIZE = "Size";
@@ -173,7 +178,7 @@ public interface ValidationConstants {
   static String STREAM_DICTIONARY_VALUE_FILTER_ASCII_HEX = "ASCIIHexDecode";
   static String STREAM_DICTIONARY_VALUE_FILTER_ASCII_85 = "ASCII85Decode";
   static String STREAM_DICTIONARY_VALUE_FILTER_RUN = "RunLengthDecode";
-  static String STREAM_DICTIONARY_VALUE_FILTER_CCITTFF = "CCITTFFaxDecode";
+  static String STREAM_DICTIONARY_VALUE_FILTER_CCITTFF = "CCITTFaxDecode";
   static String STREAM_DICTIONARY_VALUE_FILTER_JBIG = "JBIG2Decode";
   static String STREAM_DICTIONARY_VALUE_FILTER_DCT = "DCTDecode";
   static String STREAM_DICTIONARY_VALUE_FILTER_FLATE_DECODE = "FlateDecode";
@@ -305,7 +310,15 @@ public interface ValidationConstants {
    * The language declared doesn't match with the RFC1766
    */
   static final String ERROR_SYNTAX_LANG_NOT_RFC1766 = "1.0.8";
-
+  /**
+   * There are too many objects
+   */
+  static final String ERROR_SYNTAX_INDIRECT_OBJ_RANGE = "1.0.9";
+  /**
+   * CID too long
+   */
+  static final String ERROR_SYNTAX_CID_RANGE = "1.0.10";
+  
   static final String ERROR_SYNTAX_HEADER = "1.1";
   static final String ERROR_SYNTAX_HEADER_FIRST_CHAR = "1.1.1";
   static final String ERROR_SYNTAX_HEADER_FILE_TYPE = "1.1.2";
@@ -444,6 +457,8 @@ public interface ValidationConstants {
 
   static final String ERROR_GRAPHIC_MISSING_FIELD = "2.1.7";
 
+  static final String ERROR_GRAPHIC_TOO_MANY_GRAPHIC_STATES = "2.1.8";
+  
   /**
    * Main error code for graphical transparency problems
    */
@@ -509,6 +524,8 @@ public interface ValidationConstants {
    * auth in inlined image)
    */
   static final String ERROR_GRAPHIC_INVALID_COLOR_SPACE_FORBIDDEN = "2.4.9";
+  
+  static final String ERROR_GRAPHIC_INVALID_COLOR_SPACE_TOO_MANY_COMPONENTS_DEVICEN = "2.4.10";
 
   // -----------------------------------------------------------
   // ---- FONT ERRORS 3.x...

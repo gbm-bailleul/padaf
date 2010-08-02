@@ -3,15 +3,30 @@
 	<groupId>net.padaf</groupId>
 	<artifactId>pdfa-root</artifactId>
 	<packaging>pom</packaging>
-	<version>0.4.3-SNAPSHOT</version>
-	
+	<version>0.5.1</version>
 
-	<scm>
-		<connection>scm:git:git://github.com/gbailleul/padaf.git</connection>
-		<developerConnection>scm:git:https://github.com/gbailleul/padaf.git</developerConnection>
-		<url>http://github.com/gbailleul/padaf</url>
-	</scm>
 
+
+<build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+       <version>2.0</version>
+      </plugin>
+    </plugins>
+  </build>
+
+
+	<pluginRepositories>
+        </pluginRepositories>
+
+	<licenses>
+		<license>
+			<name>Apache License Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
 
 	<modules>
 		<module>parent</module>

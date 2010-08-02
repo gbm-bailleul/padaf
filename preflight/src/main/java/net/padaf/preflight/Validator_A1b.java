@@ -42,7 +42,7 @@ public class Validator_A1b {
 
 		FileDataSource fd = new FileDataSource(args[0]);
 
-		PdfA1bValidator validator = new PdfA1bValidator(PdfAValidatorFactory.pdfa1bStandardConfig);
+		PdfA1bValidator validator = new PdfA1bValidator(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
 
 		ValidationResult result = validator.validate(fd);
 		if (result.isValid()) {

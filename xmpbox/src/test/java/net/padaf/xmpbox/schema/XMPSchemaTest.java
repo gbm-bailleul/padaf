@@ -23,10 +23,8 @@ import java.util.Calendar;
 import java.util.List;
 
 import junit.framework.Assert;
-import net.padaf.xmpbox.TransformException;
 import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.parser.DateConverter;
-import net.padaf.xmpbox.schema.XMPSchema;
 import net.padaf.xmpbox.type.AbstractField;
 import net.padaf.xmpbox.type.Attribute;
 import net.padaf.xmpbox.type.BadFieldValueException;
@@ -39,22 +37,22 @@ import net.padaf.xmpbox.type.TextType;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class XMPSchemaTest {
 
 	protected XMPMetadata parent;
 	protected XMPSchema schem;
 
 	@Before
-	public void resetDocument() throws TransformException, IOException {
-		parent=new XMPMetadata();
+	public void resetDocument() throws Exception {
+		parent = new XMPMetadata();
 		schem = new XMPSchema(parent, "nsSchem", "nsURI");
 
 	}
 
 	/**
 	 * Check if Bag (Unordered Array) management is ok
-	 * @throws InappropriateTypeException 
+	 * 
+	 * @throws InappropriateTypeException
 	 */
 	@Test
 	public void testBagManagement() throws Exception {
@@ -63,9 +61,7 @@ public class XMPSchemaTest {
 		String value2 = "valueTwo";
 		schem.addBagValue(bagName, new TextType(parent, "rdf", "li", value1));
 		schem.addBagValue(bagName, value2);
-		
-		
-		
+
 		List<String> values = schem.getBagValueList(bagName);
 		Assert.assertEquals(value1, values.get(0));
 		Assert.assertEquals(value2, values.get(1));
@@ -75,30 +71,30 @@ public class XMPSchemaTest {
 		Assert.assertEquals(1, values2.size());
 		Assert.assertEquals(value2, values2.get(0));
 
-		/*System.out.println("Bag Management :");
-		parent.getFuturOwner().appendChild(schem.getElement());
-		try {
-			XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8");
-		} catch (TransformerException e) {
-
-			e.printStackTrace();
-		}
-		System.out.println("------------------");*/
+		/*
+		 * System.out.println("Bag Management :");
+		 * parent.getFuturOwner().appendChild(schem.getElement()); try {
+		 * XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8"); } catch
+		 * (TransformerException e) {
+		 * 
+		 * e.printStackTrace(); } System.out.println("------------------");
+		 */
 
 	}
-	
+
 	@Test
 	public void testArrayList() throws Exception {
-		ComplexProperty newSeq= new ComplexProperty(parent, "nsSchem", "seqType", ComplexProperty.ORDERED_ARRAY);
-		TextType li1= new TextType(parent, "rdf", "li", "valeur1");
-		TextType li2= new TextType(parent, "rdf", "li", "valeur2");
+		ComplexProperty newSeq = new ComplexProperty(parent, "nsSchem",
+				"seqType", ComplexProperty.ORDERED_ARRAY);
+		TextType li1 = new TextType(parent, "rdf", "li", "valeur1");
+		TextType li2 = new TextType(parent, "rdf", "li", "valeur2");
 		newSeq.getContainer().addProperty(li1);
 		newSeq.getContainer().addProperty(li2);
 		schem.addProperty(newSeq);
-		List<AbstractField> list=schem.getArrayList("nsSchem:seqType");
+		List<AbstractField> list = schem.getArrayList("nsSchem:seqType");
 		Assert.assertTrue(list.contains(li1));
 		Assert.assertTrue(list.contains(li2));
-		
+
 	}
 
 	/**
@@ -128,15 +124,14 @@ public class XMPSchemaTest {
 		Assert.assertEquals(bool.getStringValue(), values.get(1));
 		Assert.assertEquals(textVal, values.get(2));
 
-		/*System.out.println("Seq Management :");
-		parent.getFuturOwner().appendChild(schem.getElement());
-		try {
-			XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8");
-		} catch (TransformerException e) {
-
-			e.printStackTrace();
-		}
-		System.out.println("------------------");*/
+		/*
+		 * System.out.println("Seq Management :");
+		 * parent.getFuturOwner().appendChild(schem.getElement()); try {
+		 * XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8"); } catch
+		 * (TransformerException e) {
+		 * 
+		 * e.printStackTrace(); } System.out.println("------------------");
+		 */
 
 		schem.removeSequenceDateValue(seqName, date);
 		Assert.assertEquals(0, schem.getSequenceDateValueList(seqName).size());
@@ -147,28 +142,26 @@ public class XMPSchemaTest {
 		Assert.assertEquals(0, schem.getSequenceValueList(seqName).size());
 	}
 
-	
 	@Test
-	public void rdfAboutTest(){
+	public void rdfAboutTest() {
 		Assert.assertNull(schem.getAboutValue());
-		String about="about";
+		String about = "about";
 		schem.setAboutAsSimple(about);
 		Assert.assertEquals(about, schem.getAboutValue());
 		schem.setAboutAsSimple(null);
 		Assert.assertNull(schem.getAboutValue());
 	}
-	
-	
-	@Test(expected=BadFieldValueException.class)
-	public void testBadRdfAbout() throws BadFieldValueException{
+
+	@Test(expected = BadFieldValueException.class)
+	public void testBadRdfAbout() throws Exception {
 		schem.setAbout(new Attribute(null, "bill", "about", ""));
 	}
-	
+
 	@Test
-	public void testSetSpecifiedSimpleTypeProperty() throws Exception{
-		String prop="testprop";
-		String val="value";
-		String val2="value2";
+	public void testSetSpecifiedSimpleTypeProperty() throws Exception {
+		String prop = "testprop";
+		String val = "value";
+		String val2 = "value2";
 		schem.setTextPropertyValueAsSimple(prop, val);
 		Assert.assertEquals(val, schem.getTextPropertyValueAsSimple(prop));
 		schem.setTextPropertyValueAsSimple(prop, val2);
@@ -176,45 +169,45 @@ public class XMPSchemaTest {
 		schem.setTextPropertyValueAsSimple(prop, null);
 		Assert.assertNull(schem.getTextPropertyValueAsSimple(prop));
 	}
-	
+
 	@Test
-	public void testSpecifiedSimplePropertyFormer() throws Exception{
-		String prop="testprop";
-		String val="value";
-		String val2="value2";
+	public void testSpecifiedSimplePropertyFormer() throws Exception {
+		String prop = "testprop";
+		String val = "value";
+		String val2 = "value2";
 		schem.setTextPropertyValueAsSimple(prop, val);
-		TextType text=new TextType(parent, schem.getPrefix(), prop, "value2");
+		TextType text = new TextType(parent, schem.getPrefix(), prop, "value2");
 		schem.setTextProperty(text);
 		Assert.assertEquals(val2, schem.getTextPropertyValueAsSimple(prop));
-		Assert.assertEquals(text, schem.getTextProperty(schem.getPrefix()+":"+prop));
+		Assert.assertEquals(text, schem.getTextProperty(schem.getPrefix() + ":"
+				+ prop));
 	}
-	
-	
+
 	@Test
-	public void testAsSimpleMethods() throws Exception{
-		String bool="bool";
-		boolean boolVal=true;
-		
-		String date="date";
-		Calendar dateVal=Calendar.getInstance();
-		
-		String integ="integer";
-		Integer i=1;
-		
-		String langprop="langprop";
-		String lang="x-default";
-		String langVal="langVal";
-		
-		String bagprop="bagProp";
-		String bagVal="bagVal";
-		
-		String seqprop="SeqProp";
-		String seqPropVal="seqval";
-		
-		String seqdate="SeqDate";
-				
-		String prefSchem= schem.getPrefix()+":";
-		
+	public void testAsSimpleMethods() throws Exception {
+		String bool = "bool";
+		boolean boolVal = true;
+
+		String date = "date";
+		Calendar dateVal = Calendar.getInstance();
+
+		String integ = "integer";
+		Integer i = 1;
+
+		String langprop = "langprop";
+		String lang = "x-default";
+		String langVal = "langVal";
+
+		String bagprop = "bagProp";
+		String bagVal = "bagVal";
+
+		String seqprop = "SeqProp";
+		String seqPropVal = "seqval";
+
+		String seqdate = "SeqDate";
+
+		String prefSchem = schem.getPrefix() + ":";
+
 		schem.setBooleanPropertyValueAsSimple(bool, boolVal);
 		schem.setDatePropertyValueAsSimple(date, dateVal);
 		schem.setIntegerPropertyValueAsSimple(integ, i);
@@ -222,25 +215,40 @@ public class XMPSchemaTest {
 		schem.addBagValueAsSimple(bagprop, bagVal);
 		schem.addSequenceValueAsSimple(seqprop, seqPropVal);
 		schem.addSequenceDateValueAsSimple(seqdate, dateVal);
-		
-		Assert.assertEquals(boolVal, schem.getBooleanProperty(prefSchem+bool).getValue());
-		Assert.assertEquals(dateVal, schem.getDateProperty(prefSchem+date).getValue());
-		Assert.assertEquals(""+i, schem.getIntegerProperty(prefSchem+integ).getStringValue());
-		Assert.assertEquals(langVal, schem.getLanguagePropertyValue(prefSchem+langprop, lang));
-		Assert.assertTrue(schem.getBagValueList(prefSchem+bagprop).contains(bagVal));
-		Assert.assertTrue(schem.getSequenceValueList(prefSchem+seqprop).contains(seqPropVal));
-		Assert.assertTrue(schem.getSequenceDateValueList(prefSchem+seqdate).contains(dateVal));
-		Assert.assertTrue(schem.getLanguagePropertyLanguagesValue(prefSchem+langprop).contains(lang));
-		
-		Assert.assertEquals(boolVal, schem.getBooleanPropertyValueAsSimple(bool).booleanValue());
+
+		Assert.assertEquals(boolVal, schem.getBooleanProperty(prefSchem + bool)
+				.getValue());
+		Assert.assertEquals(dateVal, schem.getDateProperty(prefSchem + date)
+				.getValue());
+		Assert.assertEquals("" + i, schem.getIntegerProperty(prefSchem + integ)
+				.getStringValue());
+		Assert.assertEquals(langVal, schem.getLanguagePropertyValue(prefSchem
+				+ langprop, lang));
+		Assert.assertTrue(schem.getBagValueList(prefSchem + bagprop).contains(
+				bagVal));
+		Assert.assertTrue(schem.getSequenceValueList(prefSchem + seqprop)
+				.contains(seqPropVal));
+		Assert.assertTrue(schem.getSequenceDateValueList(prefSchem + seqdate)
+				.contains(dateVal));
+		Assert.assertTrue(schem.getLanguagePropertyLanguagesValue(
+				prefSchem + langprop).contains(lang));
+
+		Assert.assertEquals(boolVal, schem
+				.getBooleanPropertyValueAsSimple(bool).booleanValue());
 		Assert.assertEquals(dateVal, schem.getDatePropertyValueAsSimple(date));
 		Assert.assertEquals(i, schem.getIntegerPropertyValueAsSimple(integ));
-		Assert.assertEquals(langVal, schem.getLanguagePropertyValueAsSimple(langprop, lang));
-		Assert.assertTrue(schem.getBagValueListAsSimple(bagprop).contains(bagVal));
-		Assert.assertTrue(schem.getSequenceValueListAsSimple(seqprop).contains(seqPropVal));
-		Assert.assertTrue(schem.getSequenceDateValueListAsSimple(seqdate).contains(dateVal));
-		Assert.assertTrue(schem.getLanguagePropertyLanguagesValueAsSimple(langprop).contains(lang));
+		Assert.assertEquals(langVal, schem.getLanguagePropertyValueAsSimple(
+				langprop, lang));
+		Assert.assertTrue(schem.getBagValueListAsSimple(bagprop).contains(
+				bagVal));
+		Assert.assertTrue(schem.getSequenceValueListAsSimple(seqprop).contains(
+				seqPropVal));
+		Assert.assertTrue(schem.getSequenceDateValueListAsSimple(seqdate)
+				.contains(dateVal));
+		Assert.assertTrue(schem.getLanguagePropertyLanguagesValueAsSimple(
+				langprop).contains(lang));
 	}
+
 	/**
 	 * Test All common simple properties management in XMPSchema
 	 * 
@@ -248,99 +256,102 @@ public class XMPSchemaTest {
 	 * @throws BadFieldValueException
 	 */
 	@Test
-	public void testProperties() throws Exception{
-		
-		Assert.assertEquals("nsURI", schem.getNamespaceValue());
-		
-		//In real cases, rdf ns will be declared before !
-		schem.setAttribute(new Attribute("http://www.w3.org/2000/xmlns/", "xmlns", "rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#" ));
+	public void testProperties() throws Exception {
 
-		
-		String aboutVal="aboutTest";
+		Assert.assertEquals("nsURI", schem.getNamespaceValue());
+
+		// In real cases, rdf ns will be declared before !
+		schem.setAttribute(new Attribute("http://www.w3.org/2000/xmlns/",
+				"xmlns", "rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+
+		String aboutVal = "aboutTest";
 		schem.setAboutAsSimple(aboutVal);
 		Assert.assertEquals(aboutVal, schem.getAboutValue());
-		
-		Attribute about=new Attribute(null, "rdf", "about", "YEP");
+
+		Attribute about = new Attribute(null, "rdf", "about", "YEP");
 		schem.setAbout(about);
 		Assert.assertEquals(about, schem.getAboutAttribute());
-		
-		String textProp="nsSchem:textProp";
-		String textPropVal="TextPropTest";
+
+		String textProp = "nsSchem:textProp";
+		String textPropVal = "TextPropTest";
 		schem.setTextPropertyValue(textProp, textPropVal);
 		Assert.assertEquals(textPropVal, schem.getTextPropertyValue(textProp));
-		
-		TextType text=new TextType(parent, "nsSchem", "textType", "GRINGO");
+
+		TextType text = new TextType(parent, "nsSchem", "textType", "GRINGO");
 		schem.setTextProperty(text);
 		Assert.assertEquals(text, schem.getTextProperty("nsSchem:textType"));
-		
-		Calendar dateVal=Calendar.getInstance();
-		String date="nsSchem:dateProp";
-		schem.setDatePropertyValue(date, dateVal) ;
-		Assert.assertEquals(dateVal, schem.getDatePropertyValue(date) );
-		
-		DateType dateType=new DateType(parent, "nsSchem", "dateType", Calendar.getInstance());
+
+		Calendar dateVal = Calendar.getInstance();
+		String date = "nsSchem:dateProp";
+		schem.setDatePropertyValue(date, dateVal);
+		Assert.assertEquals(dateVal, schem.getDatePropertyValue(date));
+
+		DateType dateType = new DateType(parent, "nsSchem", "dateType",
+				Calendar.getInstance());
 		schem.setDateProperty(dateType);
-		Assert.assertEquals(dateType, schem.getDateProperty("nsSchem:dateType"));
-		
-		String bool="nsSchem:booleanTestProp";
-		Boolean boolVal=false;
-		schem.setBooleanPropertyValue(bool, boolVal); 
+		Assert
+				.assertEquals(dateType, schem
+						.getDateProperty("nsSchem:dateType"));
+
+		String bool = "nsSchem:booleanTestProp";
+		Boolean boolVal = false;
+		schem.setBooleanPropertyValue(bool, boolVal);
 		Assert.assertEquals(boolVal, schem.getBooleanPropertyValue(bool));
-		
-		BooleanType boolType=new BooleanType(parent, "nsSchem", "boolType", false);
+
+		BooleanType boolType = new BooleanType(parent, "nsSchem", "boolType",
+				false);
 		schem.setBooleanProperty(boolType);
-		Assert.assertEquals(boolType, schem.getBooleanProperty("nsSchem:boolType"));
-		
-		
-		String intProp="nsSchem:IntegerTestProp";
-		Integer intPropVal=5;
+		Assert.assertEquals(boolType, schem
+				.getBooleanProperty("nsSchem:boolType"));
+
+		String intProp = "nsSchem:IntegerTestProp";
+		Integer intPropVal = 5;
 		schem.setIntegerPropertyValue(intProp, intPropVal);
 		Assert.assertEquals(intPropVal, schem.getIntegerPropertyValue(intProp));
-		
-		IntegerType intType=new IntegerType(parent, "nsSchem", "intType", 5);
+
+		IntegerType intType = new IntegerType(parent, "nsSchem", "intType", 5);
 		schem.setIntegerProperty(intType);
-		Assert.assertEquals(intType, schem.getIntegerProperty("nsSchem:intType"));
-		
+		Assert.assertEquals(intType, schem
+				.getIntegerProperty("nsSchem:intType"));
+
 		// Check bad type verification
-		boolean ok=false;
-		try{
-			schem.getIntegerProperty("nsSchem:boolType");
-		}catch(IllegalArgumentException e){
-			ok=true;
-		}
-		Assert.assertEquals(true, ok);
-		ok=false;
-		try{
-			schem.getTextProperty("nsSchem:intType");
-		}catch(IllegalArgumentException e){
-			ok=true;
-		}
-		Assert.assertEquals(true, ok);
-		ok=false;
-		try{
-			schem.getDateProperty("nsSchem:textType");
-		}catch(IllegalArgumentException e){
-			ok=true;
-		}
-		Assert.assertEquals(true, ok);
-		ok=false;
-		try{
-			schem.getBooleanProperty("nsSchem:dateType");
-		}catch(IllegalArgumentException e){
-			ok=true;
-		}
-		
-		
-		/*System.out.println("Simple Properties Management :");
-		parent.getFuturOwner().appendChild(schem.getElement());
+		boolean ok = false;
 		try {
-			XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8");
-		} catch (TransformerException e) {
-			
-			e.printStackTrace();
+			schem.getIntegerProperty("nsSchem:boolType");
+		} catch (IllegalArgumentException e) {
+			ok = true;
 		}
-		System.out.println("------------------");*/
-				
+		Assert.assertEquals(true, ok);
+		ok = false;
+		try {
+			schem.getTextProperty("nsSchem:intType");
+		} catch (IllegalArgumentException e) {
+			ok = true;
+		}
+		Assert.assertEquals(true, ok);
+		ok = false;
+		try {
+			schem.getDateProperty("nsSchem:textType");
+		} catch (IllegalArgumentException e) {
+			ok = true;
+		}
+		Assert.assertEquals(true, ok);
+		ok = false;
+		try {
+			schem.getBooleanProperty("nsSchem:dateType");
+		} catch (IllegalArgumentException e) {
+			ok = true;
+		}
+
+		/*
+		 * System.out.println("Simple Properties Management :");
+		 * parent.getFuturOwner().appendChild(schem.getElement()); try {
+		 * XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8"); } catch
+		 * (TransformerException e) {
+		 * 
+		 * e.printStackTrace(); } System.out.println("------------------");
+		 */
+
 	}
 
 	@Test
@@ -362,10 +373,13 @@ public class XMPSchemaTest {
 
 		Assert.assertEquals(defaultVal, schem.getLanguagePropertyValue(altProp,
 				defaultLang));
-		Assert.assertEquals(frVal, schem.getLanguagePropertyValue(altProp, frLang));
-		Assert.assertEquals(usVal, schem.getLanguagePropertyValue(altProp, usLang));
+		Assert.assertEquals(frVal, schem.getLanguagePropertyValue(altProp,
+				frLang));
+		Assert.assertEquals(usVal, schem.getLanguagePropertyValue(altProp,
+				usLang));
 
-		List<String> languages = schem.getLanguagePropertyLanguagesValue(altProp);
+		List<String> languages = schem
+				.getLanguagePropertyLanguagesValue(altProp);
 		// default language must be in first place
 		Assert.assertEquals(defaultLang, languages.get(0));
 
@@ -377,22 +391,22 @@ public class XMPSchemaTest {
 		frVal = "Langue française";
 
 		schem.setLanguagePropertyValue(altProp, frLang, frVal);
-		Assert.assertEquals(frVal, schem.getLanguagePropertyValue(altProp, frLang));
+		Assert.assertEquals(frVal, schem.getLanguagePropertyValue(altProp,
+				frLang));
 
 		schem.setLanguagePropertyValue(altProp, frLang, null);
 		languages = schem.getLanguagePropertyLanguagesValue(altProp);
 		Assert.assertFalse(languages.contains(frLang));
 		schem.setLanguagePropertyValue(altProp, frLang, frVal);
 
-		/*System.out.println("Alternatives lang Management :");
-		parent.getFuturOwner().appendChild(schem.getElement());
-		try {
-			XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8");
-		} catch (TransformerException e) {
-
-			e.printStackTrace();
-		}
-		System.out.println("------------------");*/
+		/*
+		 * System.out.println("Alternatives lang Management :");
+		 * parent.getFuturOwner().appendChild(schem.getElement()); try {
+		 * XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8"); } catch
+		 * (TransformerException e) {
+		 * 
+		 * e.printStackTrace(); } System.out.println("------------------");
+		 */
 
 	}
 
@@ -435,10 +449,10 @@ public class XMPSchemaTest {
 		schem1.merge(schem2);
 
 		// Check if all values are present
-		Assert.assertEquals(valAltSchem2, schem1.getLanguagePropertyValue(altName,
-				langAltSchem2));
-		Assert.assertEquals(valAltSchem1, schem1.getLanguagePropertyValue(altName,
-				langAltSchem1));
+		Assert.assertEquals(valAltSchem2, schem1.getLanguagePropertyValue(
+				altName, langAltSchem2));
+		Assert.assertEquals(valAltSchem1, schem1.getLanguagePropertyValue(
+				altName, langAltSchem1));
 
 		List<String> bag = schem1.getBagValueList(bagName);
 
@@ -452,21 +466,24 @@ public class XMPSchemaTest {
 	}
 
 	@Test
-	public void testListAndContainerAccessor() throws Exception{
-		String boolname="bool";
-		boolean boolVal=true;
-		BooleanType bool= new BooleanType(parent, schem.getLocalPrefix(), boolname, boolVal);
-		Attribute att=new Attribute(null, "rdf", "test", "vgh");
+	public void testListAndContainerAccessor() throws Exception {
+		String boolname = "bool";
+		boolean boolVal = true;
+		BooleanType bool = new BooleanType(parent, schem.getLocalPrefix(),
+				boolname, boolVal);
+		Attribute att = new Attribute(null, "rdf", "test", "vgh");
 		schem.setAttribute(att);
 		schem.setBooleanProperty(bool);
-		
-		Assert.assertEquals(schem.getAllProperties(), schem.getContent().getAllProperties());
+
+		Assert.assertEquals(schem.getAllProperties(), schem.getContent()
+				.getAllProperties());
 		Assert.assertTrue(schem.getAllProperties().contains(bool));
 		Assert.assertTrue(schem.getAllAttributes().contains(att));
-		
+
 		Assert.assertEquals(bool, schem.getPropertyAsSimple(boolname));
-		Assert.assertEquals(bool, schem.getProperty(schem.getLocalPrefixWithSeparator()+boolname));
-		
-		
+		Assert.assertEquals(bool, schem.getProperty(schem
+				.getLocalPrefixWithSeparator()
+				+ boolname));
+
 	}
 }

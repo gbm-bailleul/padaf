@@ -29,81 +29,79 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-
-
 @RunWith(Parameterized.class)
-public class AdobePDFTest extends AbstractXMPSchemaTest{
+public class AdobePDFTest extends AbstractXMPSchemaTest {
 
-	
-		
-	
-    @Before
-    public void initTempMetaData() throws Exception {
-      metadata=new XMPMetadata();
-      schema = metadata.createAndAddAdobePDFSchema();
-      schemaClass = AdobePDFSchema.class;
-    }
+	@Before
+	public void initTempMetaData() throws Exception {
+		metadata = new XMPMetadata();
+		schema = metadata.createAndAddAdobePDFSchema();
+		schemaClass = AdobePDFSchema.class;
+	}
 
-    @Parameters
-    public static Collection<Object[]> initializeParameters() throws Exception {
-      List<Object[]> data = new ArrayList<Object[]>();
-      data.add(wrapProperty("Keywords","Text","kw1 kw2 kw3"));
-      data.add(wrapProperty("PDFVersion","Text","1.4"));
-      data.add(wrapProperty("Producer","Text","testcase"));
-      
-      return data;
-    }
-	
-    
-    public AdobePDFTest(String property,String type,Object value) {
-      super(property,type, value);
-    }
+	@Parameters
+	public static Collection<Object[]> initializeParameters() throws Exception {
+		List<Object[]> data = new ArrayList<Object[]>();
+		data.add(wrapProperty("Keywords", "Text", "kw1 kw2 kw3"));
+		data.add(wrapProperty("PDFVersion", "Text", "1.4"));
+		data.add(wrapProperty("Producer", "Text", "testcase"));
 
-    
-//	@Test
-//	public void testPDFAIdentification() throws  BadFieldValueException, TransformException{
-//		AdobePDFSchema schem=metadata.createAndAddAdobePDFSchema();
-//		
-//		String keywords="keywords ihih";
-//		String pdfVersion="1.4";
-//		String producer="producer";
-//		
-//		schem.setKeywordsValue(keywords);
-//		schem.setPDFVersionValue(pdfVersion);
-//		
-//		//Check get null if property not defined
-//		Assert.assertNull(schem.getProducer());
-//		
-//		schem.setProducerValue(producer);
-//		
-//		Assert.assertEquals("pdf:Keywords", schem.getKeywords().getQualifiedName());
-//		Assert.assertEquals(keywords, schem.getKeywordsValue());
-//		
-//		Assert.assertEquals("pdf:PDFVersion", schem.getPDFVersion().getQualifiedName());
-//		Assert.assertEquals(pdfVersion, schem.getPDFVersionValue());
-//		
-//		Assert.assertEquals("pdf:Producer", schem.getProducer().getQualifiedName());
-//		Assert.assertEquals(producer, schem.getProducerValue());
-//		
-//		//check retrieve this schema in metadata
-//		Assert.assertEquals(schem, metadata.getAdobePDFSchema());
-//		
-//		//SaveMetadataHelper.serialize(metadata, true, System.out);
-//	}
-	
-//	@Test(expected=BadFieldValueException.class)
-//	public void testBadPDFAConformanceId() throws BadFieldValueException{
-//		PDFAIdentificationSchema pdfaid= metadata.createAndAddPFAIdentificationSchema();
-//		String conformance="kiohiohiohiohio";
-//		pdfaid.setConformanceValue(conformance);
-//	}
-//	
-//	@Test(expected=IllegalArgumentException.class)
-//	public void testBadVersionIdValueType() throws Exception {
-//		PDFAIdentificationSchema pdfaid= metadata.createAndAddPFAIdentificationSchema();
-//		pdfaid.setVersionIdentifierValueWithString("1");
-//		pdfaid.setVersionIdentifierValueWithString("ojoj");
-//	}
-	
-	
+		return data;
+	}
+
+	public AdobePDFTest(String property, String type, Object value) {
+		super(property, type, value);
+	}
+
+	// @Test
+	// public void testPDFAIdentification() throws BadFieldValueException,
+	// TransformException{
+	// AdobePDFSchema schem=metadata.createAndAddAdobePDFSchema();
+	//		
+	// String keywords="keywords ihih";
+	// String pdfVersion="1.4";
+	// String producer="producer";
+	//		
+	// schem.setKeywordsValue(keywords);
+	// schem.setPDFVersionValue(pdfVersion);
+	//		
+	// //Check get null if property not defined
+	// Assert.assertNull(schem.getProducer());
+	//		
+	// schem.setProducerValue(producer);
+	//		
+	// Assert.assertEquals("pdf:Keywords",
+	// schem.getKeywords().getQualifiedName());
+	// Assert.assertEquals(keywords, schem.getKeywordsValue());
+	//		
+	// Assert.assertEquals("pdf:PDFVersion",
+	// schem.getPDFVersion().getQualifiedName());
+	// Assert.assertEquals(pdfVersion, schem.getPDFVersionValue());
+	//		
+	// Assert.assertEquals("pdf:Producer",
+	// schem.getProducer().getQualifiedName());
+	// Assert.assertEquals(producer, schem.getProducerValue());
+	//		
+	// //check retrieve this schema in metadata
+	// Assert.assertEquals(schem, metadata.getAdobePDFSchema());
+	//		
+	// //SaveMetadataHelper.serialize(metadata, true, System.out);
+	// }
+
+	// @Test(expected=BadFieldValueException.class)
+	// public void testBadPDFAConformanceId() throws BadFieldValueException{
+	// PDFAIdentificationSchema pdfaid=
+	// metadata.createAndAddPFAIdentificationSchema();
+	// String conformance="kiohiohiohiohio";
+	// pdfaid.setConformanceValue(conformance);
+	// }
+	//	
+	// @Test(expected=IllegalArgumentException.class)
+	// public void testBadVersionIdValueType() throws Exception {
+	// PDFAIdentificationSchema pdfaid=
+	// metadata.createAndAddPFAIdentificationSchema();
+	// pdfaid.setVersionIdentifierValueWithString("1");
+	// pdfaid.setVersionIdentifierValueWithString("ojoj");
+	// }
+
 }

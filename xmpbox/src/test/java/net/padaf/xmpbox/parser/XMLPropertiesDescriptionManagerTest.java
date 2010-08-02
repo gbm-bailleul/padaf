@@ -20,14 +20,11 @@ package net.padaf.xmpbox.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
-import net.padaf.xmpbox.BuildPDFAExtensionSchemaDescriptionException;
-import net.padaf.xmpbox.parser.XMLPropertiesDescriptionManager;
 import net.padaf.xmpbox.type.PropertyDescription;
 
 import org.apache.commons.io.IOUtils;
@@ -35,40 +32,38 @@ import org.junit.Test;
 
 public class XMLPropertiesDescriptionManagerTest {
 
-	
-	
 	@Test
-	public void testPropDesc() throws BuildPDFAExtensionSchemaDescriptionException, IOException{
-		List<String> propNames= new ArrayList<String>();
+	public void testPropDesc() throws Exception {
+		List<String> propNames = new ArrayList<String>();
 		propNames.add("propName1");
 		propNames.add("propName2");
-		List<String> descProps=new ArrayList<String>();
+		List<String> descProps = new ArrayList<String>();
 		descProps.add("descProp1");
 		descProps.add("descProp2");
-			
-		
-		XMLPropertiesDescriptionManager xmlParser=new XMLPropertiesDescriptionManager();
-		
-		
+
+		XMLPropertiesDescriptionManager xmlParser = new XMLPropertiesDescriptionManager();
+
 		xmlParser.addPropertyDescription(propNames.get(0), descProps.get(0));
 		xmlParser.addPropertyDescription(propNames.get(1), descProps.get(1));
-		
-		ByteArrayOutputStream bos=new ByteArrayOutputStream();
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		xmlParser.toXML(bos);
 		IOUtils.closeQuietly(bos);
-		
-		XMLPropertiesDescriptionManager propRetrieve=new XMLPropertiesDescriptionManager();
-		
-		InputStream is=new ByteArrayInputStream(bos.toByteArray());
+
+		XMLPropertiesDescriptionManager propRetrieve = new XMLPropertiesDescriptionManager();
+
+		InputStream is = new ByteArrayInputStream(bos.toByteArray());
 		propRetrieve.loadListFromXML(is);
-		
-		List<PropertyDescription> propList =propRetrieve.getPropertiesDescriptionList();
+
+		List<PropertyDescription> propList = propRetrieve
+				.getPropertiesDescriptionList();
 		Assert.assertEquals(propNames.size(), propList.size());
-		for(int i=0; i<propList.size(); i++){
-			Assert.assertTrue(propNames.contains(propList.get(i).getPropertyName()));
-			Assert.assertTrue(descProps.contains(propList.get(i).getDescription()));
+		for (int i = 0; i < propList.size(); i++) {
+			Assert.assertTrue(propNames.contains(propList.get(i)
+					.getPropertyName()));
+			Assert.assertTrue(descProps.contains(propList.get(i)
+					.getDescription()));
 		}
-		
-		
+
 	}
 }

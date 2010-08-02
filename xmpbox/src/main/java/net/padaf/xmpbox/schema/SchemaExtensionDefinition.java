@@ -23,12 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+/**
+ * to be used at runtime
+ */
 @Retention(RetentionPolicy.RUNTIME)
-
-
 @Target(ElementType.TYPE)
-
 /**
  * Annotation to specify PDF/A extension schema description associated to a schema
  * 
@@ -44,10 +43,21 @@ import java.lang.annotation.Target;
  * 
  */
 public @interface SchemaExtensionDefinition {
+	/**
+	 * Get the textual description of this schema
+	 * 
+	 */
 	String schema();
+
+	/**
+	 * Get the optional xml file path to have all textual descriptions of
+	 * properties defined in this schema
+	 */
 	String property_descriptions() default "";
+
+	/**
+	 * Get the optional xml file path to have all textual descriptions of value
+	 * types defined in this schema
+	 */
 	String valueType_description() default "";
 }
-	
-	
-

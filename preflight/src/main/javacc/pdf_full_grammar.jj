@@ -137,7 +137,7 @@ TOKEN :
 {
 	<HTML_OPEN: "<"(<UPPERLETTER>|<LOWERLETTER>)+">"> |
 	<HTML_CLOSE: "</"(<UPPERLETTER>|<LOWERLETTER>)+">"> |
-	<END_OBJECT: ( < EOL > )"endobj"( < EOL > )> |
+	<END_OBJECT: ( < EOL > )+"endobj"( < EOL > )> |
 	<STREAM: "stream"("\n"|"\r\n") > : WithinStream
 }
 
@@ -233,16 +233,30 @@ void indirect_object() :
 void object_content() :
 {}
 {
-	( 	<OBJ_BOOLEAN> (<SPACE>|<OTHER_WHITE_SPACE>)*| 
-	  	<OBJ_NUMERIC> {checkNumericLength();} (<SPACE>|<OTHER_WHITE_SPACE>)*|
-	  	<OBJ_STRING_HEX> {checkStringHexLength();} (<SPACE>|<OTHER_WHITE_SPACE>)*| 
-	  	start_literal() (<SPACE>|<OTHER_WHITE_SPACE>)*| 
-	  	array_of_object() (<SPACE>|<OTHER_WHITE_SPACE>)*| 
-		dictionary_object() (<SPACE>|<OTHER_WHITE_SPACE>)* ( (<EOL>)* <STREAM> <END_STREAM>{ 
-	  		int i = token.image.indexOf(tokenImage[END_STREAM].substring(1,tokenImage[END_STREAM].length()-1));  
-	  		if (!(token.image.charAt(i-1) == 0x0a || token.image.charAt(i-1) == 0x0d)) { throw new PdfParseException("Expected EOL before \"endstream\"", ERROR_SYNTAX_STREAM_DELIMITER); }} (<SPACE>|<OTHER_WHITE_SPACE>)*)? | 
-	  	<OBJ_NAME>  (<SPACE>|<OTHER_WHITE_SPACE>)* {checkNameLength();} | 
-	  	<OBJ_NULL>  (<SPACE>|<OTHER_WHITE_SPACE>)*)  
+	(<SPACE>|<OTHER_WHITE_SPACE>|<EOL>)*
+	(
+		( <OBJ_BOOLEAN> | <OBJ_NUMERIC> {checkNumericLength();} |
+	  		<OBJ_STRING_HEX> {checkStringHexLength();} | 
+	  		start_literal() | array_of_object() | 
+	  		<OBJ_NAME> {checkNameLength();} |
+	  		<OBJ_NULL> 
+		)(<SPACE>|<OTHER_WHITE_SPACE>)*
+		| 
+		(
+	  		dictionary_object() 
+	  		(<SPACE>|<OTHER_WHITE_SPACE>)* 
+	  		(   (<EOL>) *
+	  			<STREAM> <END_STREAM> 
+	  			{ 
+	  				int i = token.image.indexOf(tokenImage[END_STREAM].substring(1,tokenImage[END_STREAM].length()-1));  
+	  				if (!(token.image.charAt(i-1) == 0x0a || token.image.charAt(i-1) == 0x0d)) { 
+	  					throw new PdfParseException("Expected EOL before \"endstream\"", ERROR_SYNTAX_STREAM_DELIMITER); 
+	  				}
+	  			}
+	  			(<SPACE>|<OTHER_WHITE_SPACE>)* 
+	  		)?
+	  	)
+	 )
 }
 
 void array_of_object () :
@@ -333,7 +347,10 @@ void checkNumericLength() throws ParseException {
     	} catch (NumberFormatException e) {
     		// may be a real, go to the next check
     		try {
-    			Double.parseDouble(num);
+	            Double real = Double.parseDouble(num);
+                if (real > MAX_POSITIVE_FLOAT || real < MAX_NEGATIVE_FLOAT) {
+     	           throw new PdfParseException("Float is too long or too small: " + num, ERROR_SYNTAX_NUMERIC_RANGE);                        	
+                }
         	} catch (NumberFormatException e2) {
         		// should never happen 
         		throw new PdfParseException("Numeric has invalid format " + num, ERROR_SYNTAX_NUMERIC_RANGE);
@@ -344,21 +361,27 @@ void checkNumericLength() throws ParseException {
     }
 }
 
+
 void dictionary_object () :
 {int tokenNumber = 0;} 
 {
 	<START_DICTONNARY>
-	( <SPACE>|<OTHER_WHITE_SPACE>|<EOL> )? 
-	(
-		<OBJ_NAME> {++tokenNumber; checkNameLength();} 
+		( <SPACE>|<OTHER_WHITE_SPACE>|<EOL> )*
 		(
-			(
-				(<OBJ_STRING_HEX> {checkStringHexLength();} | start_literal() | array_of_object() | dictionary_object () | <OBJ_NAME> { checkNameLength();} ) | 
-				((<SPACE>|<OTHER_WHITE_SPACE>)+(<EOL>)?|<EOL>) (<OBJ_BOOLEAN> | <OBJ_NAME> {checkNameLength();} | <OBJ_NUMERIC> {checkNumericLength();} | <OBJ_STRING_HEX> {checkStringHexLength();} | start_literal()  | array_of_object() | dictionary_object () | <OBJ_NULL> | <OBJ_REF> )
+			(	<OBJ_NAME> {++tokenNumber; checkNameLength();}
+				( <SPACE>|<OTHER_WHITE_SPACE>|<EOL> )*
+				( 
+					<OBJ_BOOLEAN> | <OBJ_NAME> {checkNameLength();} |
+					<OBJ_NUMERIC> {checkNumericLength();} | 
+					<OBJ_STRING_HEX> {checkStringHexLength();} | 
+					start_literal()  | array_of_object() | 
+					dictionary_object () | <OBJ_NULL> | 
+					<OBJ_REF> 
+				)
+				{++tokenNumber;}			
 			)
-			{++tokenNumber;}
-		) ((<SPACE>|<OTHER_WHITE_SPACE>)+(<EOL>)?|(<EOL>)(<SPACE>|<OTHER_WHITE_SPACE>)*(<EOL>)*)?
-	)*
+			( <SPACE>|<OTHER_WHITE_SPACE>|<EOL> )*	
+		)*
 	<END_DICTONNARY>
 	{
 		int entries = (int)(tokenNumber / 2);
@@ -367,6 +390,7 @@ void dictionary_object () :
 		}
 	}
 }
+
 
 void PDF_header() throws HeaderParseException :
 {}

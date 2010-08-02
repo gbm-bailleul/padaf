@@ -18,74 +18,88 @@
  ******************************************************************************/
 package net.padaf.xmpbox.type;
 
-
 import net.padaf.xmpbox.XMPMetadata;
 
 /**
- * Object representation of a Complex XMP Property
- * (Represents Ordered, Unordered and Alternative Arrays builder)
- * @author Germain Costenobel
- *
+ * Object representation of a Complex XMP Property (Represents Ordered,
+ * Unordered and Alternative Arrays builder)
+ * 
+ * @author a183132
+ * 
  */
 public class ComplexProperty extends AbstractField {
 
-	public static final String UNORDERED_ARRAY="Bag";
-	public static final String ORDERED_ARRAY="Seq";
-	public static final String ALTERNATIVE_ARRAY="Alt";
-	
+	public static final String UNORDERED_ARRAY = "Bag";
+	public static final String ORDERED_ARRAY = "Seq";
+	public static final String ALTERNATIVE_ARRAY = "Alt";
+
 	protected ComplexPropertyContainer container;
-	
+
 	/**
 	 * Contructor of a complex property
+	 * 
 	 * @param metadata
-	 * @param prefix 
+	 *            The metadata to attach to this property
+	 * @param prefix
+	 *            The prefix to set for this property
 	 * @param propertyName
-	 * @param type type of complexProperty (Bag, Seq, Alt)
+	 *            The local Name of this property
+	 * @param type
+	 *            type of complexProperty (Bag, Seq, Alt)
 	 */
 	public ComplexProperty(XMPMetadata metadata, String prefix,
 			String propertyName, String type) {
 		super(metadata, prefix, propertyName);
-		container=new ComplexPropertyContainer(metadata, "rdf", type);
+		container = new ComplexPropertyContainer(metadata, "rdf", type);
 		element.appendChild(container.getElement());
 	}
 
 	/**
 	 * Contructor of a complex property
+	 * 
 	 * @param metadata
-	 * @param nameSpace
-	 * @param prefix 
+	 *            The metadata to attach to this property
+	 * @param namespace
+	 *            The namespace URI to associate to this property
+	 * @param prefix
+	 *            The prefix to set for this property
 	 * @param propertyName
-	 * @param type type of complexProperty (Bag, Seq, Alt)
+	 *            The local Name of this property
+	 * @param type
+	 *            type of complexProperty (Bag, Seq, Alt)
 	 */
-	public ComplexProperty(XMPMetadata metadata, String namespace, String prefix,
-			String propertyName, String type) {
+	public ComplexProperty(XMPMetadata metadata, String namespace,
+			String prefix, String propertyName, String type) {
 		super(metadata, namespace, prefix, propertyName);
-		container=new ComplexPropertyContainer(metadata, "rdf", type);
+		container = new ComplexPropertyContainer(metadata, "rdf", type);
 		element.appendChild(container.getElement());
 	}
-	
+
 	/**
 	 * Return the container of this Array
-	 * @return
+	 * 
+	 * @return The complex property container that represents content of this
+	 *         property
 	 */
-	public ComplexPropertyContainer getContainer(){
+	public ComplexPropertyContainer getContainer() {
 		return container;
 	}
-	
+
 	/**
 	 * Check if this complex property equals to another
+	 * 
 	 * @param prop2
-	 * @return
+	 *            The Complex property to compare
+	 * @return True if properties are equals
 	 */
-	public boolean isSameProperty(AbstractField prop2){
-		if(this.getQualifiedName().equals(prop2.getQualifiedName())){
-				if(this.getElement().getTextContent().equals(prop2.getElement().getTextContent())){
-					return true;
-				}
+	public boolean isSameProperty(AbstractField prop2) {
+		if (this.getQualifiedName().equals(prop2.getQualifiedName())) {
+			if (this.getElement().getTextContent().equals(
+					prop2.getElement().getTextContent())) {
+				return true;
+			}
 		}
 		return false;
 	}
-	
-	
-		
+
 }

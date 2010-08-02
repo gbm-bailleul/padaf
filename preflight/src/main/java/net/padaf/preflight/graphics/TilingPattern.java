@@ -18,6 +18,14 @@
  ******************************************************************************/
 package net.padaf.preflight.graphics;
 
+import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_RESOURCES;
+import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_PATTERN_DEFINITION;
+import static net.padaf.preflight.ValidationConstants.PATTERN_KEY_BBOX;
+import static net.padaf.preflight.ValidationConstants.PATTERN_KEY_PAINT_TYPE;
+import static net.padaf.preflight.ValidationConstants.PATTERN_KEY_TILING_TYPE;
+import static net.padaf.preflight.ValidationConstants.PATTERN_KEY_XSTEP;
+import static net.padaf.preflight.ValidationConstants.PATTERN_KEY_YSTEP;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +36,6 @@ import net.padaf.preflight.contentstream.ContentStreamWrapper;
 
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-
-import static net.padaf.preflight.ValidationConstants.*;
 
 public class TilingPattern implements XObjectValidator {
   /**

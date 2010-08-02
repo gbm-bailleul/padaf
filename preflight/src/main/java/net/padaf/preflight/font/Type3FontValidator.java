@@ -18,29 +18,6 @@
  ******************************************************************************/
 package net.padaf.preflight.font;
 
-import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_FONT;
-import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_RESOURCES;
-import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_SUBTYPE;
-import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_TYPE;
-import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_XOBJECT;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_DICTIONARY_INVALID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_ENCODING;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_METRICS;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_TYPE3_DAMAGED;
-import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_DICTIONARY_KEY_INVALID;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CHARPROCS;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_DIFFERENCES;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_ENCODING;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_FIRSTCHAR;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_FONTBBOX;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_FONTMATRIX;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_LASTCHAR;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_TOUNICODE;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_WIDTHS;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_FONT;
-import static net.padaf.preflight.ValidationConstants.PATTERN_KEY_SHADING;
-import static net.padaf.preflight.ValidationConstants.XOBJECT_DICTIONARY_VALUE_SUBTYPE_IMG;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +26,7 @@ import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult.ValidationError;
 import net.padaf.preflight.contentstream.ContentStreamException;
-import net.padaf.preflight.font.FontContainer.State;
+import net.padaf.preflight.font.AbstractFontContainer.State;
 import net.padaf.preflight.graphics.ExtGStateContainer;
 import net.padaf.preflight.graphics.ShadingPattern;
 import net.padaf.preflight.utils.COSUtils;
@@ -314,16 +291,16 @@ public class Type3FontValidator extends AbstractFontValidator {
     COSArray wArr = COSUtils.getAsArray(this.widths, cDoc);
     if (wArr == null) {
       this.fontContainer.addError(new ValidationError(
-          ERROR_FONTS_DICTIONARY_INVALID, "The Witdhs array is unreachable"));
+          														ERROR_FONTS_DICTIONARY_INVALID, 
+          														"The Witdhs array is unreachable"));
       return false;
     }
 
-    COSDictionary charProcsDictionary = COSUtils.getAsDictionary(
-        this.charProcs, cDoc);
+    COSDictionary charProcsDictionary = COSUtils.getAsDictionary(this.charProcs, cDoc);
     if (charProcsDictionary == null) {
       this.fontContainer.addError(new ValidationError(
-          ERROR_FONTS_DICTIONARY_INVALID,
-          "The CharProcs element isn't a dictionary"));
+          														ERROR_FONTS_DICTIONARY_INVALID,
+          														"The CharProcs element isn't a dictionary"));
       return false;
     }
 
@@ -346,13 +323,14 @@ public class Type3FontValidator extends AbstractFontValidator {
 
     // ---- Check width consistency
     for (int i = 0; i < expectedLength; i++) {
-      COSBase arrContent = wArr.get(i);
+    	int cid = fc + i;
+    	COSBase arrContent = wArr.get(i);
       if (COSUtils.isInteger(arrContent, cDoc)) {
         int width = COSUtils.getAsInteger(arrContent, cDoc);
 
         COSName charName = null;
         try {
-          charName = this.type3Encoding.getName(fc + i);
+          charName = this.type3Encoding.getName(cid);
         } catch (IOException e) {
           // shouldn't occur
           throw new ValidationException("Unable to check Widths consistency", e);
@@ -361,10 +339,11 @@ public class Type3FontValidator extends AbstractFontValidator {
         COSBase item = charProcsDictionary.getItem(charName);
         COSStream charStream = COSUtils.getAsStream(item, cDoc);
         if (charStream == null && width != 0) {
-          this.fontContainer.addError(new ValidationError(ERROR_FONTS_METRICS,
+          GlyphException glyphEx = new GlyphException(ERROR_FONTS_METRICS, cid, 
               "The CharProcs \"" + charName.getName()
-                  + "\" doesn't exist but the width is " + width));
-          return false;
+                  + "\" doesn't exist but the width is " + width);
+          GlyphDetail glyphDetail = new GlyphDetail(cid, glyphEx);
+          this.fontContainer.addKnownCidElement(glyphDetail);
         } else {
           try {
             // --- Parse the Glyph description to obtain the Width
@@ -381,10 +360,11 @@ public class Type3FontValidator extends AbstractFontValidator {
             parser.processStream(null, pRes, charStream);
 
             if (width != parser.getWidth()) {
-              this.fontContainer.addError(new ValidationError(
-                  ERROR_FONTS_METRICS, "The CharProcs \"" + charName.getName()
-                      + "\" should have a width equals to " + width));
-              return false;
+              GlyphException glyphEx = new GlyphException(ERROR_FONTS_METRICS, cid, 
+              																						"The CharProcs \"" + charName.getName()
+                  																				+ "\" should have a width equals to " + width);
+              GlyphDetail glyphDetail = new GlyphDetail(cid, glyphEx);
+              this.fontContainer.addKnownCidElement(glyphDetail);
             }
           } catch (ContentStreamException e) {
             this.fontContainer.addError(new ValidationError(e
@@ -398,8 +378,9 @@ public class Type3FontValidator extends AbstractFontValidator {
           }
         }
 
-        // keep the CID.
-        this.fontContainer.addCID((fc + i), true);
+        // Glyph is OK, we keep the CID.
+        GlyphDetail glyphDetail = new GlyphDetail(cid);
+        this.fontContainer.addKnownCidElement(glyphDetail);
       } else {
         this.fontContainer.addError(new ValidationError(
             ERROR_FONTS_DICTIONARY_INVALID,
@@ -506,7 +487,7 @@ public class Type3FontValidator extends AbstractFontValidator {
         try {
           PDFont aFont = PDFontFactory.createFont(xObjFont);
           // FontContainer aContainer = this.handler.retrieveFontContainer(aFont);
-          FontContainer aContainer = this.handler.getFont(aFont.getCOSObject());
+          AbstractFontContainer aContainer = this.handler.getFont(aFont.getCOSObject());
           // ---- another font is used in the Type3, check if the font is valid.
           if (aContainer.isValid() != State.VALID) {
             this.fontContainer

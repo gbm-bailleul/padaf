@@ -33,7 +33,6 @@ import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidatorConfig;
 import net.padaf.preflight.ValidationResult.ValidationError;
 import net.padaf.preflight.actions.AbstractActionManager;
-import net.padaf.preflight.actions.ActionManagerFactory;
 import net.padaf.preflight.graphics.ICCProfileWrapper;
 import net.padaf.preflight.utils.COSUtils;
 

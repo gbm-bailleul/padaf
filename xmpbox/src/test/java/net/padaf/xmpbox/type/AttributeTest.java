@@ -20,60 +20,57 @@ package net.padaf.xmpbox.type;
 
 import junit.framework.Assert;
 
-import net.padaf.xmpbox.type.Attribute;
-
 import org.junit.Test;
 
 public class AttributeTest {
 
-	
 	@Test
-	public void testAtt(){
-		String nsUri="nsUri";
-		String prefix="prefix";
-		String localName="localName";
-		String value="value";
-		
-		Attribute att=new Attribute(nsUri, prefix, localName, value);
-		
+	public void testAtt() {
+		String nsUri = "nsUri";
+		String prefix = "prefix";
+		String localName = "localName";
+		String value = "value";
+
+		Attribute att = new Attribute(nsUri, prefix, localName, value);
+
 		Assert.assertEquals(nsUri, att.getNamespace());
 		Assert.assertEquals(prefix, att.getPrefix());
 		Assert.assertEquals(localName, att.getLocalName());
-		Assert.assertEquals(prefix+":"+localName, att.getQualifiedName());
+		Assert.assertEquals(prefix + ":" + localName, att.getQualifiedName());
 		Assert.assertEquals(value, att.getValue());
-		
-		String nsUri2="nsUri2";
-		String prefix2="prefix2";
-		String localName2="localName2";
-		String value2="value2";
-		
+
+		String nsUri2 = "nsUri2";
+		String prefix2 = "prefix2";
+		String localName2 = "localName2";
+		String value2 = "value2";
+
 		att.setNsURI(nsUri2);
 		att.setPrefix(prefix2);
 		att.setLocalName(localName2);
 		att.setValue(value2);
-		
+
 		Assert.assertEquals(nsUri2, att.getNamespace());
 		Assert.assertEquals(prefix2, att.getPrefix());
 		Assert.assertEquals(localName2, att.getLocalName());
-		Assert.assertEquals(prefix2+":"+localName2, att.getQualifiedName());
+		Assert.assertEquals(prefix2 + ":" + localName2, att.getQualifiedName());
 		Assert.assertEquals(value2, att.getValue());
-		
+
 	}
 
 	@Test
-	public void testAttWithoutPrefix(){
-		String nsUri="nsUri";
-		String localName="localName";
-		String value="value";
-		
-		Attribute att=new Attribute(nsUri, null, localName, value);
-		
+	public void testAttWithoutPrefix() {
+		String nsUri = "nsUri";
+		String localName = "localName";
+		String value = "value";
+
+		Attribute att = new Attribute(nsUri, null, localName, value);
+
 		Assert.assertEquals(nsUri, att.getNamespace());
 		Assert.assertNull(att.getPrefix());
 		Assert.assertEquals(localName, att.getLocalName());
 		Assert.assertEquals(localName, att.getQualifiedName());
-		
-		att=new Attribute(nsUri, "", localName, value);
+
+		att = new Attribute(nsUri, "", localName, value);
 		Assert.assertEquals(nsUri, att.getNamespace());
 		Assert.assertNull(att.getPrefix());
 		Assert.assertEquals(localName, att.getLocalName());

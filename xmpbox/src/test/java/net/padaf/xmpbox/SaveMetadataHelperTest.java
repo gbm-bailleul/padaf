@@ -18,11 +18,6 @@
  ******************************************************************************/
 package net.padaf.xmpbox;
 
-import java.io.IOException;
-
-import net.padaf.xmpbox.SaveMetadataHelper;
-import net.padaf.xmpbox.TransformException;
-import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.schema.AdobePDFSchema;
 import net.padaf.xmpbox.schema.DublinCoreSchema;
 
@@ -32,50 +27,42 @@ import org.junit.Test;
 
 public class SaveMetadataHelperTest {
 
-	
-	
-	
-	
 	@Test
-	public void testSchemaParsing() throws IOException, TransformException{
-		DublinCoreSchema dc= new DublinCoreSchema(new XMPMetadata());
+	public void testSchemaParsing() throws Exception {
+		DublinCoreSchema dc = new DublinCoreSchema(new XMPMetadata());
 		dc.setCoverageValue("coverage");
 		dc.addToContributorValue("contributor1");
 		dc.addToContributorValue("contributor2");
 		dc.addToDescriptionValue("x-default", "Description");
-		ByteArrayOutputStream bos=new ByteArrayOutputStream();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		SaveMetadataHelper.serialize(dc, bos);
-		byte[] tmp=SaveMetadataHelper.serialize(dc);
+		byte[] tmp = SaveMetadataHelper.serialize(dc);
 		Assert.assertArrayEquals(bos.toByteArray(), tmp);
 	}
-	
+
 	@Test
-	public void testMetadataParsing() throws IOException, TransformException{
-		XMPMetadata meta=new XMPMetadata();
-		DublinCoreSchema dc=meta.createAndAddDublinCoreSchema();
+	public void testMetadataParsing() throws Exception {
+		XMPMetadata meta = new XMPMetadata();
+		DublinCoreSchema dc = meta.createAndAddDublinCoreSchema();
 		dc.setCoverageValue("coverage");
 		dc.addToContributorValue("contributor1");
 		dc.addToContributorValue("contributor2");
 		dc.addToDescriptionValue("x-default", "Description");
-		
-		AdobePDFSchema pdf=meta.createAndAddAdobePDFSchema();
+
+		AdobePDFSchema pdf = meta.createAndAddAdobePDFSchema();
 		pdf.setProducerValue("Producer");
 		pdf.setPDFVersionValue("1.4");
-		
-		ByteArrayOutputStream bos=new ByteArrayOutputStream();
-		byte[] tmp=SaveMetadataHelper.serialize(meta);
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		byte[] tmp = SaveMetadataHelper.serialize(meta);
 		SaveMetadataHelper.serialize(meta, bos);
-		
-		
+
 		Assert.assertArrayEquals(bos.toByteArray(), tmp);
-		
-		ByteArrayOutputStream bosWithoutPI=new ByteArrayOutputStream();
+
+		ByteArrayOutputStream bosWithoutPI = new ByteArrayOutputStream();
 		SaveMetadataHelper.serialize(meta, false, bosWithoutPI);
-		byte[] tmpWithoutPI=SaveMetadataHelper.serialize(meta, false );
+		byte[] tmpWithoutPI = SaveMetadataHelper.serialize(meta, false);
 		Assert.assertArrayEquals(bosWithoutPI.toByteArray(), tmpWithoutPI);
 	}
-	
-	
-	
-	
+
 }

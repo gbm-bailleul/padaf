@@ -29,13 +29,13 @@ public class TestAbstractHelper {
 
   @Test(expected = ValidationException.class)
   public void testAbstractHelperCheckMethod() throws ValidationException {
-    AcroFormValidationHelper afvh = new AcroFormValidationHelper(PdfAValidatorFactory.pdfa1bStandardConfig);
+    AcroFormValidationHelper afvh = new AcroFormValidationHelper(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
     afvh.validate(new DocumentHandlerStub(null));
   }
 
   @Test(expected = ValidationException.class)
   public void testAbstractHelperCheckMethod2() throws ValidationException {
-    AcroFormValidationHelper afvh = new AcroFormValidationHelper(PdfAValidatorFactory.pdfa1bStandardConfig);
+    AcroFormValidationHelper afvh = new AcroFormValidationHelper(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
     afvh.validate(null);
   }
 }

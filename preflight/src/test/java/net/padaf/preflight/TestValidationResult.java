@@ -23,72 +23,98 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.List;
 
 import javax.activation.FileDataSource;
 
-import net.padaf.preflight.ValidationException;
-import net.padaf.preflight.ValidationResult;
+import net.padaf.preflight.util.ByteArrayDataSource;
+import net.padaf.preflight.util.IsartorPdfProvider;
 
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TestValidationResult extends AbstractTestValidPDFA  {
+public class TestValidationResult {
 
+  private static File[] validPdfFiles = null;
+  private static File[] invalidPdfFiles = null;
 
-	@Test
-	public void validationSucceed() throws ValidationException {
-		if (pdfPath != null) {
-			ValidationResult result = validator.validate(new FileDataSource(pdfPath
-					+ "actions/pdf_hideAction_false.pdf"));
-			assertTrue(result.isValid());
-			assertNotNull(result.getPdf());
-			assertNotNull(result.getXmpMetaData());
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    String pdfPath = System.getProperty("pdfa.valid", null);
+    if ("${pdfa.valid}".equals(pdfPath)) {pdfPath=null;}
+    if (pdfPath!=null) {
+      File directory = new File(pdfPath);
+      if (!directory.exists()) throw new Exception ("directory does not exists : "+directory.getAbsolutePath());
+      if (!directory.isDirectory()) throw new Exception ("not a directory : "+directory.getAbsolutePath());
 
-			// try to access PDDocument content
-			PDDocument doc = result.getPdf();
-			int numPage = doc.getNumberOfPages();
-			assertTrue( numPage > 0);
-			COSDocument cosdoc = doc.getDocument();
-			assertNotNull(cosdoc);
-			List<?> objs = cosdoc.getObjects();
-			assertNotNull(objs);
-			assertFalse(objs.isEmpty());
-			
-			result.closePdf();
-		}
-	}
+      validPdfFiles = directory.listFiles();
+    }
 
-	@Test
-	public void validationFailed() throws ValidationException {
-		if (pdfPath != null) {
-			ValidationResult result = validator.validate(new FileDataSource(pdfPath
-					+ "actions/pdf_hide_noT.pdf"));
-			assertFalse(result.isValid());
-			assertNotNull(result.getPdf());
+    pdfPath = System.getProperty("pdfa.invalid", null);
+    if ("${pdfa.invalid}".equals(pdfPath)) {pdfPath=null;}
+    if (pdfPath!=null) {
+      File directory = new File(pdfPath);
+      if (!directory.exists()) throw new Exception ("directory does not exists : "+directory.getAbsolutePath());
+      if (!directory.isDirectory()) throw new Exception ("not a directory : "+directory.getAbsolutePath());
+      invalidPdfFiles = directory.listFiles();
+    }
+  }
 
-			// try to access PDDocument content
-			PDDocument doc = result.getPdf();
-			int numPage = doc.getNumberOfPages();
-			assertTrue( numPage > 0);
-			COSDocument cosdoc = doc.getDocument();
-			assertNotNull(cosdoc);
-			List<?> objs = cosdoc.getObjects();
-			assertNotNull(objs);
-			assertFalse(objs.isEmpty());
-			
-			result.closePdf();
-		}
-	}
+  @Test
+  public void validationSucceed() throws ValidationException {
+    if (validPdfFiles != null && validPdfFiles .length > 0) {
+      PdfAValidator validator = new PdfAValidatorFactory().createValidatorInstance(PdfAValidatorFactory.PDF_A_1_b);
+      ValidationResult result = validator.validate(new FileDataSource(validPdfFiles[0].getAbsolutePath()));
+      assertTrue(result.isValid());
+      assertNotNull(result.getPdf());
+      assertNotNull(result.getXmpMetaData());
 
-	@Test
-	public void validationSyntaxError() throws ValidationException {
-		if (pdfPath != null) {
-			ValidationResult result = validator.validate(new FileDataSource(pdfPath
-					+ "syntaxeError.pdf"));
-			assertFalse(result.isValid());
-			assertNull(result.getPdf());
-		}
-	}
+      // try to access PDDocument content
+      PDDocument doc = result.getPdf();
+      int numPage = doc.getNumberOfPages();
+      assertTrue( numPage > 0);
+      COSDocument cosdoc = doc.getDocument();
+      assertNotNull(cosdoc);
+      List<?> objs = cosdoc.getObjects();
+      assertNotNull(objs);
+      assertFalse(objs.isEmpty());
+
+      result.closePdf();
+    }
+  }
+
+  @Test
+  public void validationFailed() throws ValidationException {
+    if (invalidPdfFiles != null && invalidPdfFiles.length > 0) {
+      PdfAValidator validator = new PdfAValidatorFactory().createValidatorInstance(PdfAValidatorFactory.PDF_A_1_b);
+      ValidationResult result = validator.validate(new FileDataSource(invalidPdfFiles[0].getAbsolutePath()));
+      assertFalse(result.isValid());
+
+      if (result.getPdf()!=null) {
+        // try to access PDDocument content
+        PDDocument doc = result.getPdf();
+        int numPage = doc.getNumberOfPages();
+        assertTrue( numPage > 0);
+        COSDocument cosdoc = doc.getDocument();
+        assertNotNull(cosdoc);
+        List<?> objs = cosdoc.getObjects();
+        assertNotNull(objs);
+        assertFalse(objs.isEmpty());
+      }
+      result.closePdf();
+    }
+  }
+
+  @Test
+  public void validationSyntaxError() throws Exception {
+    if (invalidPdfFiles != null && invalidPdfFiles.length > 0) {
+      PdfAValidator validator = new PdfAValidatorFactory().createValidatorInstance(PdfAValidatorFactory.PDF_A_1_b);
+      ValidationResult result = validator.validate(new ByteArrayDataSource(IsartorPdfProvider.getIsartorDocument("/Isartor testsuite/PDFA-1b/6.1 File structure/6.1.8 Indirect objects/isartor-6-1-8-t01-fail-a.pdf")));
+      assertFalse(result.isValid());
+      assertNull(result.getPdf());
+    }
+  }
 }

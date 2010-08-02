@@ -1,10 +1,26 @@
 package net.padaf.preflight.utils;
 
+import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_STREAM_INVALID_FILTER;
+import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_STREAM_UNDEFINED_FILTER;
+import static net.padaf.preflight.ValidationConstants.INLINE_DICTIONARY_VALUE_FILTER_ASCII_85;
+import static net.padaf.preflight.ValidationConstants.INLINE_DICTIONARY_VALUE_FILTER_ASCII_HEX;
+import static net.padaf.preflight.ValidationConstants.INLINE_DICTIONARY_VALUE_FILTER_CCITTFF;
+import static net.padaf.preflight.ValidationConstants.INLINE_DICTIONARY_VALUE_FILTER_DCT;
+import static net.padaf.preflight.ValidationConstants.INLINE_DICTIONARY_VALUE_FILTER_FLATE_DECODE;
+import static net.padaf.preflight.ValidationConstants.INLINE_DICTIONARY_VALUE_FILTER_LZW;
+import static net.padaf.preflight.ValidationConstants.INLINE_DICTIONARY_VALUE_FILTER_RUN;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_ASCII_85;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_ASCII_HEX;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_CCITTFF;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_DCT;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_FLATE_DECODE;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_JBIG;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_LZW;
+import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_VALUE_FILTER_RUN;
+
 import java.util.List;
 
 import net.padaf.preflight.ValidationResult.ValidationError;
-
-import static net.padaf.preflight.ValidationConstants.*;
 
 public class FilterHelper {
 
@@ -26,7 +42,7 @@ public class FilterHelper {
 				errors.add(new ValidationError(ERROR_SYNTAX_STREAM_INVALID_FILTER, "LZWDecode is forbidden"));
 				return false;
 			} else {
-				errors.add(new ValidationError(ERROR_SYNTAX_STREAM_UNDEFINED_FILTER, "This filter isn't defined in the PDF Reference Third Edition."));
+				errors.add(new ValidationError(ERROR_SYNTAX_STREAM_UNDEFINED_FILTER, "This filter isn't defined in the PDF Reference Third Edition : "+filter));
 				return false;				
 			}
 		}

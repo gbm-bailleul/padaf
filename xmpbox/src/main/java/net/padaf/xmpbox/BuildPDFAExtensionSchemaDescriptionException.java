@@ -20,31 +20,40 @@ package net.padaf.xmpbox;
 
 /**
  * Throws this exception when building PDF/A Extension schema description failed
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class BuildPDFAExtensionSchemaDescriptionException extends Exception {
-
-	
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7873503174613405379L;
 
+	/**
+	 * Create an instance of BuildPDFAExtensionSchemaDescriptionException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 */
+	public BuildPDFAExtensionSchemaDescriptionException(String message) {
+		super(message);
 
-
-	public BuildPDFAExtensionSchemaDescriptionException(String arg0) {
-		super(arg0);
-		
 	}
 
-	
+	/**
+	 * Create an instance of BuildPDFAExtensionSchemaDescriptionException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
+	 */
+	public BuildPDFAExtensionSchemaDescriptionException(String message,
+			Throwable cause) {
+		super(message, cause);
 
-	public BuildPDFAExtensionSchemaDescriptionException(String arg0,
-			Throwable arg1) {
-		super(arg0, arg1);
-		
 	}
 
 }

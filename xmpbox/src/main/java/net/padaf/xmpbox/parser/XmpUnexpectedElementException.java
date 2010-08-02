@@ -20,9 +20,9 @@ package net.padaf.xmpbox.parser;
 
 /**
  * This exception is thrown when a element not equals with what is expected
- *  
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class XmpUnexpectedElementException extends XmpParsingException {
 
@@ -31,11 +31,13 @@ public class XmpUnexpectedElementException extends XmpParsingException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of XmpUnexpectedElementValue
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
 	public XmpUnexpectedElementException(String message, Throwable cause) {
 		super(message, cause);
@@ -43,7 +45,9 @@ public class XmpUnexpectedElementException extends XmpParsingException {
 
 	/**
 	 * Create an instance of XmpUnexpectedElementValue
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public XmpUnexpectedElementException(String message) {
 		super(message);

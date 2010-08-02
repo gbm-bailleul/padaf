@@ -18,6 +18,12 @@
  ******************************************************************************/
 package net.padaf.xmpbox.parser;
 
+/**
+ * Exception thrown when Parsing failed
+ * 
+ * @author a183132
+ * 
+ */
 public class XmpParsingException extends Exception {
 
 	/**
@@ -25,10 +31,24 @@ public class XmpParsingException extends Exception {
 	 */
 	private static final long serialVersionUID = -8843096358184702908L;
 
+	/**
+	 * Create an instance of XmpParsingException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
+	 */
 	public XmpParsingException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
+	/**
+	 * Create an instance of XmpParsingException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 */
 	public XmpParsingException(String message) {
 		super(message);
 	}

@@ -18,18 +18,37 @@
  ******************************************************************************/
 package net.padaf.xmpbox.parser;
 
+/**
+ * Exception thrown when problems occurs in Schema Treatment
+ * 
+ * @author a183132
+ * 
+ */
 public class XmpSchemaException extends Exception {
-
 
 	/**
 	 * serial version uid
 	 */
 	private static final long serialVersionUID = -980712488563404867L;
 
+	/**
+	 * Create an instance of XmpSchemaException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 */
 	public XmpSchemaException(String message) {
 		super(message);
 	}
 
+	/**
+	 * Create an instance of XmpSchemaException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
+	 */
 	public XmpSchemaException(String message, Throwable cause) {
 		super(message, cause);
 	}

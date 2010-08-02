@@ -18,13 +18,6 @@
  ******************************************************************************/
 package net.padaf.xmpbox;
 
-
-
-import java.io.IOException;
-
-import net.padaf.xmpbox.BirthCertificateSchemaWithXMLDescriptions;
-import net.padaf.xmpbox.BuildPDFExtensionSchemaHelper;
-import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.parser.DateConverter;
 import net.padaf.xmpbox.schema.PDFAExtensionSchema;
 import net.padaf.xmpbox.schema.SchemaDescription;
@@ -35,45 +28,50 @@ import org.junit.Test;
 
 public class BuildPDFAExtensionSchemaDescriptionTest {
 
-	
 	protected XMPMetadata metadata;
-	
+
 	@Before
-	public void init() throws IOException{
-		metadata= new XMPMetadata();
-		
+	public void init() throws Exception {
+		metadata = new XMPMetadata();
+
 	}
 
 	@Test
-	public void test() throws Exception{
-	  try {
-		BirthCertificateSchemaWithXMLDescriptions schema = new BirthCertificateSchemaWithXMLDescriptions(metadata);
-	    schema.setFirstname("Bailleul");
-	    schema.addLastname("Guillaume");
-	    schema.addLastname("Bertin");
-	    schema.setBirthCountry("France");
-	    schema.setBirthPlace("Bethune");
-	    schema.setBirthDate(DateConverter.toCalendar("1976-09-16"));
-	    schema.setMailaddr("name", "domain");
-	    // birth-certificate PDF/A Extension Schema definition building
-	    BuildPDFExtensionSchemaHelper.includePDFAExtensionDefinition(metadata, schema);
-	    
-	    //Values checking is made which what is expected with Schema definition and xml files 
-	    PDFAExtensionSchema ext=metadata.getPDFExtensionSchema();
-	    Assert.assertEquals(1, ext.getDescriptionSchema().size());
-	    SchemaDescription schemaDescription=ext.getDescriptionSchema().get(0);
-	    Assert.assertEquals(schema.getNamespaceValue(), schemaDescription.getNameSpaceURI());
-	    Assert.assertEquals(schema.getPrefix(), schemaDescription.getPrefix());
-	    Assert.assertEquals("Birth-Certificate Schema" ,schemaDescription.getSchema());
-	    
-	    Assert.assertEquals(6 , schemaDescription.getProperties().size());
-	    Assert.assertEquals(1, schemaDescription.getValueTypes().size());
-	  } catch (Exception e) {
-	    e.printStackTrace();
-	    throw e;
-	  }
-	    
-	}
+	public void test() throws Exception {
+		try {
+			BirthCertificateSchemaWithXMLDescriptions schema = new BirthCertificateSchemaWithXMLDescriptions(
+					metadata);
+			schema.setFirstname("Bailleul");
+			schema.addLastname("Guillaume");
+			schema.addLastname("Bertin");
+			schema.setBirthCountry("France");
+			schema.setBirthPlace("Bethune");
+			schema.setBirthDate(DateConverter.toCalendar("1976-09-16"));
+			schema.setMailaddr("name", "domain");
+			// birth-certificate PDF/A Extension Schema definition building
+			BuildPDFExtensionSchemaHelper.includePDFAExtensionDefinition(
+					metadata, schema);
 
+			// Values checking is made which what is expected with Schema
+			// definition and xml files
+			PDFAExtensionSchema ext = metadata.getPDFExtensionSchema();
+			Assert.assertEquals(1, ext.getDescriptionSchema().size());
+			SchemaDescription schemaDescription = ext.getDescriptionSchema()
+					.get(0);
+			Assert.assertEquals(schema.getNamespaceValue(), schemaDescription
+					.getNameSpaceURI());
+			Assert.assertEquals(schema.getPrefix(), schemaDescription
+					.getPrefix());
+			Assert.assertEquals("Birth-Certificate Schema", schemaDescription
+					.getSchema());
+
+			Assert.assertEquals(6, schemaDescription.getProperties().size());
+			Assert.assertEquals(1, schemaDescription.getValueTypes().size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+
+	}
 
 }

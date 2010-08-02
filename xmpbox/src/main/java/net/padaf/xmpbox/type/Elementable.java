@@ -40,14 +40,14 @@ import org.w3c.dom.Element;
  * A simple class that allows access to an XML element.
  * 
  * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public interface Elementable
-{   
-    /**
-     * Get the XML element that this object represents.
-     * 
-     * @return The xml element.
-     */
-    public Element getElement();
+public interface Elementable {
+
+	/**
+	 * Get the XML element that this object represents.
+	 * 
+	 * @return The xml element.
+	 */
+	public Element getElement();
 }

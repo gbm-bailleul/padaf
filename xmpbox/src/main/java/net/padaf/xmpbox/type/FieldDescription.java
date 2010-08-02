@@ -22,35 +22,72 @@ import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.schema.PDFAFieldDescription;
 
 /**
- * Represents one Property Description described in xml file
- * @author Germain Costenobel
- *
+ * Represents one Property Description described in xml file in order to be use
+ * in automatic SchemaDescriptionBulding
+ * 
+ * @author a183132
+ * 
  */
 public class FieldDescription {
 	protected String name;
 	protected String valueType;
 	protected String description;
-	
-	public FieldDescription(String name, String valueType, String description){
-		this.name=name;
-		this.valueType=valueType;
-		this.description=description;
+
+	/**
+	 * Constructor of a FieldDescription in order to be use in automatic
+	 * SchemaDescriptionBulding
+	 * 
+	 * @param name
+	 *            Name of the field described
+	 * @param valueType
+	 *            The type of the field described
+	 * @param description
+	 *            The description of the field described
+	 */
+	public FieldDescription(String name, String valueType, String description) {
+		this.name = name;
+		this.valueType = valueType;
+		this.description = description;
 	}
-	
-	public String getValueType(){
+
+	/**
+	 * get value Type declared
+	 * 
+	 * @return ValueType declared
+	 */
+	public String getValueType() {
 		return valueType;
 	}
-	
-	public String getDescription(){
+
+	/**
+	 * Get Description declared
+	 * 
+	 * @return Description declared
+	 */
+	public String getDescription() {
 		return description;
 	}
-	
-	public String getName(){
+
+	/**
+	 * Get Name declared
+	 * 
+	 * @return Name declared
+	 */
+	public String getName() {
 		return name;
 	}
-	
-	public PDFAFieldDescription createPDFAFieldDescription(XMPMetadata metadata){
-		PDFAFieldDescription fieldDesc=new PDFAFieldDescription(metadata);
+
+	/**
+	 * Create a PDFAFieldDescription which can be included in
+	 * PDFAPropertyDescription (for Schema Descritpions in PDF/A Extension
+	 * Schema)
+	 * 
+	 * @param metadata
+	 *            The metadata to attach the future property
+	 * @return The PDF/A Field Description generated
+	 */
+	public PDFAFieldDescription createPDFAFieldDescription(XMPMetadata metadata) {
+		PDFAFieldDescription fieldDesc = new PDFAFieldDescription(metadata);
 		fieldDesc.setNameValue(name);
 		fieldDesc.setValueTypeValue(valueType);
 		fieldDesc.setDescriptionValue(description);

@@ -18,130 +18,127 @@
  ******************************************************************************/
 package net.padaf.xmpbox.type;
 
-
-
-
-
-import java.io.IOException;
-
-import net.padaf.xmpbox.TransformException;
 import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.schema.XMPSchema;
-import net.padaf.xmpbox.type.BadFieldValueException;
-import net.padaf.xmpbox.type.ComplexProperty;
-import net.padaf.xmpbox.type.ComplexPropertyContainer;
-import net.padaf.xmpbox.type.TextType;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * Test MetaData Objects for complex properties
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class ComplexMetadataPropertyTest {
-	
+
 	protected XMPMetadata metadata;
 	protected XMPSchema tmpSchem;
-		
+
 	@Before
-	public void resetDocument() throws TransformException, IOException{
-		metadata=new XMPMetadata();
-		tmpSchem=metadata.createAndAddDefaultSchema("test", "http://www.test.org/test/");
-		
+	public void resetDocument() throws Exception {
+		metadata = new XMPMetadata();
+		tmpSchem = metadata.createAndAddDefaultSchema("test",
+				"http://www.test.org/test/");
+
 	}
-	
-	
+
 	/**
 	 * Check if Array building works (complexproperty)
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	@Test
-	public void testBuildAndCompareArray() throws Exception{
-		//Build a bag with one rdf:li
-		ComplexProperty bag=new ComplexProperty(metadata, "test", "TESTBAG", ComplexProperty.UNORDERED_ARRAY);
-		TextType litmp=new TextType(metadata, "rdf", "li", "TestValue");
+	public void testBuildAndCompareArray() throws Exception {
+		// Build a bag with one rdf:li
+		ComplexProperty bag = new ComplexProperty(metadata, "test", "TESTBAG",
+				ComplexProperty.UNORDERED_ARRAY);
+		TextType litmp = new TextType(metadata, "rdf", "li", "TestValue");
 		bag.getContainer().addProperty(litmp);
-		//bag.getContainer().addProperty(new TextType(metadata.getFuturOwner(), "rdf", "li", "TestValue"));
-		
-		
-		
-		Assert.assertTrue(bag.getContainer().getAllProperties().contains(litmp));
-	//	Assert.assertEquals(litmp.getElement(), bag.getContainer().getElement().getFirstChild());
-		
-		
-		
-		//Build a bag with 2 rdf:li	
-		ComplexProperty seq=new ComplexProperty(metadata, "http://www.test.org/test/", "test", "TESTSEQNS", ComplexProperty.ORDERED_ARRAY);
-		TextType li1=new TextType(metadata, "rdf", "li", "TestValue1");
-		TextType li2=new TextType(metadata, "rdf", "li", "TestValue2");
+		// bag.getContainer().addProperty(new TextType(metadata.getFuturOwner(),
+		// "rdf", "li", "TestValue"));
+
+		Assert
+				.assertTrue(bag.getContainer().getAllProperties().contains(
+						litmp));
+		// Assert.assertEquals(litmp.getElement(),
+		// bag.getContainer().getElement().getFirstChild());
+
+		// Build a bag with 2 rdf:li
+		ComplexProperty seq = new ComplexProperty(metadata,
+				"http://www.test.org/test/", "test", "TESTSEQNS",
+				ComplexProperty.ORDERED_ARRAY);
+		TextType li1 = new TextType(metadata, "rdf", "li", "TestValue1");
+		TextType li2 = new TextType(metadata, "rdf", "li", "TestValue2");
 		seq.getContainer().addProperty(li1);
 		seq.getContainer().addProperty(li2);
-		
-		//Comparing content
+
+		// Comparing content
 		Assert.assertTrue(seq.isSameProperty(seq));
 		Assert.assertFalse(seq.isSameProperty(bag));
-		
-		ComplexProperty seqBis=new ComplexProperty(metadata, "http://www.test.org/test/", "test", "TESTSEQNS", ComplexProperty.ORDERED_ARRAY);
-		TextType lis1=new TextType(metadata, "rdf", "li", "TestValue");
+
+		ComplexProperty seqBis = new ComplexProperty(metadata,
+				"http://www.test.org/test/", "test", "TESTSEQNS",
+				ComplexProperty.ORDERED_ARRAY);
+		TextType lis1 = new TextType(metadata, "rdf", "li", "TestValue");
 		seqBis.getContainer().addProperty(lis1);
 		Assert.assertFalse(seq.isSameProperty(seqBis));
-		
+
 		tmpSchem.addProperty(bag);
 		tmpSchem.addProperty(seq);
-		//SaveMetadataHelper.serialize(metadata, true, System.out);
+		// SaveMetadataHelper.serialize(metadata, true, System.out);
 	}
-	
+
 	/**
-	 * Check if Complex property container building works (used directly for complex rdf:li)
-	 * @throws Exception 
+	 * Check if Complex property container building works (used directly for
+	 * complex rdf:li)
+	 * 
+	 * @throws Exception
 	 */
 	@Test
-	public void testBuildingComplexRDFLi() throws Exception{
-		//Build a bag with one rdf:li
-		ComplexPropertyContainer complexLi=new ComplexPropertyContainer(metadata, "http://www.test.org/test/", "rdf", "li");
-		
-		TextType li1=new TextType(metadata, "test", "value1", "ValueOne");
-		TextType li2=new TextType(metadata, "test", "value2", "ValueTwo");
-		TextType li3=new TextType(metadata, "test", "value3", "ValueThree");
-		
+	public void testBuildingComplexRDFLi() throws Exception {
+		// Build a bag with one rdf:li
+		ComplexPropertyContainer complexLi = new ComplexPropertyContainer(
+				metadata, "http://www.test.org/test/", "rdf", "li");
+
+		TextType li1 = new TextType(metadata, "test", "value1", "ValueOne");
+		TextType li2 = new TextType(metadata, "test", "value2", "ValueTwo");
+		TextType li3 = new TextType(metadata, "test", "value3", "ValueThree");
+
 		complexLi.addProperty(li1);
-		//Test removing during adding
+		// Test removing during adding
 		complexLi.addProperty(li1);
 		complexLi.addProperty(li2);
 		complexLi.addProperty(li3);
-		
-		//Test contains checking
+
+		// Test contains checking
 		Assert.assertTrue(complexLi.containsProperty(li1));
 		complexLi.removeProperty(li1);
 		Assert.assertFalse(complexLi.containsProperty(li1));
-		
-		
+
 		tmpSchem.addProperty(complexLi);
-		//SaveMetadataHelper.serialize(metadata, true, System.out);
+		// SaveMetadataHelper.serialize(metadata, true, System.out);
 	}
-	
+
 	/**
-	 * Throw BadFieldValueException 
+	 * Throw BadFieldValueException
+	 * 
 	 * @throws BadFieldValueException
 	 */
-	@Test(expected=BadFieldValueException.class)
-	public void testBadFieldValueExceptionWithCause() throws BadFieldValueException{
+	@Test(expected = BadFieldValueException.class)
+	public void testBadFieldValueExceptionWithCause() throws Exception {
 		throw new BadFieldValueException("TEST", new Throwable());
 	}
-	
+
 	/**
-	 * Throw BadFieldValueException 
+	 * Throw BadFieldValueException
+	 * 
 	 * @throws BadFieldValueException
 	 */
-	@Test(expected=BadFieldValueException.class)
-	public void badFieldValuetestException() throws BadFieldValueException{
+	@Test(expected = BadFieldValueException.class)
+	public void badFieldValuetestException() throws Exception {
 		throw new BadFieldValueException("TEST");
 	}
-	
-	
-				
+
 }

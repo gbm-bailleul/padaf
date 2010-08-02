@@ -35,7 +35,6 @@ import net.padaf.preflight.xmp.RDFAboutAttributeConcordanceValidation;
 import net.padaf.preflight.xmp.SynchronizedMetaDataValidation;
 import net.padaf.preflight.xmp.XpacketParsingException;
 import net.padaf.preflight.xmp.RDFAboutAttributeConcordanceValidation.DifferentRDFAboutException;
-import net.padaf.xmpbox.TransformException;
 import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.parser.XMPDocumentBuilder;
 import net.padaf.xmpbox.parser.XmpExpectedRdfAboutAttribute;
@@ -118,8 +117,6 @@ public class MetadataValidationHelper extends AbstractValidationHelper {
       try {
         metadata = builder.parse(tmp);
         handler.setMetadata(metadata);
-      } catch (TransformException e) {
-        throw new ValidationException(e.getMessage(), e);
       } catch (XmpSchemaException e) {
         throw new ValidationException(
             "Parser: Internal Problem (failed to instanciate Schema object)", e);

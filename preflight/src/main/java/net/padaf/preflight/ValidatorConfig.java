@@ -18,8 +18,8 @@
  ******************************************************************************/
 package net.padaf.preflight;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
 import net.padaf.preflight.actions.ActionManagerFactory;
@@ -39,6 +39,19 @@ import net.padaf.preflight.helpers.AbstractValidationHelper;
  * </ul>
  */
 public class ValidatorConfig {
+	public static final String FONT_FILTER = "font-filter";
+	public static final String STREAM_FILTER = "stream-filter";
+	public static final String CATALOG_FILTER = "catalog-filter";
+	public static final String GRAPHIC_FILTER = "graphic-filter";
+
+	public static final String TRAILER_FILTER = "trailer-filter";
+	public static final String XREF_FILTER = "xref-filter";
+	public static final String BOOKMARK_FILTER = "bookmark-filter";
+	public static final String ACRO_FORM_FILTER = "acro-form-filter";
+	public static final String FILE_SPECIF_FILTER = "file-specification-filter";
+	public static final String PAGE_FILTER = "page-filter";
+	public static final String META_DATA_FILTER = "metadata-filter";
+
 	/**
 	 * Container for future properties values
 	 */
@@ -47,12 +60,12 @@ public class ValidatorConfig {
 	 * List of Helpers which have to be executed first. Helpers are called in the order ofa
 	 * appearance. 
 	 */
-	private List<Class<? extends AbstractValidationHelper>> priorHelpers = new ArrayList<Class<? extends AbstractValidationHelper>>();
+	private LinkedHashMap<String, Class<? extends AbstractValidationHelper>> priorHelpers = new LinkedHashMap<String, Class<? extends AbstractValidationHelper>>();
 	/**
 	 * List of Helpers which have to be executed after priorHelpers. Helpers are called in the order ofa
 	 * appearance. 
 	 */
-	private List<Class<? extends AbstractValidationHelper>> standHelpers = new ArrayList<Class<? extends AbstractValidationHelper>>();
+	private LinkedHashMap<String, Class<? extends AbstractValidationHelper>> standHelpers = new LinkedHashMap<String, Class<? extends AbstractValidationHelper>>();
 	/**
 	 * Define the AnnotationFactory used by helpers
 	 * Default value is PDFAbAnnotationFactory.class
@@ -88,23 +101,19 @@ public class ValidatorConfig {
 		return this.properties.get(key);
 	}
 
-	public void addPriorHelpers(List<Class<? extends AbstractValidationHelper>> priors) {
-		priorHelpers.addAll(priors);
+	public void addPriorHelpers(String key, Class<? extends AbstractValidationHelper> filter) {
+		priorHelpers.put(key, filter);
 	}
 
-	public void addStandHelpers(List<Class<? extends AbstractValidationHelper>> stands) {
-		standHelpers.addAll(stands);
+	public void addStandHelpers(String key, Class<? extends AbstractValidationHelper> filter) {
+		standHelpers.put(key, filter);
 	}
 	
-	public void getStandHelpers(List<Class<? extends AbstractValidationHelper>> stand) {
-		standHelpers.addAll(stand);
-	}
-	
-	public List<Class<? extends AbstractValidationHelper>> getPriorHelpers() {
-		return priorHelpers;
+	public Collection<Class<? extends AbstractValidationHelper>> getPriorHelpers() {
+		return priorHelpers.values();
 	}
 
-	public List<Class<? extends AbstractValidationHelper>> getStandHelpers() {
-		return standHelpers;
+	public Collection<Class<? extends AbstractValidationHelper>> getStandHelpers() {
+		return standHelpers.values();
 	}
 }

@@ -21,9 +21,11 @@ package net.padaf.preflight.utils;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLOR_SPACE_CMYK;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLOR_SPACE_MISSING;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLOR_SPACE_RGB;
+import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_TOO_MANY_GRAPHIC_STATES;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_UNEXPECTED_VALUE_FOR_KEY;
 import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_STREAM_INVALID_FILTER;
 import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_STREAM_UNDEFINED_FILTER;
+import static net.padaf.preflight.ValidationConstants.MAX_GRAPHIC_STATES;
 import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_KEY_COLOR_SPACE;
 import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_KEY_F;
 import static net.padaf.preflight.ValidationConstants.STREAM_DICTIONARY_KEY_FILTER;
@@ -208,6 +210,20 @@ public abstract class ContentStreamEngine extends PDFStreamEngine {
     }
   }
 
+  /**
+   * Valid the number of graphic states if the operator is the Save Graphic state operator ("q")
+   * @param operator
+   * @throws ContentStreamException
+   */
+  protected void validNumberOfGraphicStates(PDFOperator operator) throws ContentStreamException  {
+	  if ("q".equals(operator.getOperation())) {
+		  int numberOfGraphicStates = this.graphicsStack.size();
+		  if (numberOfGraphicStates > MAX_GRAPHIC_STATES) {
+			  throwContentStreamException("Too many graphic states", ERROR_GRAPHIC_TOO_MANY_GRAPHIC_STATES);
+		  }
+	  }
+  }
+  
   /**
    * Throw a ContentStreamException if the LZW filter is used in a InlinedImage.
    * 

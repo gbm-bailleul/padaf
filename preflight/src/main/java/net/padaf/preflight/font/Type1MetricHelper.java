@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright 2010 Atos Worldline SAS
+
  * 
  * Licensed by Atos Worldline SAS under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,9 +17,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-/**
- * 
- */
 package net.padaf.preflight.font;
 
 import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_ENCODING_MAC;
@@ -56,7 +54,10 @@ import org.apache.pdfbox.encoding.WinAnsiEncoding;
  * Remark : According to the PDF Reference only PostScript Type 1 binary fonts
  * are allowed in a conforming PDF file so the encrypted "eexec" data are
  * considered as binary data...
+ * 
+ * This class is depreciated, now it is better to use the Type1Parser. 
  */
+@Deprecated 
 public class Type1MetricHelper {
 	protected static final char NAME_START = '/';
 
@@ -147,7 +148,8 @@ public class Type1MetricHelper {
 		this.eexecSize = length2;
 		this.cidToLabel.put(-1, NOTDEF);
 		this.labelToCid.put(NOTDEF, -1);
-
+		
+		
 		// ---- Instantiate the Encoding Map
 		if (FONT_DICTIONARY_VALUE_ENCODING_MAC.equals(encodingName)) {
 			this.encoding = new MacRomanEncoding();
@@ -615,6 +617,10 @@ public class Type1MetricHelper {
 		try {
 			byte[] eexec = readEexec();
 			byte[] decryptedEexec = decodeEexec(eexec);
+//			// Uncomment this to see EExec as clear text 
+//			System.out.println("DECODED EEXEC : ");
+//			System.out.println(new String(decryptedEexec));
+
 			parseDecodedEexec(decryptedEexec);
 		} catch (IOException e) {
 			throw new ValidationException("Unable to compute the eexec portion : "
@@ -933,6 +939,26 @@ public class Type1MetricHelper {
 					// ---- Add useful character
 					buffer.add(currentByte);
 				}
+			} else if (currentByte > 0 && currentByte == '{') {
+				// ---- token is an dictionary
+				int opened = 1;
+				buffer.add(currentByte);
+
+				while (opened != 0) {
+					currentByte = stream.read();
+					if (currentByte < 0) {
+						throw new IOException("Unexpected End Of File");
+					}
+
+					if (currentByte == '{') {
+						opened++;
+					} else if (currentByte == '}') {
+						opened--;
+					}
+
+					// ---- Add useful character
+					buffer.add(currentByte);
+				}
 			} else if (currentByte > 0
 					&& (currentByte != ' ' && currentByte != '\n' && currentByte != '\r')) {
 				// ---- Add useful character
@@ -949,10 +975,10 @@ public class Type1MetricHelper {
 			res[i] = buffer.get(i).byteValue();
 		}
 
-		// System.out.println("### READ TOKEN : " + new String(res));
-		// if ("/CharStrings".equals(new String(res))) {
-		// System.err.println("POUET");
-		// }
+//		 System.out.println("### READ TOKEN : " + new String(res));
+//		 if ("/CharStrings".equals(new String(res))) {
+//		 System.err.println("POUET");
+//		 }
 		return res;
 	}
 

@@ -25,9 +25,11 @@ import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.schema.PDFAFieldDescription;
 
 /**
- * Represents one Property Description described in xml file
- * @author Germain Costenobel
- *
+ * Represents one ValueType Description described in xml file in order to be use
+ * in automatic SchemaDescriptionBulding
+ * 
+ * @author a183132
+ * 
  */
 public class ValueTypeDescription {
 	protected String type;
@@ -35,58 +37,119 @@ public class ValueTypeDescription {
 	protected String prefix;
 	protected String description;
 	protected List<FieldDescription> fields;
-	
-	
-	public ValueTypeDescription(String type, String namespaceURI, String prefix, String description, List<FieldDescription> fields){
-		this.type=type;
-		this.namespaceURI=namespaceURI;
-		this.prefix=prefix;
-		this.description=description;
-		this.fields=fields;
-		
-	}
-	
-	public ValueTypeDescription(String type, String namespaceURI, String prefix, String description){
-		this.type=type;
-		this.namespaceURI=namespaceURI;
-		this.prefix=prefix;
-		this.description=description;
-		this.fields=null;
-		
+
+	/**
+	 * Constructor of ValueType Description with fields associated in order to
+	 * be use in automatic SchemaDescriptionBulding
+	 * 
+	 * @param type
+	 *            type (or name) of valuetype to describe
+	 * @param namespaceURI
+	 *            the namespace URI of valuetype to describe
+	 * @param prefix
+	 *            the prefix of valuetype to describe
+	 * @param description
+	 *            the description of valuetype to describe
+	 * @param fields
+	 *            Fields descriptions list associated to the valuetype to
+	 *            describe
+	 */
+	public ValueTypeDescription(String type, String namespaceURI,
+			String prefix, String description, List<FieldDescription> fields) {
+		this.type = type;
+		this.namespaceURI = namespaceURI;
+		this.prefix = prefix;
+		this.description = description;
+		this.fields = fields;
+
 	}
 
+	/**
+	 * /** Constructor of ValueType Description without fields associated in
+	 * order to be use in automatic SchemaDescriptionBulding
+	 * 
+	 * @param type
+	 *            type (or name) of valuetype to describe
+	 * @param namespaceURI
+	 *            the namespace URI of valuetype to describe
+	 * @param prefix
+	 *            the prefix of valuetype to describe
+	 * @param description
+	 *            the description of valuetype to describe
+	 */
+	public ValueTypeDescription(String type, String namespaceURI,
+			String prefix, String description) {
+		this.type = type;
+		this.namespaceURI = namespaceURI;
+		this.prefix = prefix;
+		this.description = description;
+		this.fields = null;
+
+	}
+
+	/**
+	 * Get Type (or name) of this value type
+	 * 
+	 * @return Type defined
+	 */
 	public String getType() {
 		return type;
 	}
 
+	/**
+	 * Get the namespace URI
+	 * 
+	 * @return the namespace URI
+	 */
 	public String getNamespaceURI() {
 		return namespaceURI;
 	}
 
+	/**
+	 * Get the Prefix
+	 * 
+	 * @return the prefix defined
+	 */
 	public String getPrefix() {
 		return prefix;
 	}
 
+	/**
+	 * Get the Description
+	 * 
+	 * @return the description defined
+	 */
 	public String getDescription() {
 		return description;
 	}
 
-	public List<FieldDescription> getFields(){
+	/**
+	 * Get the list of field description associated to this value type
+	 * 
+	 * @return List of fields declared for this valueType
+	 */
+	public List<FieldDescription> getFields() {
 		return fields;
 	}
-	
+
+	/**
+	 * Get PDF/A Field Descriptions in order to be used in PDF/A Extension
+	 * schema
+	 * 
+	 * @param metadata
+	 *            The metadata to attach the future property
+	 * @return The list of PDF/A Field Descriptions
+	 */
 	public List<PDFAFieldDescription> getPDFAFieldsAssocied(XMPMetadata metadata) {
-		if(fields!=null){
-			List<PDFAFieldDescription> pdfaFields=new ArrayList<PDFAFieldDescription>();
+		if (fields != null) {
+			List<PDFAFieldDescription> pdfaFields = new ArrayList<PDFAFieldDescription>();
 			for (FieldDescription field : fields) {
 				pdfaFields.add(field.createPDFAFieldDescription(metadata));
 			}
 			return pdfaFields;
 		}
-		
+
 		return null;
 	}
-	
-	
-	
+
 }

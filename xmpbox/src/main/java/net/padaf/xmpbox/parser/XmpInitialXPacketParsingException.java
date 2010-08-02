@@ -19,10 +19,11 @@
 package net.padaf.xmpbox.parser;
 
 /**
- * This exception is thrown when a problem is encountered during the initial Xpacket parsing
- *  
- * @author Germain Costenobel
- *
+ * This exception is thrown when a problem is encountered during the initial
+ * Xpacket parsing
+ * 
+ * @author a183132
+ * 
  */
 public class XmpInitialXPacketParsingException extends XmpParsingException {
 
@@ -31,11 +32,13 @@ public class XmpInitialXPacketParsingException extends XmpParsingException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of InitialXPacketParsingException
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
 	public XmpInitialXPacketParsingException(String message, Throwable cause) {
 		super(message, cause);
@@ -43,7 +46,9 @@ public class XmpInitialXPacketParsingException extends XmpParsingException {
 
 	/**
 	 * Create an instance of InitialXPacketParsingException
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public XmpInitialXPacketParsingException(String message) {
 		super(message);

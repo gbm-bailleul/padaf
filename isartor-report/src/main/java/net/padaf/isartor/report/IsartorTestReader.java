@@ -28,7 +28,8 @@ public class IsartorTestReader {
 			String line = reader.readLine();
 			String[] split = line.split("#");
 			if ( split.length == 3 ) {
-				addResult(split[0], split[1], split[2]);
+			    String s = new File(split[0]).getName();
+				addResult(s, split[1], split[2]);
 			}
 		}
 		
@@ -46,10 +47,12 @@ public class IsartorTestReader {
 	}
 	
 	public List getIartorResults(String isoartorName) {
+	  System.err.println("### "+isoartorName);
 		List lRes = (List)this.mapOfRes.get(isoartorName);
 		if (lRes == null) {
 			lRes = new ArrayList(0);
 		}
+		System.err.println("  #"+lRes.size());
 		return lRes;
 	}
 	

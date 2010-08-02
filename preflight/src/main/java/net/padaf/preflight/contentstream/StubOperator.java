@@ -30,6 +30,8 @@ import static net.padaf.preflight.ValidationConstants.ERROR_SYNTAX_TOO_MANY_ENTR
 import static net.padaf.preflight.ValidationConstants.MAX_ARRAY_ELEMENTS;
 import static net.padaf.preflight.ValidationConstants.MAX_DICT_ENTRIES;
 import static net.padaf.preflight.ValidationConstants.MAX_NAME_SIZE;
+import static net.padaf.preflight.ValidationConstants.MAX_NEGATIVE_FLOAT;
+import static net.padaf.preflight.ValidationConstants.MAX_POSITIVE_FLOAT;
 import static net.padaf.preflight.ValidationConstants.MAX_STRING_LENGTH;
 
 import java.io.IOException;
@@ -249,8 +251,8 @@ public class StubOperator extends OperatorProcessor {
       }
 
       if (arg instanceof COSFloat
-          && (((COSFloat) arg).doubleValue() > 32767f || ((COSFloat) arg)
-              .doubleValue() < -32767f)) {
+          && (((COSFloat) arg).doubleValue() > MAX_POSITIVE_FLOAT || ((COSFloat) arg)
+              .doubleValue() < MAX_NEGATIVE_FLOAT)) {
         throw createLimitError(ERROR_SYNTAX_NUMERIC_RANGE, "Invalid float range in a Number operands");
       }
     }

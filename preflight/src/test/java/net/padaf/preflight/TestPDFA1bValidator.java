@@ -85,7 +85,7 @@ public class TestPDFA1bValidator {
 
   private class DummyPdfaValidator extends PdfA1bValidator {
     public DummyPdfaValidator() throws ValidationException {
-      super(PdfAValidatorFactory.pdfa1bStandardConfig);
+      super(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
     }
   }
 }

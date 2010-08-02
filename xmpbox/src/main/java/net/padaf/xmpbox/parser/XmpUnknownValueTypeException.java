@@ -19,22 +19,26 @@
 package net.padaf.xmpbox.parser;
 
 /**
- * This exception is thrown when a property use a value type which is not declared
- * @author Germain Costenobel
- *
+ * This exception is thrown when a property use a value type which is not
+ * declared
+ * 
+ * @author a183132
+ * 
  */
-public class XmpUnknownValueTypeException extends Exception{
+public class XmpUnknownValueTypeException extends Exception {
 
 	/**
 	 * serial version id
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of XmpUnknownValueTypeException
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
 	public XmpUnknownValueTypeException(String message, Throwable cause) {
 		super(message, cause);
@@ -42,7 +46,9 @@ public class XmpUnknownValueTypeException extends Exception{
 
 	/**
 	 * Create an instance of XmpUnknownValueTypeException
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public XmpUnknownValueTypeException(String message) {
 		super(message);

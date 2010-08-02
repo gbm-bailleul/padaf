@@ -19,75 +19,70 @@
 package net.padaf.xmpbox.schema;
 
 import junit.framework.Assert;
-import net.padaf.xmpbox.TransformException;
 import net.padaf.xmpbox.XMPMetadata;
-import net.padaf.xmpbox.schema.AdobePDFSchema;
-import net.padaf.xmpbox.schema.PDFAIdentificationSchema;
 import net.padaf.xmpbox.type.BadFieldValueException;
 
 import org.junit.Before;
 import org.junit.Test;
 
-
-
 public class AdobePDFErrorsTest {
 
-	
 	protected XMPMetadata metadata;
-	
-		
-	
+
 	@Before
 	public void initTempMetaData() throws Exception {
-		metadata=new XMPMetadata();
-		
+		metadata = new XMPMetadata();
 
 	}
-	
+
 	@Test
-	public void testPDFAIdentification() throws  BadFieldValueException, TransformException{
-		AdobePDFSchema schem=metadata.createAndAddAdobePDFSchema();
-		
-		String keywords="keywords ihih";
-		String pdfVersion="1.4";
-		String producer="producer";
-		
+	public void testPDFAIdentification() throws Exception {
+		AdobePDFSchema schem = metadata.createAndAddAdobePDFSchema();
+
+		String keywords = "keywords ihih";
+		String pdfVersion = "1.4";
+		String producer = "producer";
+
 		schem.setKeywordsValue(keywords);
 		schem.setPDFVersionValue(pdfVersion);
-		
-		//Check get null if property not defined
+
+		// Check get null if property not defined
 		Assert.assertNull(schem.getProducer());
-		
+
 		schem.setProducerValue(producer);
-		
-		Assert.assertEquals("pdf:Keywords", schem.getKeywords().getQualifiedName());
+
+		Assert.assertEquals("pdf:Keywords", schem.getKeywords()
+				.getQualifiedName());
 		Assert.assertEquals(keywords, schem.getKeywordsValue());
-		
-		Assert.assertEquals("pdf:PDFVersion", schem.getPDFVersion().getQualifiedName());
+
+		Assert.assertEquals("pdf:PDFVersion", schem.getPDFVersion()
+				.getQualifiedName());
 		Assert.assertEquals(pdfVersion, schem.getPDFVersionValue());
-		
-		Assert.assertEquals("pdf:Producer", schem.getProducer().getQualifiedName());
+
+		Assert.assertEquals("pdf:Producer", schem.getProducer()
+				.getQualifiedName());
 		Assert.assertEquals(producer, schem.getProducerValue());
-		
-		//check retrieve this schema in metadata
+
+		// check retrieve this schema in metadata
 		Assert.assertEquals(schem, metadata.getAdobePDFSchema());
-		
-		//SaveMetadataHelper.serialize(metadata, true, System.out);
+
+		// SaveMetadataHelper.serialize(metadata, true, System.out);
 	}
-	
-	@Test(expected=BadFieldValueException.class)
-	public void testBadPDFAConformanceId() throws BadFieldValueException{
-		PDFAIdentificationSchema pdfaid= metadata.createAndAddPFAIdentificationSchema();
-		String conformance="kiohiohiohiohio";
+
+	@Test(expected = BadFieldValueException.class)
+	public void testBadPDFAConformanceId() throws Exception {
+		PDFAIdentificationSchema pdfaid = metadata
+				.createAndAddPFAIdentificationSchema();
+		String conformance = "kiohiohiohiohio";
 		pdfaid.setConformanceValue(conformance);
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
+
+	@Test(expected = IllegalArgumentException.class)
 	public void testBadVersionIdValueType() throws Exception {
-		PDFAIdentificationSchema pdfaid= metadata.createAndAddPFAIdentificationSchema();
+		PDFAIdentificationSchema pdfaid = metadata
+				.createAndAddPFAIdentificationSchema();
 		pdfaid.setPartValueWithString("1");
 		pdfaid.setPartValueWithString("ojoj");
 	}
-	
-	
+
 }

@@ -31,9 +31,8 @@ import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationConstants;
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult.ValidationError;
-import net.padaf.preflight.font.FontContainer.State;
+import net.padaf.preflight.font.AbstractFontContainer.State;
 import net.padaf.preflight.xmp.FontMetaDataValidation;
-import net.padaf.xmpbox.TransformException;
 import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.parser.XMPDocumentBuilder;
 import net.padaf.xmpbox.parser.XmpExpectedRdfAboutAttribute;
@@ -52,7 +51,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.font.PDFontFactory;
 
-public abstract class AbstractFontValidator implements FontValidator {
+public abstract class AbstractFontValidator implements FontValidator,ValidationConstants {
   /**
    * DocumentHandler which contains all useful objects to validate a PDF/A ex :
    * parser JavaCC
@@ -79,7 +78,7 @@ public abstract class AbstractFontValidator implements FontValidator {
    * file or not. (Ex : if the FontContainer flags this font as not embedded,
    * the PDF is a PDF/A only if the font is used in a Rendering Mode 3.)
    */
-  protected FontContainer fontContainer = null;
+  protected AbstractFontContainer fontContainer = null;
 
   /**
    * Abstract Constructor
@@ -88,18 +87,35 @@ public abstract class AbstractFontValidator implements FontValidator {
    * @throws ValidationException when object creation fails
    */
   public AbstractFontValidator(DocumentHandler handler, COSObject cObj)
-      throws ValidationException {
+  throws ValidationException {
     try {
       this.handler = handler;
       this.cObj = cObj;
       this.fDictionary = (COSDictionary) cObj.getObject();
       this.pFont = PDFontFactory.createFont(fDictionary);
-      this.fontContainer = new FontContainer(this.pFont);
-//      COSObjectKey fKey = new COSObjectKey(this.cObj);
+
+      this.fontContainer = instanciateContainer(this.pFont);
       this.handler.addFont(this.pFont.getCOSObject(), this.fontContainer);
     } catch (IOException e) {
       throw new ValidationException(
           "Unable to instantiate a FontValidator object : " + e.getMessage());
+    }
+  }
+
+  protected AbstractFontContainer instanciateContainer (PDFont fd) {
+    String subtype = fd.getSubType();
+    if (FONT_DICTIONARY_VALUE_TRUETYPE.equals(subtype)) {
+      return new TrueTypeFontContainer(fd);
+    } else if (FONT_DICTIONARY_VALUE_MMTYPE.equals(subtype)) {
+      return new Type1FontContainer(fd);
+    } else if (FONT_DICTIONARY_VALUE_TYPE1.equals(subtype)) {
+      return new Type1FontContainer(fd);
+    } else if (FONT_DICTIONARY_VALUE_TYPE3.equals(subtype)) {
+      return new Type3FontContainer(fd);
+    } else if (FONT_DICTIONARY_VALUE_COMPOSITE.equals(subtype)) {
+      return new CompositeFontContainer(fd);
+    } else {
+      return new UndefFontContainer(fd);
     }
   }
 
@@ -150,7 +166,7 @@ public abstract class AbstractFontValidator implements FontValidator {
       if (metadata.getFilters() != null && !metadata.getFilters().isEmpty()) {
         fontContainer.addError(new ValidationError(
             ValidationConstants.ERROR_SYNTAX_STREAM_INVALID_FILTER,
-            "Filter specified in font file metadata dictionnary"));
+        "Filter specified in font file metadata dictionnary"));
         return false;
       }
 
@@ -185,7 +201,7 @@ public abstract class AbstractFontValidator implements FontValidator {
       } catch (XmpUnknownValueTypeException e) {
         fontContainer.addError(new ValidationError(
             ValidationConstants.ERROR_METADATA_UNKNOWN_VALUETYPE, e
-                .getMessage()));
+            .getMessage()));
         return false;
       } catch (XmpParsingException e) {
         fontContainer.addError(new ValidationError(
@@ -195,18 +211,12 @@ public abstract class AbstractFontValidator implements FontValidator {
         fontContainer.addError(new ValidationError(
             ValidationConstants.ERROR_METADATA_FORMAT, e.getMessage()));
         return false;
-      } catch (TransformException e) {
-        throw new ValidationException("Unable to parse font metadata due to : "
-            + e.getMessage(), e);
-      } catch (IOException e) {
-        throw new ValidationException("Unable to parse font metadata due to : "
-            + e.getMessage(), e);
       } catch (XmpExpectedRdfAboutAttribute e) {
-			fontContainer.addError(new ValidationError(ValidationConstants.ERROR_METADATA_RDF_ABOUT_ATTRIBUTE_MISSING,e.getMessage()));
-			return false;
+        fontContainer.addError(new ValidationError(ValidationConstants.ERROR_METADATA_RDF_ABOUT_ATTRIBUTE_MISSING,e.getMessage()));
+        return false;
       } catch (BadFieldValueException e) {
-    	  fontContainer.addError(new ValidationError(ValidationConstants.ERROR_METADATA_CATEGORY_PROPERTY_INVALID,e.getMessage()));
-    	  return false;
+        fontContainer.addError(new ValidationError(ValidationConstants.ERROR_METADATA_CATEGORY_PROPERTY_INVALID,e.getMessage()));
+        return false;
       } catch (XmpXpacketEndException e) {
         throw new ValidationException("Unable to parse font metadata due to : "
             + e.getMessage(), e);

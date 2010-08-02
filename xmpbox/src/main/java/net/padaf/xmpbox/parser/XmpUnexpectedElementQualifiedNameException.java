@@ -19,31 +19,38 @@
 package net.padaf.xmpbox.parser;
 
 /**
- * This exception is thrown when a element qualified name not equals with what is expected
- *  
- * @author Germain Costenobel
- *
+ * This exception is thrown when a element qualified name not equals with what
+ * is expected
+ * 
+ * @author a183132
+ * 
  */
-public class XmpUnexpectedElementQualifiedNameException extends XmpParsingException {
+public class XmpUnexpectedElementQualifiedNameException extends
+		XmpParsingException {
 
 	/**
 	 * serial version id
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of UnexpectedElementQualifiedNameException
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
-	public XmpUnexpectedElementQualifiedNameException(String message, Throwable cause) {
+	public XmpUnexpectedElementQualifiedNameException(String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * Create an instance of UnexpectedElementQualifiedNameException
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public XmpUnexpectedElementQualifiedNameException(String message) {
 		super(message);

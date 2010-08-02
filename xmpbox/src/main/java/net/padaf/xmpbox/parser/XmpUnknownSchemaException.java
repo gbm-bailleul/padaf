@@ -19,11 +19,11 @@
 package net.padaf.xmpbox.parser;
 
 /**
- * This exception is thrown when a schema is unknown (NameSpace Mapping)
- * in predefined schema.
+ * This exception is thrown when a schema is unknown (NameSpace Mapping) in
+ * predefined schema.
  * 
  * @author gbailleul
- *
+ * 
  */
 public class XmpUnknownSchemaException extends XmpParsingException {
 
@@ -32,11 +32,13 @@ public class XmpUnknownSchemaException extends XmpParsingException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of XmpUnknownSchemaException
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
 	public XmpUnknownSchemaException(String message, Throwable cause) {
 		super(message, cause);
@@ -44,7 +46,9 @@ public class XmpUnknownSchemaException extends XmpParsingException {
 
 	/**
 	 * Create an instance of XmpUnknownSchemaException
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public XmpUnknownSchemaException(String message) {
 		super(message);

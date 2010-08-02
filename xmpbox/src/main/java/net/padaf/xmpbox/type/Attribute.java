@@ -18,26 +18,43 @@
  ******************************************************************************/
 package net.padaf.xmpbox.type;
 
-
 /**
  * Simple representation of an attribute
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class Attribute {
 
 	private String nsURI, prefix, localName, value;
-		
+
+	/**
+	 * Constructor of a new Attribute
+	 * 
+	 * @param nsURI
+	 *            namespaceURI of this attribute (could be null)
+	 * @param prefix
+	 *            prefix of this attribute
+	 * @param localName
+	 *            localName of this attribute
+	 * @param value
+	 *            value given to this attribute
+	 */
 	public Attribute(String nsURI, String prefix, String localName, String value) {
-		this.nsURI=nsURI;
-		this.prefix=prefix;
-		this.localName=localName;
-		this.value=value;
+		this.nsURI = nsURI;
+		this.prefix = prefix;
+		this.localName = localName;
+		this.value = value;
 	}
-	
-	public String getPrefix(){
-		if(prefix !=null){
-			if(prefix.equals("")){
+
+	/**
+	 * Get prefix defined for this attribute
+	 * 
+	 * @return prefix defined (could be null)
+	 */
+	public String getPrefix() {
+		if (prefix != null) {
+			if (prefix.equals("")) {
 				return null;
 			}
 			return prefix;
@@ -45,45 +62,86 @@ public class Attribute {
 		return null;
 	}
 
-	public void setPrefix(String prefix){
-		this.prefix=prefix;
+	/**
+	 * Set prefix for this attribute
+	 * 
+	 * @param prefix
+	 *            the prefix defined for this attribute
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
 	}
-	
-	public String getLocalName(){
+
+	/**
+	 * Get the localName of this attribute
+	 * 
+	 * @return local name of this attribute
+	 */
+	public String getLocalName() {
 		return localName;
 	}
-	
-	public void setLocalName(String lname){
-		localName=lname;
+
+	/**
+	 * Set the localName of this attribute
+	 * 
+	 * @param lname
+	 *            the local name to set
+	 */
+	public void setLocalName(String lname) {
+		localName = lname;
 	}
-	
+
+	/**
+	 * Get the namespace URI of this attribute
+	 * 
+	 * @return the namespace URI associated to this attribute (could be null)
+	 */
 	public String getNamespace() {
 		return nsURI;
 	}
 
+	/**
+	 * Set the namespace URI of this attribute
+	 * 
+	 * @param nsURI
+	 *            the namespace URI to set
+	 */
 	public void setNsURI(String nsURI) {
 		this.nsURI = nsURI;
 	}
 
+	/**
+	 * Get the attribute qualified Name (prefix+localName)
+	 * 
+	 * @return the full qualified name of this attribute
+	 */
 	public String getQualifiedName() {
-		if(prefix==null){
+		if (prefix == null) {
 			return localName;
 		}
-		if(prefix.equals("")){
+		if (prefix.equals("")) {
 			return localName;
 		}
-		return prefix+":"+localName;
+		return prefix + ":" + localName;
 	}
 
+	/**
+	 * Get value of this attribute
+	 * 
+	 * @return value of this attribute
+	 */
 	public String getValue() {
 		return value;
 	}
 
+	/**
+	 * Set value of this attribute
+	 * 
+	 * @param value
+	 *            the value to set for this attribute
+	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
 
-	
-	
-	
 }

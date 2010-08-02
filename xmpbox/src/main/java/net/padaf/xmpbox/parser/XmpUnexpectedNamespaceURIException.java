@@ -20,9 +20,9 @@ package net.padaf.xmpbox.parser;
 
 /**
  * This exception is thrown when a predefined schema have a wrong namespace URI
- *  
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class XmpUnexpectedNamespaceURIException extends XmpParsingException {
 
@@ -31,11 +31,13 @@ public class XmpUnexpectedNamespaceURIException extends XmpParsingException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of XmpUnexpectedNamespaceURI
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
 	public XmpUnexpectedNamespaceURIException(String message, Throwable cause) {
 		super(message, cause);
@@ -43,7 +45,9 @@ public class XmpUnexpectedNamespaceURIException extends XmpParsingException {
 
 	/**
 	 * Create an instance of XmpUnexpectedNamespaceURI
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public XmpUnexpectedNamespaceURIException(String message) {
 		super(message);

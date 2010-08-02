@@ -48,20 +48,19 @@ import org.w3c.dom.Element;
  * REPRESENTATION
  * 
  */
-public class XMPSchema implements Elementable{
+public class XMPSchema implements Elementable {
 	/**
 	 * The standard xmlns namespace.
 	 */
 	public static final String NS_NAMESPACE = "http://www.w3.org/2000/xmlns/";
 
-	
+	public static final String RDFABOUT = "rdf:about";
+
 	protected String localPrefix, localNSUri;
 	protected String localPrefixSep;
 	protected XMPMetadata metadata;
 	protected ComplexPropertyContainer content;
 
-	public static final String RDFABOUT="rdf:about";
-	
 	/**
 	 * Create a new blank schema that can be populated.
 	 * 
@@ -73,27 +72,36 @@ public class XMPSchema implements Elementable{
 	 *            The URI of the namespace, ie "http://ns.adobe.com/pdf/1.3/"
 	 * 
 	 */
-	public XMPSchema(XMPMetadata metadata, String namespaceName, String namespaceURI) {
-		this.metadata=metadata;
-		content=new ComplexPropertyContainer(metadata, "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf",
+	public XMPSchema(XMPMetadata metadata, String namespaceName,
+			String namespaceURI) {
+		this.metadata = metadata;
+		content = new ComplexPropertyContainer(metadata,
+				"http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf",
 				"Description");
-		
-			localPrefix = namespaceName;
-			localPrefixSep=localPrefix+":";
-			localNSUri = namespaceURI;
-			content.setAttribute(
-					new Attribute(NS_NAMESPACE, "xmlns", namespaceName, namespaceURI));
-		
-		
-	}
-	
-	
 
+		localPrefix = namespaceName;
+		localPrefixSep = localPrefix + ":";
+		localNSUri = namespaceURI;
+		content.setAttribute(new Attribute(NS_NAMESPACE, "xmlns",
+				namespaceName, namespaceURI));
+
+	}
+
+	/**
+	 * Get the schema prefix
+	 * 
+	 * @return Prefix fixed for the schema
+	 */
 	public String getPrefix() {
 		return localPrefix;
 
 	}
 
+	/**
+	 * Get the namespace URI of this schema
+	 * 
+	 * @return the namespace URI of this schema
+	 */
 	public String getNamespaceValue() {
 		return localNSUri;
 	}
@@ -102,19 +110,20 @@ public class XMPSchema implements Elementable{
 	 * Retrieve a generic simple type property
 	 * 
 	 * @param qualifiedName
-	 * @return
+	 *            Full qualified name of proeprty wanted
+	 * @return The generic simple type property according to its qualified Name
 	 */
 	public AbstractField getAbstractProperty(String qualifiedName) {
-			Iterator<AbstractField> it = content.getAllProperties().iterator();
-			AbstractField tmp;
-			while (it.hasNext()) {
-				tmp = it.next();
-				if (tmp.getQualifiedName().equals(qualifiedName)) {
-					return tmp;
-				}
+		Iterator<AbstractField> it = content.getAllProperties().iterator();
+		AbstractField tmp;
+		while (it.hasNext()) {
+			tmp = it.next();
+			if (tmp.getQualifiedName().equals(qualifiedName)) {
+				return tmp;
 			}
-			return null;
-		
+		}
+		return null;
+
 	}
 
 	/**
@@ -145,9 +154,11 @@ public class XMPSchema implements Elementable{
 	 * @param about
 	 *            the well-formed attribute
 	 * @throws BadFieldValueException
+	 *             Bad Attribute name (not corresponding to about attribute)
 	 */
 	public void setAbout(Attribute about) throws BadFieldValueException {
-		if (about.getQualifiedName().equals(RDFABOUT) || about.getQualifiedName().equals("about")) {
+		if (about.getQualifiedName().equals(RDFABOUT)
+				|| about.getQualifiedName().equals("about")) {
 			content.setAttribute(about);
 		} else {
 			throw new BadFieldValueException(
@@ -166,7 +177,7 @@ public class XMPSchema implements Elementable{
 			content.removeAttribute(RDFABOUT);
 		} else {
 			content.setAttribute(new Attribute(null, "rdf", "about", about));
-			
+
 		}
 	}
 
@@ -176,17 +187,18 @@ public class XMPSchema implements Elementable{
 	 * @param type
 	 *            the property type
 	 * @param qualifiedName
+	 *            the qualified name to specify for the new property
 	 * @param propertyValue
-	 * @throws InappropriateTypeException
+	 *            The value (must be an object understandable by specified type)
 	 */
 	@SuppressWarnings("unchecked")
 	private void setSpecifiedSimpleTypeProperty(
 			Class<? extends AbstractSimpleProperty> type, String qualifiedName,
-			Object propertyValue)  {
+			Object propertyValue) {
 		String[] splittedQualifiedName = qualifiedName.split(":");
 
-		Class[] propertyArgsClass = new Class[] { XMPMetadata.class, String.class,
-				String.class, Object.class };
+		Class[] propertyArgsClass = new Class[] { XMPMetadata.class,
+				String.class, String.class, Object.class };
 		Object[] propertyArgs = new Object[] { metadata,
 				splittedQualifiedName[0], splittedQualifiedName[1],
 				propertyValue };
@@ -210,10 +222,10 @@ public class XMPSchema implements Elementable{
 				specifiedTypeProperty = (AbstractSimpleProperty) propertyConstructor
 						.newInstance(propertyArgs);
 			} catch (Exception e) {
-				throw new IllegalArgumentException (
+				throw new IllegalArgumentException(
 						"Failed to create property with the specified type given in parameters");
 			}
-			//attribute placement for simple property has been removed
+			// attribute placement for simple property has been removed
 			// Search in properties to erase
 			Iterator<AbstractField> it = content.getAllProperties().iterator();
 			AbstractField tmp;
@@ -233,9 +245,10 @@ public class XMPSchema implements Elementable{
 	 * Add a SimpleProperty to this schema
 	 * 
 	 * @param prop
+	 *            The Property to add
 	 */
 	private void setSpecifiedSimpleTypeProperty(AbstractSimpleProperty prop) {
-		//attribute placement for simple property has been removed
+		// attribute placement for simple property has been removed
 		// Search in properties to erase
 		Iterator<AbstractField> it = content.getAllProperties().iterator();
 		AbstractField tmp;
@@ -254,6 +267,7 @@ public class XMPSchema implements Elementable{
 	 * Set TextType property
 	 * 
 	 * @param prop
+	 *            The text property to add
 	 */
 	public void setTextProperty(TextType prop) {
 		setSpecifiedSimpleTypeProperty(prop);
@@ -270,48 +284,56 @@ public class XMPSchema implements Elementable{
 	 *            will remove the property.
 	 */
 	public void setTextPropertyValue(String qualifiedName, String propertyValue) {
-			setSpecifiedSimpleTypeProperty(TextType.class, qualifiedName,
-					propertyValue);
+		setSpecifiedSimpleTypeProperty(TextType.class, qualifiedName,
+				propertyValue);
 	}
 
 	/**
 	 * Set a simple text property on the schema, using the current prefix.
-	 * @param simpleName the name of the property without prefix
-	 * @param propertyValue The value for the property, can be any string. Passing null
-     *            will remove the property.
+	 * 
+	 * @param simpleName
+	 *            the name of the property without prefix
+	 * @param propertyValue
+	 *            The value for the property, can be any string. Passing null
+	 *            will remove the property.
 	 */
-	public void setTextPropertyValueAsSimple (String simpleName, String propertyValue) {
-	  this.setTextPropertyValue(localPrefixSep+simpleName,propertyValue);
+	public void setTextPropertyValueAsSimple(String simpleName,
+			String propertyValue) {
+		this.setTextPropertyValue(localPrefixSep + simpleName, propertyValue);
 	}
-	
+
 	/**
 	 * Get a TextProperty Type from its name
 	 * 
 	 * @param qualifiedName
-	 * @return
-	 * @throws InappropriateTypeException
+	 *            The full qualified name of the property wanted
+	 * @return The Text Type property wanted
 	 */
-	public TextType getTextProperty(String qualifiedName)
-			 {
+	public TextType getTextProperty(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
-		if (prop instanceof TextType) {
-			return (TextType) prop;
-		} else {
-			throw new IllegalArgumentException(
-					"Property asked is not a Text Property");
+		if (prop != null) {
+			if (prop instanceof TextType) {
+				return (TextType) prop;
+			} else {
+				throw new IllegalArgumentException(
+						"Property asked is not a Text Property");
+			}
 		}
+		return null;
 	}
 
 	/**
 	 * Get a simple text property value on the schema, using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            The local name of the property wanted
 	 * @return The value of the text property or the null if there is no value.
-	 * @throws InappropriateTypeException
+	 * 
 	 */
-	public String getTextPropertyValueAsSimple (String simpleName)  {
-	   return this.getTextPropertyValue(localPrefixSep+simpleName);
+	public String getTextPropertyValueAsSimple(String simpleName) {
+		return this.getTextPropertyValue(localPrefixSep + simpleName);
 	}
-	
+
 	/**
 	 * Get the value of a simple text property.
 	 * 
@@ -320,10 +342,9 @@ public class XMPSchema implements Elementable{
 	 *            prefix. ie "pdf:Keywords".
 	 * 
 	 * @return The value of the text property or the null if there is no value.
-	 * @throws InappropriateTypeException
+	 * 
 	 */
-	public String getTextPropertyValue(String qualifiedName)
-			 {
+	public String getTextPropertyValue(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
 		if (prop != null) {
 			if (prop instanceof TextType) {
@@ -340,11 +361,12 @@ public class XMPSchema implements Elementable{
 	 * Get the Date property with its name
 	 * 
 	 * @param qualifiedName
-	 * @return
-	 * @throws InappropriateTypeException
+	 *            The name of the property to get, it must include the namespace
+	 *            prefix. ie "pdf:Keywords".
+	 * @return Date Type property
+	 * 
 	 */
-	public DateType getDateProperty(String qualifiedName)
-			 {
+	public DateType getDateProperty(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
 		if (prop != null) {
 			if (prop instanceof DateType) {
@@ -358,18 +380,18 @@ public class XMPSchema implements Elementable{
 		return null;
 	}
 
-	
 	/**
 	 * Get a simple date property value on the schema, using the current prefix.
+	 * 
 	 * @param simpleName
-     * @return The value of the property as a calendar.
-	 * @throws InappropriateTypeException
+	 *            the local name of the property to get
+	 * @return The value of the property as a calendar.
+	 * 
 	 */
-	public Calendar getDatePropertyValueAsSimple (String simpleName) {
-		return this.getDatePropertyValue(localPrefixSep+simpleName);
+	public Calendar getDatePropertyValueAsSimple(String simpleName) {
+		return this.getDatePropertyValue(localPrefixSep + simpleName);
 	}
-	
-	
+
 	/**
 	 * Get the value of the property as a date.
 	 * 
@@ -377,11 +399,9 @@ public class XMPSchema implements Elementable{
 	 *            The fully qualified property name for the date.
 	 * 
 	 * @return The value of the property as a date.
-	 * @throws InappropriateTypeException
 	 * 
 	 */
-	public Calendar getDatePropertyValue(String qualifiedName)
-			 {
+	public Calendar getDatePropertyValue(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
 		if (prop != null) {
 			if (prop instanceof DateType) {
@@ -407,15 +427,17 @@ public class XMPSchema implements Elementable{
 
 	/**
 	 * Set a simple Date property on the schema, using the current prefix.
-	 * @param simpleName the name of the property without prefix
-	 * @param date The calendar value for the property, can be any string. Passing null
-     *            will remove the property.
+	 * 
+	 * @param simpleName
+	 *            the name of the property without prefix
+	 * @param date
+	 *            The calendar value for the property, can be any string.
+	 *            Passing null will remove the property.
 	 */
-	public void setDatePropertyValueAsSimple (String simpleName, Calendar date) {
-	  this.setDatePropertyValue(localPrefixSep+simpleName, date);
+	public void setDatePropertyValueAsSimple(String simpleName, Calendar date) {
+		this.setDatePropertyValue(localPrefixSep + simpleName, date);
 	}
-	
-	
+
 	/**
 	 * Set the value of the property as a date.
 	 * 
@@ -433,11 +455,10 @@ public class XMPSchema implements Elementable{
 	 * Get a BooleanType property with its name
 	 * 
 	 * @param qualifiedName
-	 * @return
-	 * @throws InappropriateTypeException
+	 *            the full qualified name of property wanted
+	 * @return boolean Type property
 	 */
-	public BooleanType getBooleanProperty(String qualifiedName)
-			 {
+	public BooleanType getBooleanProperty(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
 		if (prop != null) {
 			if (prop instanceof BooleanType) {
@@ -450,28 +471,28 @@ public class XMPSchema implements Elementable{
 		return null;
 	}
 
-	
 	/**
-	 * Get a simple boolean property value on the schema, using the current prefix.
+	 * Get a simple boolean property value on the schema, using the current
+	 * prefix.
+	 * 
 	 * @param simpleName
-     * @return The value of the property as a boolean.
-	 * @throws InappropriateTypeException
+	 *            the local name of property wanted
+	 * @return The value of the property as a boolean.
 	 */
-	public Boolean getBooleanPropertyValueAsSimple (String simpleName)  {
-		return this.getBooleanPropertyValue(localPrefixSep+simpleName);
+	public Boolean getBooleanPropertyValueAsSimple(String simpleName) {
+		return this.getBooleanPropertyValue(localPrefixSep + simpleName);
 	}
-	
+
 	/**
 	 * Get the value of the property as a boolean.
 	 * 
 	 * @param qualifiedName
 	 *            The fully qualified property name for the boolean.
 	 * 
-	 * @return The value of the property as a boolean. Return null if property not exist
-	 * @throws InappropriateTypeException
+	 * @return The value of the property as a boolean. Return null if property
+	 *         not exist
 	 */
-	public Boolean getBooleanPropertyValue(String qualifiedName)
-			 {
+	public Boolean getBooleanPropertyValue(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
 		if (prop != null) {
 			if (prop instanceof BooleanType) {
@@ -481,8 +502,10 @@ public class XMPSchema implements Elementable{
 						"Property asked is not a Boolean Property");
 			}
 		}
-		//Return null if property not exist. This method give the property value so treat this return in this way.
-		//If you want to use this value like a condition, you must check this return before
+		// Return null if property not exist. This method give the property
+		// value so treat this return in this way.
+		// If you want to use this value like a condition, you must check this
+		// return before
 		return null;
 	}
 
@@ -498,14 +521,17 @@ public class XMPSchema implements Elementable{
 
 	/**
 	 * Set a simple Boolean property on the schema, using the current prefix.
-	 * @param simpleName the name of the property without prefix
-	 * @param bool The value for the property, can be any string. Passing null
-     *            will remove the property.
+	 * 
+	 * @param simpleName
+	 *            the name of the property without prefix
+	 * @param bool
+	 *            The value for the property, can be any string. Passing null
+	 *            will remove the property.
 	 */
-	public void setBooleanPropertyValueAsSimple (String simpleName, Boolean bool) {
-	  this.setBooleanPropertyValue(localPrefixSep+simpleName, bool);
+	public void setBooleanPropertyValueAsSimple(String simpleName, Boolean bool) {
+		this.setBooleanPropertyValue(localPrefixSep + simpleName, bool);
 	}
-	
+
 	/**
 	 * Set the value of the property as a boolean.
 	 * 
@@ -515,19 +541,17 @@ public class XMPSchema implements Elementable{
 	 *            The boolean to set, or null to clear.
 	 */
 	public void setBooleanPropertyValue(String qualifiedName, Boolean bool) {
-			setSpecifiedSimpleTypeProperty(BooleanType.class, qualifiedName,
-					bool);
+		setSpecifiedSimpleTypeProperty(BooleanType.class, qualifiedName, bool);
 	}
 
 	/**
 	 * Get the Integer property with its name
 	 * 
 	 * @param qualifiedName
-	 * @return
-	 * @throws InappropriateTypeException
+	 *            the full qualified name of property wanted
+	 * @return Integer Type property
 	 */
-	public IntegerType getIntegerProperty(String qualifiedName)
-			{
+	public IntegerType getIntegerProperty(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
 		if (prop != null) {
 			if (prop instanceof IntegerType) {
@@ -540,17 +564,18 @@ public class XMPSchema implements Elementable{
 		return null;
 	}
 
-	
 	/**
-	 * Get a simple integer property value on the schema, using the current prefix.
+	 * Get a simple integer property value on the schema, using the current
+	 * prefix.
+	 * 
 	 * @param simpleName
-     * @return The value of the property as an integer.
-	 * @throws InappropriateTypeException
+	 *            the local name of property wanted
+	 * @return The value of the property as an integer.
 	 */
-	public Integer getIntegerPropertyValueAsSimple (String simpleName) {
-		return this.getIntegerPropertyValue(localPrefixSep+simpleName);
+	public Integer getIntegerPropertyValueAsSimple(String simpleName) {
+		return this.getIntegerPropertyValue(localPrefixSep + simpleName);
 	}
-	
+
 	/**
 	 * Get the value of the property as an integer.
 	 * 
@@ -558,10 +583,8 @@ public class XMPSchema implements Elementable{
 	 *            The fully qualified property name for the integer.
 	 * 
 	 * @return The value of the property as an integer.
-	 * @throws InappropriateTypeException
 	 */
-	public Integer getIntegerPropertyValue(String qualifiedName)
-			 {
+	public Integer getIntegerPropertyValue(String qualifiedName) {
 		AbstractField prop = getAbstractProperty(qualifiedName);
 		if (prop != null) {
 			if (prop instanceof IntegerType) {
@@ -578,6 +601,7 @@ public class XMPSchema implements Elementable{
 	 * Add an integerProperty
 	 * 
 	 * @param prop
+	 *            The Integer Type property
 	 */
 	public void setIntegerProperty(IntegerType prop) {
 		setSpecifiedSimpleTypeProperty(prop);
@@ -585,14 +609,18 @@ public class XMPSchema implements Elementable{
 
 	/**
 	 * Set a simple Integer property on the schema, using the current prefix.
-	 * @param simpleName the name of the property without prefix
-	 * @param intValue The value for the property, can be any string. Passing null
-     *            will remove the property.
+	 * 
+	 * @param simpleName
+	 *            the name of the property without prefix
+	 * @param intValue
+	 *            The value for the property, can be any string. Passing null
+	 *            will remove the property.
 	 */
-	public void setIntegerPropertyValueAsSimple (String simpleName, Integer intValue) {
-	  this.setIntegerPropertyValue(localPrefixSep+simpleName, intValue);
+	public void setIntegerPropertyValueAsSimple(String simpleName,
+			Integer intValue) {
+		this.setIntegerPropertyValue(localPrefixSep + simpleName, intValue);
 	}
-	
+
 	/**
 	 * Set the value of the property as an integer.
 	 * 
@@ -602,15 +630,17 @@ public class XMPSchema implements Elementable{
 	 *            The int to set, or null to clear.
 	 */
 	public void setIntegerPropertyValue(String qualifiedName, Integer intValue) {
-			setSpecifiedSimpleTypeProperty(IntegerType.class, qualifiedName,
-					intValue);
+		setSpecifiedSimpleTypeProperty(IntegerType.class, qualifiedName,
+				intValue);
 	}
 
 	/**
 	 * Generic array property removing
 	 * 
 	 * @param qualifiedArrayName
+	 *            the full qualified name of property wanted
 	 * @param fieldValue
+	 *            the field value
 	 */
 	private void removeArrayValue(String qualifiedArrayName, String fieldValue) {
 		ComplexProperty array = (ComplexProperty) getAbstractProperty(qualifiedArrayName);
@@ -648,14 +678,16 @@ public class XMPSchema implements Elementable{
 
 	/**
 	 * add a bag value property on the schema, using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            the local name of property
 	 * @param bagValue
-	 * @throws InappropriateTypeException
+	 *            the string value to add
 	 */
-	public void addBagValueAsSimple (String simpleName, String bagValue) {
-	  this.addBagValue(localPrefixSep+simpleName, bagValue);
+	public void addBagValueAsSimple(String simpleName, String bagValue) {
+		this.addBagValue(localPrefixSep + simpleName, bagValue);
 	}
-	
+
 	/**
 	 * Add an entry to a bag property.
 	 * 
@@ -664,7 +696,6 @@ public class XMPSchema implements Elementable{
 	 *            "pdf:Keywords".
 	 * @param bagValue
 	 *            The value to add to the bagList.
-	 * @throws InappropriateTypeException 
 	 */
 	public void addBagValue(String qualifiedBagName, String bagValue) {
 		String[] splittedQualifiedName = qualifiedBagName.split(":");
@@ -685,7 +716,8 @@ public class XMPSchema implements Elementable{
 	 * Generic String List Builder for arrays contents
 	 * 
 	 * @param qualifiedArrayName
-	 * @return
+	 *            the full qualified name of property concerned
+	 * @return String list which represents content of array property
 	 */
 	private List<String> getArrayListToString(String qualifiedArrayName) {
 		List<String> retval = null;
@@ -705,19 +737,19 @@ public class XMPSchema implements Elementable{
 	}
 
 	/**
-	 * Get all the values of the bag property, using the current prefix. This will return a list of
-	 * java.lang.String objects, this is a read-only list.
+	 * Get all the values of the bag property, using the current prefix. This
+	 * will return a list of java.lang.String objects, this is a read-only list.
 	 * 
 	 * @param simpleName
-	 *           
+	 *            the local name of property concerned
 	 * 
-	 * @return All of the values of the bag property in a list.
+	 * 
+	 * @return All values of the bag property in a list.
 	 */
 	public List<String> getBagValueListAsSimple(String simpleName) {
-		return getBagValueList(localPrefixSep+simpleName);
+		return getBagValueList(localPrefixSep + simpleName);
 	}
-	
-	
+
 	/**
 	 * Get all the values of the bag property. This will return a list of
 	 * java.lang.String objects, this is a read-only list.
@@ -726,7 +758,7 @@ public class XMPSchema implements Elementable{
 	 *            The name of the bag property to get, it must include the
 	 *            namespace prefix. ie "pdf:Keywords"
 	 * 
-	 * @return All of the values of the bag property in a list.
+	 * @return All values of the bag property in a list.
 	 */
 	public List<String> getBagValueList(String qualifiedBagName) {
 		return getArrayListToString(qualifiedBagName);
@@ -749,7 +781,9 @@ public class XMPSchema implements Elementable{
 	 * Generic method to remove a field from an array with an Elementable Object
 	 * 
 	 * @param qualifiedArrayName
+	 *            the full qualified name of the property concerned
 	 * @param fieldValue
+	 *            the elementable field value
 	 */
 	public void removeArrayValue(String qualifiedArrayName,
 			Elementable fieldValue) {
@@ -795,21 +829,20 @@ public class XMPSchema implements Elementable{
 	 *            namespace prefix. ie "pdf:Keywords"
 	 * @param seqValue
 	 *            The value to add to the sequence.
-	 * @throws InappropriateTypeException 
 	 */
-	public void addSequenceValue(String qualifiedSeqName, String seqValue)  {
+	public void addSequenceValue(String qualifiedSeqName, String seqValue) {
 		String[] splittedQualifiedName = qualifiedSeqName.split(":");
-			ComplexProperty seq = (ComplexProperty) getAbstractProperty(qualifiedSeqName);
-			TextType li = new TextType(metadata, "rdf", "li", seqValue);
-			if (seq != null) {
-				seq.getContainer().addProperty(li);
-			} else {
-				ComplexProperty newSeq = new ComplexProperty(metadata,
-						splittedQualifiedName[0], splittedQualifiedName[1],
-						ComplexProperty.ORDERED_ARRAY);
-				newSeq.getContainer().addProperty(li);
-				content.addProperty(newSeq);
-			}
+		ComplexProperty seq = (ComplexProperty) getAbstractProperty(qualifiedSeqName);
+		TextType li = new TextType(metadata, "rdf", "li", seqValue);
+		if (seq != null) {
+			seq.getContainer().addProperty(li);
+		} else {
+			ComplexProperty newSeq = new ComplexProperty(metadata,
+					splittedQualifiedName[0], splittedQualifiedName[1],
+					ComplexProperty.ORDERED_ARRAY);
+			newSeq.getContainer().addProperty(li);
+			content.addProperty(newSeq);
+		}
 
 	}
 
@@ -836,18 +869,19 @@ public class XMPSchema implements Elementable{
 			content.addProperty(newBag);
 		}
 	}
-	
-	
+
 	/**
-	 * add a new value to a sequance property using the current prefix.
+	 * add a new value to a sequence property using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            the local name of the property
 	 * @param seqValue
-	 * @throws InappropriateTypeException
+	 *            the string value to add
 	 */
-	public void addSequenceValueAsSimple (String simpleName, String seqValue)  {
-	  this.addSequenceValue(localPrefixSep+simpleName, seqValue);
+	public void addSequenceValueAsSimple(String simpleName, String seqValue) {
+		this.addSequenceValue(localPrefixSep + simpleName, seqValue);
 	}
-	
+
 	/**
 	 * Add a new value to a sequence property.
 	 * 
@@ -872,17 +906,18 @@ public class XMPSchema implements Elementable{
 		}
 	}
 
-	
 	/**
 	 * Get all the values in a sequence property, using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            the local name of the property
 	 * @return A read-only list of java.lang.String objects or null if the
 	 *         property does not exist.
 	 */
-	public List<String> getSequenceValueListAsSimple (String simpleName) {
-		return this.getSequenceValueList(localPrefixSep+simpleName);
+	public List<String> getSequenceValueListAsSimple(String simpleName) {
+		return this.getSequenceValueList(localPrefixSep + simpleName);
 	}
-	
+
 	/**
 	 * Get all the values in a sequence property.
 	 * 
@@ -910,7 +945,8 @@ public class XMPSchema implements Elementable{
 		ComplexProperty seq = (ComplexProperty) getAbstractProperty(qualifiedSeqName);
 		if (seq != null) {
 			ArrayList<AbstractField> toDelete = new ArrayList<AbstractField>();
-			Iterator<AbstractField> it = seq.getContainer().getAllProperties().iterator();
+			Iterator<AbstractField> it = seq.getContainer().getAllProperties()
+					.iterator();
 			AbstractField tmp;
 			while (it.hasNext()) {
 				tmp = it.next();
@@ -930,14 +966,16 @@ public class XMPSchema implements Elementable{
 
 	/**
 	 * Add a date sequence value to the list using the current prefix
+	 * 
 	 * @param simpleName
+	 *            the local name of the property
 	 * @param date
+	 *            the value to add
 	 */
 	public void addSequenceDateValueAsSimple(String simpleName, Calendar date) {
-		addSequenceDateValue(localPrefixSep+simpleName, date);
+		addSequenceDateValue(localPrefixSep + simpleName, date);
 	}
-	
-	
+
 	/**
 	 * Add a date sequence value to the list.
 	 * 
@@ -948,21 +986,22 @@ public class XMPSchema implements Elementable{
 	 *            The date to add to the sequence property.
 	 */
 	public void addSequenceDateValue(String qualifiedSeqName, Calendar date) {
-		addSequenceValue(qualifiedSeqName, new DateType(metadata, "rdf",
-					"li", date));
+		addSequenceValue(qualifiedSeqName, new DateType(metadata, "rdf", "li",
+				date));
 	}
 
-	
 	/**
 	 * Get all the date values in a sequence property, using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            the local name of property concerned
 	 * @return A read-only list of java.util.Calendar objects or null if the
 	 *         property does not exist.
 	 */
-	public List<Calendar> getSequenceDateValueListAsSimple (String simpleName) {
-	  return this.getSequenceDateValueList(localPrefixSep+simpleName);
+	public List<Calendar> getSequenceDateValueListAsSimple(String simpleName) {
+		return this.getSequenceDateValueList(localPrefixSep + simpleName);
 	}
-	
+
 	/**
 	 * Get all the date values in a sequence property.
 	 * 
@@ -974,12 +1013,13 @@ public class XMPSchema implements Elementable{
 	 *         property does not exist.
 	 * 
 	 */
-	public List<Calendar> getSequenceDateValueList(String qualifiedSeqName)	{
+	public List<Calendar> getSequenceDateValueList(String qualifiedSeqName) {
 		List<Calendar> retval = null;
 		ComplexProperty seq = (ComplexProperty) getAbstractProperty(qualifiedSeqName);
 		if (seq != null) {
 			retval = new ArrayList<Calendar>();
-			Iterator<AbstractField> it = seq.getContainer().getAllProperties().iterator();
+			Iterator<AbstractField> it = seq.getContainer().getAllProperties()
+					.iterator();
 			AbstractField tmp;
 			while (it.hasNext()) {
 				tmp = it.next();
@@ -996,6 +1036,7 @@ public class XMPSchema implements Elementable{
 	 * alternatives as said in xmp spec
 	 * 
 	 * @param alt
+	 *            The property to reorganize
 	 */
 	public void reorganizeAltOrder(ComplexPropertyContainer alt) {
 		Iterator<AbstractField> it = alt.getAllProperties().iterator();
@@ -1003,15 +1044,16 @@ public class XMPSchema implements Elementable{
 		boolean xdefaultFound = false;
 		// If alternatives contains x-default in first value
 		if (it.hasNext()) {
-			if (it.next().getAttribute("xml:lang").getValue().equals("x-default")) {
+			if (it.next().getAttribute("xml:lang").getValue().equals(
+					"x-default")) {
 				return;
 			}
 		}
 		// Find the xdefault definition
 		while (it.hasNext() && !xdefaultFound) {
 			xdefault = it.next();
-			if (xdefault.getAttribute("xml:lang").getValue().equals(
-					"x-default")) {
+			if (xdefault.getAttribute("xml:lang").getValue()
+					.equals("x-default")) {
 				alt.removeProperty(xdefault);
 				xdefaultFound = true;
 			}
@@ -1036,17 +1078,23 @@ public class XMPSchema implements Elementable{
 				alt.addProperty(it.next());
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Set a multi-lingual property on the schema, using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            the local name of the property
 	 * @param language
+	 *            the language concerned
 	 * @param value
+	 *            the value to set for the language specified
 	 */
-	public void setLanguagePropertyValueAsSimple (String simpleName, String language, String value) {
-	  this.setLanguagePropertyValue(localPrefixSep+simpleName, language, value);
+	public void setLanguagePropertyValueAsSimple(String simpleName,
+			String language, String value) {
+		this.setLanguagePropertyValue(localPrefixSep + simpleName, language,
+				value);
 	}
 
 	/**
@@ -1077,8 +1125,8 @@ public class XMPSchema implements Elementable{
 				while (itCplx.hasNext()) {
 					tmp = itCplx.next();
 					// System.err.println(tmp.getAttribute("xml:lang").getStringValue());
-					if (tmp.getAttribute("xml:lang").getValue().equals(
-							language)) {
+					if (tmp.getAttribute("xml:lang").getValue()
+							.equals(language)) {
 						// the same language has been found
 						if (value == null) {
 							// if value null, erase this definition
@@ -1086,12 +1134,12 @@ public class XMPSchema implements Elementable{
 						} else {
 							prop.getContainer().removeProperty(tmp);
 							TextType langValue;
-								langValue = new TextType(metadata, "rdf",
-										"li", value);
-								
-								langValue.setAttribute(new Attribute(null, "xml",
-										"lang", language));
-								prop.getContainer().addProperty(langValue);
+							langValue = new TextType(metadata, "rdf", "li",
+									value);
+
+							langValue.setAttribute(new Attribute(null, "xml",
+									"lang", language));
+							prop.getContainer().addProperty(langValue);
 						}
 						reorganizeAltOrder(prop.getContainer());
 						return;
@@ -1099,39 +1147,42 @@ public class XMPSchema implements Elementable{
 				}
 				// if no definition found, we add a new one
 				TextType langValue;
-					langValue = new TextType(metadata, "rdf", "li", value);
-					langValue.setAttribute(new Attribute(null, "xml", "lang",
+				langValue = new TextType(metadata, "rdf", "li", value);
+				langValue.setAttribute(new Attribute(null, "xml", "lang",
 						language));
 				prop.getContainer().addProperty(langValue);
 				reorganizeAltOrder(prop.getContainer());
-			} 
+			}
 		} else {
 			String[] splittedQualifiedName = qualifiedName.split(":");
 			prop = new ComplexProperty(metadata, splittedQualifiedName[0],
 					splittedQualifiedName[1], ComplexProperty.ALTERNATIVE_ARRAY);
 			TextType langValue;
-				langValue = new TextType(metadata, "rdf", "li", value);
-				langValue
+			langValue = new TextType(metadata, "rdf", "li", value);
+			langValue
 					.setAttribute(new Attribute(null, "xml", "lang", language));
-				prop.getContainer().addProperty(langValue);
-				content.addProperty(prop);
+			prop.getContainer().addProperty(langValue);
+			content.addProperty(prop);
 		}
 	}
 
-	
 	/**
 	 * Get the value of a multi-lingual property, using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            the local name of the property
 	 * @param language
 	 *            The language code of the value. If null then "x-default" is
 	 *            assumed.
 	 * 
 	 * @return The value of the language property.
 	 */
-	public String getLanguagePropertyValueAsSimple (String simpleName, String language) {
-		return this.getLanguagePropertyValue(localPrefixSep+simpleName, language);
+	public String getLanguagePropertyValueAsSimple(String simpleName,
+			String language) {
+		return this.getLanguagePropertyValue(localPrefixSep + simpleName,
+				language);
 	}
-	
+
 	/**
 	 * Get the value of a multi-lingual property.
 	 * 
@@ -1150,41 +1201,46 @@ public class XMPSchema implements Elementable{
 		}
 
 		AbstractField property = getAbstractProperty(qualifiedName);
-		if (property instanceof ComplexProperty) {
-			ComplexProperty prop = (ComplexProperty) property;
-			Iterator<AbstractField> langsDef = prop.getContainer()
-					.getAllProperties().iterator();
-			AbstractField tmp;
-			Attribute text;
-			while (langsDef.hasNext()) {
-				tmp = langsDef.next();
-				text = tmp.getAttribute("xml:lang");
-				if (text != null) {
-					if (text.getValue().equals(language)) {
-						return ((TextType) tmp).getStringValue();
+		if (property != null) {
+			if (property instanceof ComplexProperty) {
+				ComplexProperty prop = (ComplexProperty) property;
+				Iterator<AbstractField> langsDef = prop.getContainer()
+						.getAllProperties().iterator();
+				AbstractField tmp;
+				Attribute text;
+				while (langsDef.hasNext()) {
+					tmp = langsDef.next();
+					text = tmp.getAttribute("xml:lang");
+					if (text != null) {
+						if (text.getValue().equals(language)) {
+							return ((TextType) tmp).getStringValue();
+						}
 					}
 				}
+				return null;
+			} else {
+				throw new IllegalArgumentException("The property '"
+						+ qualifiedName + "' is not of Lang Alt type");
 			}
-			return null;
-		} else if (property==null){
-		  return null;
-		} else {
-		  throw new IllegalArgumentException("The property '"+qualifiedName+"' is not of Lang Alt type");
 		}
+		return null;
 	}
 
-	
 	/**
 	 * Get a list of all languages that are currently defined for a specific
 	 * property, using the current prefix.
+	 * 
 	 * @param simpleName
+	 *            the local name of the property
 	 * @return A list of all languages, this will return an non-null empty list
 	 *         if none have been defined.
 	 */
-	public List<String> getLanguagePropertyLanguagesValueAsSimple (String simpleName) {
-		return this.getLanguagePropertyLanguagesValue(localPrefixSep+simpleName);
+	public List<String> getLanguagePropertyLanguagesValueAsSimple(
+			String simpleName) {
+		return this.getLanguagePropertyLanguagesValue(localPrefixSep
+				+ simpleName);
 	}
-	
+
 	/**
 	 * Get a list of all languages that are currently defined for a specific
 	 * property.
@@ -1200,28 +1256,30 @@ public class XMPSchema implements Elementable{
 		List<String> retval = new ArrayList<String>();
 
 		AbstractField property = getAbstractProperty(qualifiedName);
-		if (property instanceof ComplexProperty) {
-			ComplexProperty prop = (ComplexProperty) property;
-			Iterator<AbstractField> langsDef = prop.getContainer()
-					.getAllProperties().iterator();
-			AbstractField tmp;
-			Attribute text;
-			while (langsDef.hasNext()) {
-				tmp = langsDef.next();
-				text = tmp.getAttribute("xml:lang");
-				if (text != null) {
-					retval.add(text.getValue());
-				} else {
-					retval.add("x-default");
+		if (property != null) {
+			if (property instanceof ComplexProperty) {
+				ComplexProperty prop = (ComplexProperty) property;
+				Iterator<AbstractField> langsDef = prop.getContainer()
+						.getAllProperties().iterator();
+				AbstractField tmp;
+				Attribute text;
+				while (langsDef.hasNext()) {
+					tmp = langsDef.next();
+					text = tmp.getAttribute("xml:lang");
+					if (text != null) {
+						retval.add(text.getValue());
+					} else {
+						retval.add("x-default");
+					}
 				}
+				return retval;
+			} else {
+				throw new IllegalArgumentException("The property '"
+						+ qualifiedName + "' is not of Lang Alt type");
 			}
-	        return retval;
-		} else if (property==null){
-		  // no property with that name
-		  return null;
-		} else {
-		  throw new IllegalArgumentException("The property '"+qualifiedName+"' is not of Lang Alt type");
 		}
+		// no property with that name
+		return null;
 	}
 
 	/**
@@ -1238,7 +1296,8 @@ public class XMPSchema implements Elementable{
 			throw new IOException("Can only merge schemas of the same type.");
 		}
 
-		Iterator<Attribute> itAtt = xmpSchema.content.getAllAttributes().iterator();
+		Iterator<Attribute> itAtt = xmpSchema.content.getAllAttributes()
+				.iterator();
 		Attribute att;
 		while (itAtt.hasNext()) {
 			att = itAtt.next();
@@ -1248,14 +1307,16 @@ public class XMPSchema implements Elementable{
 		}
 
 		String analyzedPropQualifiedName;
-		Iterator<AbstractField> itProp = xmpSchema.content.getAllProperties().iterator();
+		Iterator<AbstractField> itProp = xmpSchema.content.getAllProperties()
+				.iterator();
 		AbstractField prop;
 		while (itProp.hasNext()) {
 			prop = itProp.next();
 			if (prop.getPrefix().equals(getPrefix())) {
 				if (prop instanceof ComplexProperty) {
 					analyzedPropQualifiedName = prop.getQualifiedName();
-					Iterator<AbstractField> itActualEmbeddedProperties = content.getAllProperties().iterator();
+					Iterator<AbstractField> itActualEmbeddedProperties = content
+							.getAllProperties().iterator();
 					AbstractField tmpEmbeddedProperty;
 
 					Iterator<AbstractField> itNewValues;
@@ -1272,12 +1333,14 @@ public class XMPSchema implements Elementable{
 							if (tmpEmbeddedProperty.getQualifiedName().equals(
 									analyzedPropQualifiedName)) {
 								itNewValues = ((ComplexProperty) prop)
-										.getContainer().getAllProperties().iterator();
+										.getContainer().getAllProperties()
+										.iterator();
 								// Merge a complex property
 								while (itNewValues.hasNext()) {
 									tmpNewValue = (TextType) itNewValues.next();
 									itOldValues = ((ComplexProperty) tmpEmbeddedProperty)
-											.getContainer().getAllProperties().iterator();
+											.getContainer().getAllProperties()
+											.iterator();
 									while (itOldValues.hasNext()
 											&& !alreadyPresent) {
 										tmpOldValue = (TextType) itOldValues
@@ -1308,32 +1371,36 @@ public class XMPSchema implements Elementable{
 	}
 
 	/**
-	 * Get an AbstractField list corresponding to the content of an array
-	 * Return null if the property is unknown
-	 *
-	 * @param array
-	 * @return
-	 * @throws BadFieldValueException 
+	 * Get an AbstractField list corresponding to the content of an array Return
+	 * null if the property is unknown
+	 * 
+	 * @param qualifiedName
+	 *            the full qualified name of the property concerned
+	 * @return List of property contained in the complex property
+	 * @throws BadFieldValueException
+	 *             Property not contains property (not complex property)
 	 */
-	public List<AbstractField> getArrayList(String qualifiedName) throws BadFieldValueException {
-		ComplexProperty array=null;
-		Iterator<AbstractField> itProp=content.getAllProperties().iterator();
+	public List<AbstractField> getArrayList(String qualifiedName)
+			throws BadFieldValueException {
+		ComplexProperty array = null;
+		Iterator<AbstractField> itProp = content.getAllProperties().iterator();
 		AbstractField tmp;
-		while(itProp.hasNext()){
-			tmp=itProp.next();
-			if(tmp.getQualifiedName().equals(qualifiedName)){
-				if(tmp instanceof ComplexProperty){
-					array=(ComplexProperty)tmp;
+		while (itProp.hasNext()) {
+			tmp = itProp.next();
+			if (tmp.getQualifiedName().equals(qualifiedName)) {
+				if (tmp instanceof ComplexProperty) {
+					array = (ComplexProperty) tmp;
 					break;
+				} else {
+					throw new BadFieldValueException(
+							"Property asked not seems to be an array");
 				}
-				else{
-					throw new BadFieldValueException("Property asked not seems to be an array");
-				}
-				
+
 			}
 		}
-		if(array!=null){
-			Iterator<AbstractField> it = array.getContainer().getAllProperties().iterator();
+		if (array != null) {
+			Iterator<AbstractField> it = array.getContainer()
+					.getAllProperties().iterator();
 			List<AbstractField> list = new ArrayList<AbstractField>();
 			while (it.hasNext()) {
 				list.add(it.next());
@@ -1343,69 +1410,108 @@ public class XMPSchema implements Elementable{
 		return null;
 	}
 
-	
-	public ComplexPropertyContainer getContent(){
+	/**
+	 * Get PropertyContainer of this Schema
+	 * 
+	 * @return the ComplexProperty which represents the schema content
+	 */
+	public ComplexPropertyContainer getContent() {
 		return content;
 	}
 
-	public List<Attribute> getAllAttributes(){
+	/**
+	 * Get All attributes defined for this schema
+	 * 
+	 * @return Attributes list defined for this schema
+	 */
+	public List<Attribute> getAllAttributes() {
 		return content.getAllAttributes();
 	}
-	
-	public List<AbstractField> getAllProperties(){
+
+	/**
+	 * Get All properties defined in this schema
+	 * 
+	 * @return Properties list defined in this schema
+	 */
+	public List<AbstractField> getAllProperties() {
 		return content.getAllProperties();
 	}
-	
-	public void setAttribute(Attribute attr){
+
+	/**
+	 * Set a new attribute for this schema
+	 * 
+	 * @param attr
+	 *            The new Attribute to set
+	 */
+	public void setAttribute(Attribute attr) {
 		content.setAttribute(attr);
 	}
-	
-	public void addProperty(AbstractField obj){
+
+	/**
+	 * Add a new Property to this schema
+	 * 
+	 * @param obj
+	 *            The new property to add
+	 */
+	public void addProperty(AbstractField obj) {
 		content.addProperty(obj);
 	}
-	
+
+	/**
+	 * Get DOM Element for rdf/xml serialization
+	 * 
+	 * @return the DOM Element
+	 */
 	public Element getElement() {
 		return content.getElement();
 	}
-	
+
 	/**
 	 * get a Property with its name, using the current prefix
+	 * 
 	 * @param simpleName
-	 * @return
+	 *            the local name of the property
+	 * @return The property wanted
 	 */
-	protected AbstractField getPropertyAsSimple(String simpleName){
-		return getProperty(localPrefixSep+simpleName);
+	protected AbstractField getPropertyAsSimple(String simpleName) {
+		return getProperty(localPrefixSep + simpleName);
 	}
-	
+
 	/**
 	 * get a Property with its qualified Name (with its prefix)
+	 * 
 	 * @param qualifiedName
-	 * @return
+	 *            The full qualified name of the property wanted
+	 * @return the property wanted
 	 */
-	protected AbstractField getProperty(String qualifiedName){
-		Iterator<AbstractField> it=getAllProperties().iterator();
+	protected AbstractField getProperty(String qualifiedName) {
+		Iterator<AbstractField> it = getAllProperties().iterator();
 		AbstractField tmp;
-		while(it.hasNext()){
-			tmp=it.next();
-			if(tmp.getQualifiedName().equals(qualifiedName)){
+		while (it.hasNext()) {
+			tmp = it.next();
+			if (tmp.getQualifiedName().equals(qualifiedName)) {
 				return tmp;
 			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Return local prefix
+	 * 
+	 * @return current prefix fixed for this schema
 	 */
 	public String getLocalPrefix() {
-	  return this.localPrefix;
+		return this.localPrefix;
 	}
-	
-	   /**
-     * Return local prefix with separator
-     */
-    public String getLocalPrefixWithSeparator() {
-      return this.localPrefixSep;
-    }
-	
+
+	/**
+	 * Return local prefix with separator
+	 * 
+	 * @return current prefix fixed for this schema with ':' separator
+	 */
+	public String getLocalPrefixWithSeparator() {
+		return this.localPrefixSep;
+	}
+
 }

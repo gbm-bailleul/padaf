@@ -23,12 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+/**
+ * To be used at runtime
+ */
 @Retention(RetentionPolicy.RUNTIME)
-
-
 @Target(ElementType.FIELD)
-
 /**
  * Annotation to specify type schema associated to a property.
  * This annotation help to make automatically PDF/A Extension schema description
@@ -42,10 +41,18 @@ import java.lang.annotation.Target;
  * is written
  */
 public @interface PropertyExtensionDefinition {
-	String propertyCategory();
-	String propertyDescription() default "";
-	
-}
-	
-	
 
+	/**
+	 * get category defined in this description that must be used to build
+	 * schema descriptions Note: More details in this class javadoc
+	 */
+	String propertyCategory();
+
+	/**
+	 * get description defined in this description that must be used to build
+	 * schema descriptions Note: More details in this class javadoc
+	 * 
+	 */
+	String propertyDescription() default "";
+
+}

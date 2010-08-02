@@ -21,11 +21,6 @@
  */
 package net.padaf.preflight.font;
 
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_DICTIONARY_INVALID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_METRICS;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_ENCODING;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_LENGTH1;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -238,14 +233,11 @@ public class TrueTypeFontValidator extends SimpleFontValidator {
 	 */
 	protected boolean checkFontMetrics(TrueTypeFont ttf) throws IOException,
 	ValidationException {
-		List<?> pdfWidths = this.pFont.getWidths();
+
 		int firstChar = pFont.getFirstChar();
-		int lastChar = pFont.getLastChar();
-		int delta = (lastChar - firstChar) + 1;
+		float defaultGlyphWidth = this.pFontDesc.getMissingWidth();
 
-		int unitsPerEm = ttf.getHeader().getUnitsPerEm();
-		int[] glyphWidths = ttf.getHorizontalMetrics().getAdvanceWidth();
-
+		List<?> pdfWidths = this.pFont.getWidths();
 		COSArray widths = null;
 		if (pdfWidths instanceof COSArrayList) {
 			widths = ((COSArrayList) pdfWidths).toList();
@@ -253,41 +245,12 @@ public class TrueTypeFontValidator extends SimpleFontValidator {
 			widths = ((COSArray) pdfWidths);
 		}
 
-		CMAPEncodingEntry cmapEntries = getCMapOfFontProgram(ttf);
+		((TrueTypeFontContainer)this.fontContainer).setWidthsArray(widths.toList());
+		((TrueTypeFontContainer)this.fontContainer).setFirstCharInWidthsArray(firstChar);
+		((TrueTypeFontContainer)this.fontContainer).setDefaultGlyphWidth(defaultGlyphWidth);
+		((TrueTypeFontContainer)this.fontContainer).setFontObjectAndInitializeInnerFields(ttf);
+		((TrueTypeFontContainer)this.fontContainer).setCMap(getCMapOfFontProgram(ttf));
 
-		// ---- In a Mono space font program, the length of the AdvanceWidth array
-		// must be one.
-		// ---- According to the TrueType font specification, the Last Value of the
-		// AdvanceWidth array
-		// ---- is apply to the subsequent glyphs. So if the GlyphId is greater than
-		// the length of the array
-		// ---- the last entry is used.
-		int numberOfLongHorMetrics = ttf.getHorizontalHeader()
-		.getNumberOfHMetrics();
-
-		// ---- build the font container and keep it in the Handler.
-		for (int i = 0; i < delta; ++i) {
-			int pdfw = ((COSInteger) widths.get(i)).intValue();
-
-			int glyphId = cmapEntries.getGlyphId(firstChar + i);
-
-			float glypdWidth = glyphWidths[numberOfLongHorMetrics - 1];
-			if (glyphId < numberOfLongHorMetrics) {
-				glypdWidth = glyphWidths[glyphId];
-			}
-
-			float convertedWidth = ((glypdWidth * 1000) / unitsPerEm);
-			if (pdfw != 0 && glyphId != 0 ){
-				if(!(Math.floor(convertedWidth) == pdfw || Math.round(convertedWidth) == pdfw)) {
-					this.fontContainer.addError(new ValidationError(ERROR_FONTS_METRICS));
-					this.fontContainer.setAreWidthsConsistent(false);
-					return false;
-				} else {
-					// ---- A width is declared and the glyphId isn't 0 (.notdef), the glyph is present.
-					this.fontContainer.addCID((firstChar + i), convertedWidth != 0);    		  
-				}
-			}
-		}
 		return true;
 	}
 

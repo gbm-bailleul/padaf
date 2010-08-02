@@ -19,24 +19,45 @@
 package net.padaf.xmpbox.type;
 
 /**
- * Represents one Property Description described in xml file
- * @author Germain Costenobel
- *
+ * Represents one Property Description described in xml file in order to be use
+ * in automatic SchemaDescriptionBulding
+ * 
+ * @author a183132
+ * 
  */
 public class PropertyDescription {
 	protected String propName;
 	protected String propDesc;
-	
-	public PropertyDescription(String propName, String propDesc){
-		this.propName=propName;
-		this.propDesc=propDesc;
+
+	/**
+	 * Constructor of a propertyDescription in order to be use in automatic
+	 * SchemaDescriptionBulding
+	 * 
+	 * @param propName
+	 *            the local Name of the property to describe
+	 * @param propDesc
+	 *            the description of the property to describe
+	 */
+	public PropertyDescription(String propName, String propDesc) {
+		this.propName = propName;
+		this.propDesc = propDesc;
 	}
-	
-	public String getDescription(){
+
+	/**
+	 * Get description declared
+	 * 
+	 * @return description declared
+	 */
+	public String getDescription() {
 		return propDesc;
 	}
-	
-	public String getPropertyName(){
+
+	/**
+	 * Get property name declared
+	 * 
+	 * @return property name declared
+	 */
+	public String getPropertyName() {
 		return propName;
 	}
 }

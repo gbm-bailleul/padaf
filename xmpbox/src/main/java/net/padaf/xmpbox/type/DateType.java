@@ -24,109 +24,133 @@ import java.util.Calendar;
 import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.parser.DateConverter;
 
-
-
-
 /**
  * Object representation of a Date XMP type
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
-public class DateType extends AbstractSimpleProperty{
+public class DateType extends AbstractSimpleProperty {
 
 	/**
 	 * Property Date type constructor (namespaceURI is not given)
+	 * 
 	 * @param metadata
+	 *            The metadata to attach to this property
 	 * @param prefix
+	 *            The prefix to set for this property
 	 * @param propertyName
+	 *            The local Name of this property
 	 * @param value
-	 * @throws InappropriateTypeException
+	 *            The value to set for this property
 	 */
-	public DateType(XMPMetadata metadata, String prefix, String propertyName, Object value)  {
+	public DateType(XMPMetadata metadata, String prefix, String propertyName,
+			Object value) {
 		super(metadata, prefix, propertyName, value);
-		
+
 	}
 
 	/**
 	 * Property Date type constructor (namespaceURI is given)
+	 * 
 	 * @param metadata
+	 *            The metadata to attach to this property
+	 * @param namespaceURI
+	 *            the namespace URI to associate to this property
 	 * @param prefix
+	 *            The prefix to set for this property
 	 * @param propertyName
+	 *            The local Name of this property
 	 * @param value
-	 * @throws InappropriateTypeException
+	 *            The value to set for this property
 	 */
-	public DateType(XMPMetadata metadata, String namespaceURI, String prefix, String propertyName, Object value)  {
+	public DateType(XMPMetadata metadata, String namespaceURI, String prefix,
+			String propertyName, Object value) {
 		super(metadata, namespaceURI, prefix, propertyName, value);
 	}
-	
-	
+
 	/**
 	 * Set property value
-	 * @param value the new Calendar element value
-	 * @throws InappropriateTypeException 
+	 * 
+	 * @param value
+	 *            the new Calendar element value
+	 * @throws InappropriateTypeException
 	 */
-	private void setValueFromCalendar(Calendar value){
-		objValue=value;
+	private void setValueFromCalendar(Calendar value) {
+		objValue = value;
 		element.setTextContent(DateConverter.toISO8601(value));
-		
+
 	}
-	
-	
-	 /**
-	 * return the property value 
+
+	/**
+	 * return the property value
 	 * 
 	 * @return boolean
 	 */
 	public Calendar getValue() {
-		return (Calendar)objValue;
+		return (Calendar) objValue;
 	}
 
+	/**
+	 * Check if the value has a type which can be understood
+	 * 
+	 * @param value
+	 *            Object value to check
+	 * @return True if types are compatibles
+	 */
 	public boolean isGoodType(Object value) {
-		if(value instanceof Calendar){
+		if (value instanceof Calendar) {
 			return true;
-		}else if(value instanceof String){
-			try{
-				DateConverter.toCalendar((String)value);
+		} else if (value instanceof String) {
+			try {
+				DateConverter.toCalendar((String) value);
 				return true;
-			}
-			catch(IOException e){
+			} catch (IOException e) {
 				return false;
 			}
 		}
 		return false;
 	}
 
-	
+	/**
+	 * Set value of this property
+	 * 
+	 * @param value
+	 *            The value to set
+	 */
 	public void setValue(Object value) {
-		if(!isGoodType(value)){
-			throw new IllegalArgumentException("Value given is not allowed for the Date type.");
-		}
-		else{
+		if (!isGoodType(value)) {
+			throw new IllegalArgumentException(
+					"Value given is not allowed for the Date type.");
+		} else {
 			// if string object
-			if(value instanceof String){
-				setValueFromString((String)value); 
-			}else{
+			if (value instanceof String) {
+				setValueFromString((String) value);
+			} else {
 				// if Calendar
-				setValueFromCalendar((Calendar)value);
+				setValueFromCalendar((Calendar) value);
 			}
-			
+
 		}
-		
+
 	}
 
-	
+	/**
+	 * Set the property value with a String
+	 * 
+	 * @param value
+	 *            The String value
+	 */
 	private void setValueFromString(String value) {
 		try {
-			setValueFromCalendar(DateConverter.toCalendar((String)value));
-			
+			setValueFromCalendar(DateConverter.toCalendar((String) value));
+
 		} catch (IOException e) {
 			// SHOULD NEVER HAPPEN
 			// STRING HAS BEEN CHECKED BEFORE
 			throw new IllegalArgumentException(e.getCause());
 		}
-		
-	}
 
-	
+	}
 
 }

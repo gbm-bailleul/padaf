@@ -3,7 +3,7 @@
 	<groupId>net.padaf</groupId>
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.4.3-SNAPSHOT</version>
+	<version>0.5.1</version>
 
 
 	<licenses>
@@ -12,13 +12,6 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
-
-	<scm>
-		<connection>scm:git:git://github.com/gbailleul/padaf.git</connection>
-		<developerConnection>scm:git:https://github.com/gbailleul/padaf.git</developerConnection>
-		<url>http://github.com/gbailleul/padaf</url>
-	</scm>
-
 
 
 	<build>
@@ -57,7 +50,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.0</version>
-				<configuration />
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -73,14 +65,18 @@
 						<property>
 							<name>isartor.results.path</name>
 							<value>${project.build.directory}/isartor_results.txt</value>
-						</property>					
+						</property>
 						<property>
 							<name>isartor.path</name>
 							<value>${user.isartor.path}</value>
 						</property>
 						<property>
-							<name>pdf4test.path</name>
-							<value>${user.pdf4test.path}</value>
+							<name>pdfa.valid</name>
+							<value>${user.pdfa.valid}</value>
+						</property>
+						<property>
+							<name>pdfa.invalid</name>
+							<value>${user.pdfa.invalid}</value>
 						</property>
 					</systemProperties>
 				</configuration>

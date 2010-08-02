@@ -24,8 +24,10 @@ import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLO
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLOR_SPACE_INDEXED;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLOR_SPACE_MISSING;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLOR_SPACE_RGB;
+import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_COLOR_SPACE_TOO_MANY_COMPONENTS_DEVICEN;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_PATTERN_COLOR_SPACE_FORBIDDEN;
 import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_UNKNOWN_COLOR_SPACE;
+import static net.padaf.preflight.ValidationConstants.MAX_DEVICE_N_LIMIT;
 
 import java.io.IOException;
 import java.util.List;
@@ -87,8 +89,7 @@ public class StandardColorSpaceHelper implements ColorSpaceHelper {
    * net.awl.edoc.pdfa.validation.graphics.color.ColorSpaceHelper#validate(java
    * .util.List)
    */
-  public final boolean validate(List<ValidationError> result)
-      throws ValidationException {
+  public final boolean validate(List<ValidationError> result) throws ValidationException {
     // ---- Create a PDFBox ColorSpace object
     if (pdcs == null && csObject != null) {
       try {
@@ -99,7 +100,6 @@ public class StandardColorSpaceHelper implements ColorSpaceHelper {
       }
     }
 
-//    if (pdcs == null && csObject == null) {
     if ( pdcs == null ) {
       throw new ValidationException(
           "Unable to create a PDColorSpace with the value null");
@@ -319,12 +319,20 @@ public class StandardColorSpaceHelper implements ColorSpaceHelper {
       }
 
       Map colorants = deviceN.getAttributes().getColorants();
+      int numberOfColorants = 0;
       if (colorants != null) {
+    	numberOfColorants = colorants.size();
         for (Object col : colorants.values()) {
           if (col != null) {
             res = res && processAllColorSpace((PDColorSpace) col, result);
           }
         }
+      }
+
+      int numberOfComponents = deviceN.getNumberOfComponents();
+      if (numberOfColorants > MAX_DEVICE_N_LIMIT || numberOfComponents > MAX_DEVICE_N_LIMIT ) {
+    	  result.add(new ValidationError(ERROR_GRAPHIC_INVALID_COLOR_SPACE_TOO_MANY_COMPONENTS_DEVICEN, "DeviceN has too many tint components or colorants"));  
+    	  res = false;
       }
       return res;
     } catch (IOException e) {

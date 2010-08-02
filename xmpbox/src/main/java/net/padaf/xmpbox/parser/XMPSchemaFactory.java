@@ -26,8 +26,9 @@ import net.padaf.xmpbox.schema.XMPSchema;
 
 /**
  * A factory for each kind of schemas
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class XMPSchemaFactory {
 
@@ -36,77 +37,114 @@ public class XMPSchemaFactory {
 	protected PropMapping propDef;
 	protected String nsName;
 	protected boolean isDeclarative;
-	
-	
+
 	/**
-	 * Factory Constructor for basic known schemas 
+	 * Factory Constructor for basic known schemas
+	 * 
 	 * @param namespace
+	 *            namespace URI to treat
 	 * @param schemaClass
+	 *            Class representation associated to this URI
 	 * @param propDef
+	 *            Properties Types list associated
 	 */
-	public XMPSchemaFactory(String namespace, Class<? extends XMPSchema> schemaClass, PropMapping propDef){
-		this.isDeclarative=false;
-		this.namespace=namespace;
-		this.schemaClass=schemaClass;
-		this.propDef=propDef;
+	public XMPSchemaFactory(String namespace,
+			Class<? extends XMPSchema> schemaClass, PropMapping propDef) {
+		this.isDeclarative = false;
+		this.namespace = namespace;
+		this.schemaClass = schemaClass;
+		this.propDef = propDef;
 	}
-	
 
 	/**
 	 * Factory constructor for declarative XMP Schemas
+	 * 
 	 * @param nsName
+	 *            namespace name to treat
 	 * @param namespace
+	 *            namespace URI to treat
 	 * @param schemaClass
+	 *            Class representation associated to this URI
 	 * @param propDef
+	 *            Properties Types list associated
 	 */
 	public XMPSchemaFactory(String nsName, String namespace,
 			Class<? extends XMPSchema> schemaClass, PropMapping propDef) {
-		this.isDeclarative=true;
-		this.namespace=namespace;
-		this.schemaClass=schemaClass;
-		this.propDef=propDef;
-		this.nsName=nsName;
+		this.isDeclarative = true;
+		this.namespace = namespace;
+		this.schemaClass = schemaClass;
+		this.propDef = propDef;
+		this.nsName = nsName;
 	}
-	
-	public String getNamespace(){
+
+	/**
+	 * Get namespace URI treated by this factory
+	 * 
+	 * @return The namespace URI
+	 */
+	public String getNamespace() {
 		return namespace;
 	}
-	
-	public String getPropertyType(String name){
+
+	/**
+	 * Get type declared for the name property given
+	 * 
+	 * @param name
+	 *            The property name
+	 * @return null if propery name is unknown
+	 */
+	public String getPropertyType(String name) {
 		return propDef.getPropertyType(name);
 	}
-	
-	public List<String> getPropertyAttributes(String name){
+
+	/**
+	 * Get attributes declared for a property (NOT USED YET)
+	 * 
+	 * @param name
+	 *            The property Name
+	 * @return List of all attributes defined for this property
+	 */
+	public List<String> getPropertyAttributes(String name) {
 		return propDef.getPropertyAttributes(name);
 	}
-	
+
+	/**
+	 * Create a schema that corresponding to this factory and add it to metadata
+	 * 
+	 * @param metadata
+	 *            Metadata to attach the Schema created
+	 * @return the schema created and added to metadata
+	 * @throws XmpSchemaException
+	 *             When Instancing specified Object Schema failed
+	 */
 	@SuppressWarnings("unchecked")
-	public XMPSchema createXMPSchema(XMPMetadata metadata) throws XmpSchemaException{
-		XMPSchema schema=null;
-		Class[] argsClass ;
+	public XMPSchema createXMPSchema(XMPMetadata metadata)
+			throws XmpSchemaException {
+		XMPSchema schema = null;
+		Class[] argsClass;
 		Object[] schemaArgs;
-		
-		if(isDeclarative){
-			argsClass = new Class[] {XMPMetadata.class, String.class, String.class};
-			schemaArgs = new Object[] { metadata, nsName, namespace};
+
+		if (isDeclarative) {
+			argsClass = new Class[] { XMPMetadata.class, String.class,
+					String.class };
+			schemaArgs = new Object[] { metadata, nsName, namespace };
+		} else {
+			argsClass = new Class[] { XMPMetadata.class };
+			schemaArgs = new Object[] { metadata };
 		}
-		else{
-			argsClass = new Class[] {XMPMetadata.class};
-			schemaArgs = new Object[] { metadata};
-		}
-		
+
 		Constructor<? extends XMPSchema> schemaConstructor;
 		try {
 			schemaConstructor = schemaClass.getConstructor(argsClass);
 			schema = schemaConstructor.newInstance(schemaArgs);
-			if(schema!=null){
+			if (schema != null) {
 				metadata.addSchema(schema);
 			}
 			return schema;
 		} catch (Exception e) {
-			throw new XmpSchemaException("Cannot Instanciate specified Object Schema", e);
+			throw new XmpSchemaException(
+					"Cannot Instanciate specified Object Schema", e);
 		}
 	}
-	
-	
+
 }

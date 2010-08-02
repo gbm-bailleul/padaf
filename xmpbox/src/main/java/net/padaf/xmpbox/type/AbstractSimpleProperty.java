@@ -22,68 +22,80 @@ import net.padaf.xmpbox.XMPMetadata;
 
 /**
  * Abstract Class of an Simple XMP Property
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public abstract class AbstractSimpleProperty extends AbstractField {
 
 	protected Object objValue;
-	
+
 	/**
 	 * Property specific type constructor (namespaceURI is not given)
+	 * 
 	 * @param metadata
+	 *            The metadata to attach to this property
 	 * @param prefix
+	 *            The prefix to set for this property
 	 * @param propertyName
+	 *            The local Name of this property
 	 * @param value
-	 * @throws InappropriateTypeException
+	 *            the value to give
+	 * 
 	 */
-	public AbstractSimpleProperty(XMPMetadata metadata, String prefix, String propertyName, Object value) {
+	public AbstractSimpleProperty(XMPMetadata metadata, String prefix,
+			String propertyName, Object value) {
 		super(metadata, prefix, propertyName);
 		setValue(value);
 	}
 
-	
 	/**
 	 * Property specific type constructor (namespaceURI is given)
+	 * 
 	 * @param metadata
+	 *            The metadata to attach to this property
 	 * @param namespaceURI
+	 *            the specified namespace URI associated to this property
 	 * @param prefix
+	 *            The prefix to set for this property
 	 * @param propertyName
+	 *            The local Name of this property
 	 * @param value
-	 * @throws InappropriateTypeException
+	 *            the value to give
 	 */
-	public AbstractSimpleProperty(XMPMetadata metadata, String namespaceURI, String prefix, String propertyName, Object value) {
+	public AbstractSimpleProperty(XMPMetadata metadata, String namespaceURI,
+			String prefix, String propertyName, Object value) {
 		super(metadata, namespaceURI, prefix, propertyName);
 		setValue(value);
-		
+
 	}
-	
+
 	/**
-	 * Must be rewritten in each special XMP type Class
-	 * to check if the value type corresponding to the XMP Type
+	 * Must be rewritten in each special XMP type Class to check if the value
+	 * type corresponding to the XMP Type
+	 * 
 	 * @param value
-	 * @return
+	 *            Object to analyze
+	 * @return true if object type can be treat by the property type
 	 */
 	public abstract boolean isGoodType(Object value);
-	
-	
+
 	/**
-	 * Check and set new property value 
-	 * (in Element and in its Object Representation)
+	 * Check and set new property value (in Element and in its Object
+	 * Representation)
+	 * 
 	 * @param value
-	 * @return
+	 *            Object value to set
 	 */
-	public abstract void setValue(Object value) throws IllegalArgumentException;
-	
-		
+	public abstract void setValue(Object value);
+
 	/**
 	 * Return the property value
+	 * 
 	 * @return a string
 	 */
-	public String getStringValue(){
+	public String getStringValue() {
 		return element.getTextContent();
 	}
-	
-	
-		
+
 }

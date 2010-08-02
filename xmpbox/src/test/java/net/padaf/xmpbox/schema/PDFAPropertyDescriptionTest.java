@@ -18,13 +18,7 @@
  ******************************************************************************/
 package net.padaf.xmpbox.schema;
 
-import java.io.IOException;
-
-import javax.xml.transform.TransformerException;
-
-import net.padaf.xmpbox.TransformException;
 import net.padaf.xmpbox.XMPMetadata;
-import net.padaf.xmpbox.schema.PDFAPropertyDescription;
 import net.padaf.xmpbox.type.BadFieldValueException;
 
 import org.junit.Assert;
@@ -32,63 +26,57 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
-
-
-
 public class PDFAPropertyDescriptionTest {
 
 	protected XMPMetadata parent;
-		
-	
+
 	@Before
-	public void resetDocument() throws TransformException, IOException {
-		parent=new XMPMetadata();
+	public void resetDocument() throws Exception {
+		parent = new XMPMetadata();
 	}
-	
+
 	@Test
-	public void testCreateOnePdfaProperty() throws TransformerException, BadFieldValueException{
-		PDFAPropertyDescription pdfprop=new PDFAPropertyDescription(parent);
-		String name="value Test";
-		String valueT="Text";
-		String cat="external";
-		String desc="it's a test property";
+	public void testCreateOnePdfaProperty() throws Exception {
+		PDFAPropertyDescription pdfprop = new PDFAPropertyDescription(parent);
+		String name = "value Test";
+		String valueT = "Text";
+		String cat = "external";
+		String desc = "it's a test property";
 		pdfprop.setNameValue(name);
 		pdfprop.setValueTypeValue(valueT);
 		pdfprop.setCategoryValue(cat);
 		pdfprop.setDescriptionValue(desc);
-		
+
 		Assert.assertEquals(name, pdfprop.getNameValue());
 		Assert.assertEquals(valueT, pdfprop.getValueTypeValue());
 		Assert.assertEquals(cat, pdfprop.getCategoryValue());
 		Assert.assertEquals(desc, pdfprop.getDescriptionValue());
-		
+
 		Assert.assertEquals(name, pdfprop.getName().getStringValue());
 		Assert.assertEquals(valueT, pdfprop.getValueType().getStringValue());
 		Assert.assertEquals(cat, pdfprop.getCategory().getStringValue());
 		Assert.assertEquals(desc, pdfprop.getDescription().getStringValue());
-		
-		
-		Element e=parent.getFuturOwner().createElement("test");
-		e.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+
+		Element e = parent.getFuturOwner().createElement("test");
+		e.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:rdf",
+				"http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 		e.appendChild(pdfprop.getElement());
 		parent.getFuturOwner().appendChild(e);
-		//XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8");
+		// XMLUtil.save(parent.getFuturOwner(), System.out, "UTF-8");
 	}
-	
-	@Test(expected=BadFieldValueException.class)
-	public void testBadFieldCheckForCategory() throws Exception{
-		PDFAPropertyDescription pdfprop=new PDFAPropertyDescription(parent);
-		String name="value Test";
-		String valueT="Text";
-		String cat="badvalue";
-		String desc="it's a test property";
+
+	@Test(expected = BadFieldValueException.class)
+	public void testBadFieldCheckForCategory() throws Exception {
+		PDFAPropertyDescription pdfprop = new PDFAPropertyDescription(parent);
+		String name = "value Test";
+		String valueT = "Text";
+		String cat = "badvalue";
+		String desc = "it's a test property";
 		pdfprop.setNameValue(name);
 		pdfprop.setValueTypeValue(valueT);
 		pdfprop.setCategoryValue(cat);
 		pdfprop.setDescriptionValue(desc);
-		
-		
+
 	}
-	
-	
+
 }

@@ -126,6 +126,7 @@ public class PDFAType3StreamParser extends ContentStreamEngine {
     checkColorOperators(operation);
     validRenderingIntent(operator, arguments);
     checkSetColorSpaceOperators(operator, arguments);
+    validNumberOfGraphicStates(operator);
     firstOperator = false;
   }
 

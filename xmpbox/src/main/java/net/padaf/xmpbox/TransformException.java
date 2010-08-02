@@ -20,20 +20,35 @@ package net.padaf.xmpbox;
 
 /**
  * Exception when Parsing cannot be made
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class TransformException extends Exception {
 
 	private static final long serialVersionUID = -3495894314480173555L;
 
+	/**
+	 * Create an instance of TransformException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 */
 	public TransformException(String message) {
 		super(message);
 	}
 
+	/**
+	 * Create an instance of TransformException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
+	 */
 	public TransformException(String message, Throwable cause) {
 		super(message, cause);
-		
+
 	}
 
 }

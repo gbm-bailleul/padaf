@@ -19,11 +19,11 @@
 package net.padaf.xmpbox.parser;
 
 /**
- * This exception is thrown when a property is found in xmp block and is not existing
- * in predefined schema.
+ * This exception is thrown when a property is found in xmp block and is not
+ * existing in predefined schema.
  * 
  * @author gbailleul
- *
+ * 
  */
 public class XmpUnknownPropertyException extends XmpParsingException {
 
@@ -32,11 +32,13 @@ public class XmpUnknownPropertyException extends XmpParsingException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of XmpUnknownPropertyException
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
 	public XmpUnknownPropertyException(String message, Throwable cause) {
 		super(message, cause);
@@ -44,7 +46,9 @@ public class XmpUnknownPropertyException extends XmpParsingException {
 
 	/**
 	 * Create an instance of XmpUnknownPropertyException
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public XmpUnknownPropertyException(String message) {
 		super(message);

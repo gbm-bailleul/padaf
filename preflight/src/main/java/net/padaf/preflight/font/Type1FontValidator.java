@@ -18,8 +18,6 @@
  ******************************************************************************/
 package net.padaf.preflight.font;
 
-import static net.padaf.preflight.ValidationConstants.*;
-
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.ByteArrayInputStream;
@@ -30,12 +28,13 @@ import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult;
 import net.padaf.preflight.ValidationResult.ValidationError;
+import net.padaf.preflight.font.type1.Type1;
+import net.padaf.preflight.font.type1.Type1Parser;
 import net.padaf.preflight.utils.COSUtils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSStream;
@@ -212,7 +211,7 @@ public class Type1FontValidator extends SimpleFontValidator {
 
       bis = new ByteArrayInputStream(ff1.getByteArray());
       Font.createFont(Font.TYPE1_FONT, bis);
-      return checkFontMetrics(ff1) && checkFontFileMetaData(pFontDesc, ff1);
+      return checkFontMetricsDataAndFeedFontContainer(ff1) && checkFontFileMetaData(pFontDesc, ff1);
     } catch (IOException e) {
       this.fontContainer.addError(new ValidationResult.ValidationError(
           ERROR_FONTS_TYPE1_DAMAGED, "The FontFile can't be read"));
@@ -236,9 +235,10 @@ public class Type1FontValidator extends SimpleFontValidator {
    * @return
    * @throws ValidationException
    */
-  protected boolean checkFontMetrics(PDStream fontStream)
+  protected boolean checkFontMetricsDataAndFeedFontContainer(PDStream fontStream)
       throws ValidationException {
     try {
+
       // ---- Parse the Type1 Font program
       ByteArrayInputStream bis = new ByteArrayInputStream(fontStream
           .getByteArray());
@@ -247,19 +247,15 @@ public class Type1FontValidator extends SimpleFontValidator {
           .getPDFName(FONT_DICTIONARY_KEY_LENGTH1));
       int length2 = streamObj.getInt(COSName
           .getPDFName(FONT_DICTIONARY_KEY_LENGTH2));
+      
+      Type1Parser parserForMetrics = Type1Parser.createParserWithEncodingObject(bis, length1, length2, pFont.getEncoding());
+      Type1 parsedData = parserForMetrics.parse();
 
-      Type1MetricHelper metricHelper = new Type1MetricHelper(bis, length1,
-          length2, pFont.getEncoding());
-      metricHelper.parse();
-      metricHelper.close();
-
-      // ---- Check metrics consistency and Store characters in the
-      // FontContainer object
       List<?> pdfWidths = this.pFont.getWidths();
       int firstChar = pFont.getFirstChar();
       int lastChar = pFont.getLastChar();
-      int delta = (lastChar - firstChar) + 1;
-
+      float defaultGlyphWidth = pFontDesc.getMissingWidth();
+      
       COSArray widths = null;
       if (pdfWidths instanceof COSArrayList) {
         widths = ((COSArrayList) pdfWidths).toList();
@@ -267,20 +263,11 @@ public class Type1FontValidator extends SimpleFontValidator {
         widths = ((COSArray) pdfWidths);
       }
 
-      for (int i = 0; i < delta; ++i) {
-        int pdfw = ((COSInteger) widths.get(i)).intValue();
-        // ---- Character code is (FirstChar + index array)
-        int parsedWidth = metricHelper.getWidth(i + firstChar);
-        if (pdfw != 0 && parsedWidth != 0) {
-        	if (parsedWidth != pdfw) {
-        		this.fontContainer.addError(new ValidationError(ERROR_FONTS_METRICS));
-        		this.fontContainer.setAreWidthsConsistent(false);
-        		return false;
-        	} else {
-                this.fontContainer.addCID((firstChar + i), parsedWidth != 0);
-        	}
-        }
-      }
+      ((Type1FontContainer)this.fontContainer).setFontObject(parsedData);
+      ((Type1FontContainer)this.fontContainer).setWidthsArray(widths.toList());
+      ((Type1FontContainer)this.fontContainer).setFirstCharInWidthsArray(firstChar);
+      ((Type1FontContainer)this.fontContainer).setDefaultGlyphWidth(defaultGlyphWidth);
+
       return true;
     } catch (IOException e) {
       throw new ValidationException("Unable to check Type1 metrics due to : "

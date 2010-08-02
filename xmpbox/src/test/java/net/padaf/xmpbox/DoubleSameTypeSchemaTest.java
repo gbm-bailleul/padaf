@@ -18,12 +18,10 @@
  ******************************************************************************/
 package net.padaf.xmpbox;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
-import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.schema.DublinCoreSchema;
 import net.padaf.xmpbox.schema.XMPSchema;
 
@@ -31,56 +29,58 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test with 2 dublinCore with different prefix (Test comportment of XMPMetadata)
- * @author Germain Costenobel
- *
+ * Test with 2 dublinCore with different prefix (Test comportment of
+ * XMPMetadata)
+ * 
+ * @author a183132
+ * 
  */
 public class DoubleSameTypeSchemaTest {
 
-	
 	protected XMPMetadata metadata;
-	
+
 	@Before
-	public void testInit() throws IOException{
-		metadata=new XMPMetadata();
+	public void testInit() throws Exception {
+		metadata = new XMPMetadata();
 	}
-	
-	
+
 	@Test
-	public void testDoubleDublinCore() throws Exception{
-		DublinCoreSchema dc1=metadata.createAndAddDublinCoreSchema();
-		String ownPrefix="test";
-		DublinCoreSchema dc2=new DublinCoreSchema(metadata, ownPrefix);
+	public void testDoubleDublinCore() throws Exception {
+		DublinCoreSchema dc1 = metadata.createAndAddDublinCoreSchema();
+		String ownPrefix = "test";
+		DublinCoreSchema dc2 = new DublinCoreSchema(metadata, ownPrefix);
 		metadata.addSchema(dc2);
-		
-		List<String> creators=new ArrayList<String>();
+
+		List<String> creators = new ArrayList<String>();
 		creators.add("creator1");
 		creators.add("creator2");
-		
-		String format ="application/pdf";
+
+		String format = "application/pdf";
 		dc1.setFormatValue(format);
 		dc1.addToCreatorValue(creators.get(0));
 		dc1.addToCreatorValue(creators.get(1));
-		
-		String coverage="Coverage";
+
+		String coverage = "Coverage";
 		dc2.setCoverageValue(coverage);
 		dc2.addToCreatorValue(creators.get(0));
 		dc2.addToCreatorValue(creators.get(1));
-		
-		
-		//We can't use metadata.getDublinCoreSchema() due to specification of XMPBox (see Javadoc of XMPMetadata)
-		Assert.assertEquals(format, ((DublinCoreSchema)metadata.getSchema(DublinCoreSchema.PREFERRED_DC_PREFIX, DublinCoreSchema.DCURI) ).getFormatValue());
-		Assert.assertEquals(coverage, ((DublinCoreSchema)metadata.getSchema(ownPrefix, DublinCoreSchema.DCURI)).getCoverageValue());
-		
-		List<XMPSchema> schems=metadata.getAllSchemas();
+
+		// We can't use metadata.getDublinCoreSchema() due to specification of
+		// XMPBox (see Javadoc of XMPMetadata)
+		Assert.assertEquals(format, ((DublinCoreSchema) metadata.getSchema(
+				DublinCoreSchema.PREFERRED_DC_PREFIX, DublinCoreSchema.DCURI))
+				.getFormatValue());
+		Assert.assertEquals(coverage, ((DublinCoreSchema) metadata.getSchema(
+				ownPrefix, DublinCoreSchema.DCURI)).getCoverageValue());
+
+		List<XMPSchema> schems = metadata.getAllSchemas();
 		DublinCoreSchema dc;
 		for (XMPSchema xmpSchema : schems) {
-			dc=(DublinCoreSchema)xmpSchema;
+			dc = (DublinCoreSchema) xmpSchema;
 			Assert.assertTrue(dc.getCreatorValue().containsAll(creators));
 		}
-		
-		//SaveMetadataHelper.serialize(metadata, true, System.out);
-		
-		
+
+		// SaveMetadataHelper.serialize(metadata, true, System.out);
+
 	}
 }

@@ -35,11 +35,12 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 
+import static net.padaf.preflight.ValidationConstants.*;
+
 /**
  * This class processes commons validations of XObjects.
  */
-public abstract class AbstractXObjValidator implements XObjectValidator,
-    ValidationConstants {
+public abstract class AbstractXObjValidator implements XObjectValidator {
   /**
    * The XObject to validate as a COSStream.
    */

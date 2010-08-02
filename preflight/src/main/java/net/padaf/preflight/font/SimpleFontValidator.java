@@ -21,7 +21,6 @@
  */
 package net.padaf.preflight.font;
 
-import static net.padaf.preflight.ValidationConstants.*;
 import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationConstants;
 import net.padaf.preflight.ValidationException;

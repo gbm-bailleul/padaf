@@ -18,12 +18,20 @@
  ******************************************************************************/
 package net.padaf.preflight;
 
-import java.util.ArrayList;
-import java.util.List;
 
+import static net.padaf.preflight.ValidatorConfig.ACRO_FORM_FILTER;
+import static net.padaf.preflight.ValidatorConfig.BOOKMARK_FILTER;
+import static net.padaf.preflight.ValidatorConfig.CATALOG_FILTER;
+import static net.padaf.preflight.ValidatorConfig.FILE_SPECIF_FILTER;
+import static net.padaf.preflight.ValidatorConfig.FONT_FILTER;
+import static net.padaf.preflight.ValidatorConfig.GRAPHIC_FILTER;
+import static net.padaf.preflight.ValidatorConfig.META_DATA_FILTER;
+import static net.padaf.preflight.ValidatorConfig.PAGE_FILTER;
+import static net.padaf.preflight.ValidatorConfig.STREAM_FILTER;
+import static net.padaf.preflight.ValidatorConfig.TRAILER_FILTER;
+import static net.padaf.preflight.ValidatorConfig.XREF_FILTER;
 import net.padaf.preflight.actions.ActionManagerFactory;
 import net.padaf.preflight.annotation.PDFAbAnnotationFactory;
-import net.padaf.preflight.helpers.AbstractValidationHelper;
 import net.padaf.preflight.helpers.AcroFormValidationHelper;
 import net.padaf.preflight.helpers.BookmarkValidationHelper;
 import net.padaf.preflight.helpers.CatalogValidationHelper;
@@ -34,6 +42,7 @@ import net.padaf.preflight.helpers.MetadataValidationHelper;
 import net.padaf.preflight.helpers.PagesValidationHelper;
 import net.padaf.preflight.helpers.StreamValidationHelper;
 import net.padaf.preflight.helpers.TrailerValidationHelper;
+import net.padaf.preflight.helpers.XRefValidationHelper;
 
 /**
  * This Factory Provide an instance of PdfAValidator.<BR />
@@ -54,35 +63,29 @@ public class PdfAValidatorFactory {
   public static final String PDF_A_1_b = "PDF/A-1b";
  
   /**
-   * Default configuration for PDF/A-1b
+   * Create the Generic Configuration For the PDF/A-1B file
+   * @return
    */
-  public static final ValidatorConfig pdfa1bStandardConfig ;
-  
-  static {
-	  /* ====================================================== */
-	  /* Create the Generic Configuration For the PDF/A-1B file */
-	  /* ====================================================== */
-	  pdfa1bStandardConfig = new ValidatorConfig();
-	  List<Class<? extends AbstractValidationHelper>> priors = new ArrayList<Class<? extends AbstractValidationHelper>>();
-	  priors.add(CatalogValidationHelper.class);
-	  priors.add(StreamValidationHelper.class);
-	  priors.add(FontValidationHelper.class);
-	  priors.add(GraphicsValidationHelper.class);
-	  pdfa1bStandardConfig.addPriorHelpers(priors);
+  public static ValidatorConfig getStandardPDFA1BConfiguration () {
+	  ValidatorConfig pdfa1bStandardConfig = new ValidatorConfig();
+	  pdfa1bStandardConfig.addPriorHelpers(STREAM_FILTER, StreamValidationHelper.class);
+	  pdfa1bStandardConfig.addPriorHelpers(CATALOG_FILTER, CatalogValidationHelper.class);
+	  pdfa1bStandardConfig.addPriorHelpers(FONT_FILTER, FontValidationHelper.class);
+	  pdfa1bStandardConfig.addPriorHelpers(GRAPHIC_FILTER, GraphicsValidationHelper.class);
 
-	  List<Class<? extends AbstractValidationHelper>> stands = new ArrayList<Class<? extends AbstractValidationHelper>>();
-	  stands.add(TrailerValidationHelper.class);
-	  stands.add(BookmarkValidationHelper.class);
-	  stands.add(AcroFormValidationHelper.class);
-	  stands.add(FileSpecificationValidationHelper.class);
+	  pdfa1bStandardConfig.addStandHelpers(TRAILER_FILTER, TrailerValidationHelper.class);
+	  pdfa1bStandardConfig.addStandHelpers(XREF_FILTER, XRefValidationHelper.class);
+	  pdfa1bStandardConfig.addStandHelpers(BOOKMARK_FILTER, BookmarkValidationHelper.class);
+	  pdfa1bStandardConfig.addStandHelpers(ACRO_FORM_FILTER, AcroFormValidationHelper.class);
+	  pdfa1bStandardConfig.addStandHelpers(FILE_SPECIF_FILTER, FileSpecificationValidationHelper.class);
 	  // Page Helper must be called after the FontHelper to check
 	  // if Fonts used by the page content are embedded in the PDF file.
-	  stands.add(PagesValidationHelper.class);
-	  stands.add(MetadataValidationHelper.class);
-	  pdfa1bStandardConfig.addStandHelpers(stands);
+	  pdfa1bStandardConfig.addStandHelpers(PAGE_FILTER, PagesValidationHelper.class);
+	  pdfa1bStandardConfig.addStandHelpers(META_DATA_FILTER, MetadataValidationHelper.class);
 
 	  pdfa1bStandardConfig.setActionFactory(ActionManagerFactory.class);
 	  pdfa1bStandardConfig.setAnnotationFactory(PDFAbAnnotationFactory.class);
+	  return pdfa1bStandardConfig;
   }
 
   /**
@@ -97,7 +100,7 @@ public class PdfAValidatorFactory {
   public PdfAValidator createValidatorInstance(String format)
       throws ValidationException {
     if (PDF_A_1_b.equals(format)) {
-      return new PdfA1bValidator(pdfa1bStandardConfig);
+      return new PdfA1bValidator(getStandardPDFA1BConfiguration());
     } else {
       throw new ValidationException("Unknown pdf format : " + format);
     }

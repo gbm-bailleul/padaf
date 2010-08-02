@@ -18,29 +18,41 @@
  ******************************************************************************/
 package net.padaf.xmpbox.parser;
 
-
 /**
  * This exception is thrown when a xpacket end is malformed
- * @author Germain Costenobel
- *
+ * 
+ * @author a183132
+ * 
  */
 public class XmpXpacketEndException extends Exception {
-
-
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 737516114298078255L;
 
+	/**
+	 * Create an instance of XmpXpacketEndException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 */
 	public XmpXpacketEndException(String message) {
 		super(message);
-		
+
 	}
 
+	/**
+	 * Create an instance of XmpXpacketEndException
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
+	 */
 	public XmpXpacketEndException(String message, Throwable cause) {
 		super(message, cause);
-		
+
 	}
 
 }

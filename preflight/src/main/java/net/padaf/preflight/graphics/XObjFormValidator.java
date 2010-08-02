@@ -21,6 +21,16 @@
  */
 package net.padaf.preflight.graphics;
 
+import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_TYPE;
+import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_INVALID_BBOX;
+import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_MISSING_FIELD;
+import static net.padaf.preflight.ValidationConstants.ERROR_GRAPHIC_TRANSPARENCY_GROUP;
+import static net.padaf.preflight.ValidationConstants.PATTERN_KEY_SHADING;
+import static net.padaf.preflight.ValidationConstants.XOBJECT_DICTIONARY_KEY_BBOX;
+import static net.padaf.preflight.ValidationConstants.XOBJECT_DICTIONARY_KEY_GROUP;
+import static net.padaf.preflight.ValidationConstants.XOBJECT_DICTIONARY_KEY_GROUP_S;
+import static net.padaf.preflight.ValidationConstants.XOBJECT_DICTIONARY_VALUE_S_TRANSPARENCY;
+
 import java.util.List;
 
 import net.padaf.preflight.DocumentHandler;

@@ -18,58 +18,10 @@
  ******************************************************************************/
 package net.padaf.preflight.font;
 
-import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_SUBTYPE;
-import static net.padaf.preflight.ValidationConstants.DICTIONARY_KEY_TYPE;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_CIDKEYED_CIDTOGID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_CIDKEYED_CMAP_INVALID_OR_MISSING;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_CIDKEYED_INVALID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_CIDKEYED_SYSINFO;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_CIDSET_MISSING_FOR_SUBSET;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_CID_CMAP_DAMAGED;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_CID_DAMAGED;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_DESCRIPTOR_INVALID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_DICTIONARY_INVALID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_FONT_FILEX_INVALID;
-import static net.padaf.preflight.ValidationConstants.ERROR_FONTS_METRICS;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_ASCENT;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_BASEFONT;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CAPHEIGHT;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CIDSET;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CID_GIDMAP;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CID_SYSINFO;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CMAP_NAME;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CMAP_USECMAP;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_CMAP_WMODE;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_DESCENDANT_FONTS;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_DESCENT;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_ENCODING;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_FLAGS;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_FONTBBOX;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_FONTNAME;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_FONT_DESC;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_ITALICANGLE;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_LENGTH1;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_STEMV;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_SYSINFO_ORDERING;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_SYSINFO_REGISTRY;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_SYSINFO_SUPPLEMENT;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_KEY_TOUNICODE;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_CMAP_IDENTITY;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_CMAP_IDENTITY_H;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_CMAP_IDENTITY_V;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_FONT;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE0;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE0C;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE1C;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE2;
-import static net.padaf.preflight.ValidationConstants.FONT_DICTIONARY_VALUE_TYPE_CMAP;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationConstants;
@@ -80,7 +32,6 @@ import net.padaf.preflight.utils.COSUtils;
 
 import org.apache.fontbox.cff.CFFFont;
 import org.apache.fontbox.cff.CFFParser;
-import org.apache.fontbox.cff.CFFFont.Mapping;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.cmap.CMapParser;
 import org.apache.fontbox.ttf.CIDFontType2Parser;
@@ -691,13 +642,6 @@ public class CompositeFontValidator extends AbstractFontValidator {
 				return false;
 			}
 
-			// ---- build the font container and keep it in the Handler.
-			for (CFFFont font : lCFonts) {
-				Collection<Mapping> cMapping = font.getMappings();
-				for (Mapping mapping : cMapping) {
-					this.fontContainer.addCID(mapping.getSID(), true);
-				}
-			}
 			return checkCIDFontWidths(lCFonts)
 			&& checkFontFileMetaData(pfDescriptor, ff3);
 		} catch (IOException e) {
@@ -719,70 +663,24 @@ public class CompositeFontValidator extends AbstractFontValidator {
 	protected boolean checkTTFontMetrics(TrueTypeFont ttf)
 	throws ValidationException {
 		LinkedHashMap<Integer, Integer> widths = getWidthsArray();
-
+		int defaultWidth = this.cidFont.getInt("DW", 1000);
 		int unitsPerEm = ttf.getHeader().getUnitsPerEm();
 		int[] glyphWidths = ttf.getHorizontalMetrics().getAdvanceWidth();
-
-		// ---- In a Mono space font program, the length of the AdvanceWidth array
-		// must be one.
-		// ---- According to the TrueType font specification, the Last Value of the
-		// AdvanceWidth array
-		// ---- is apply to the subsequent glyphs. So if the GlyphId is greater than
-		// the length of the array
-		// ---- the last entry is used.
-		int numberOfLongHorMetrics = ttf.getHorizontalHeader()
-		.getNumberOfHMetrics();
-		for (Entry<Integer, Integer> entry : widths.entrySet()) {
-			int cid = entry.getKey();
-			int pdfWidth = entry.getValue();
-
-			// ---- If CIDToGID map is Identity, the GID equals to the CID.
-			// ---- Otherwise the conversion is done by the CIDToGID map
-			int glyphIndex = cid;
-			if (this.cidToGidMap != null) {
-				byte[] cidAsByteArray = null;
-				if (cid < 256) {
-					cidAsByteArray = new byte[1];
-					cidAsByteArray[0] = (byte) ((cid + 256) % 256);
-				} else {
-					cidAsByteArray = new byte[1];
-					cidAsByteArray[0] = (byte) ((cid >> 8) & 0xFF);
-					cidAsByteArray[1] = (byte) (cid & 0xFF);
-				}
-
-				String glyphIdAsString = this.cidToGidMap.lookup(cidAsByteArray, 0,
-						cidAsByteArray.length);
-
-				// ---- glyphIdAsString should be a Integer
-				// TODO OD-PDFA-4 : A vérifier avec un PDF qui contient une stream pour
-				// CidToGid...
-				try {
-					glyphIndex = Integer.parseInt(glyphIdAsString);
-				} catch (NumberFormatException e) {
-					throw new ValidationException("CID " + cid
-							+ " isn't linked with a GlyphIndex >> " + glyphIdAsString);
-				}
-			}
-
-			float glypdWidth = glyphWidths[numberOfLongHorMetrics - 1];
-			if (glyphIndex < numberOfLongHorMetrics) {
-				glypdWidth = glyphWidths[glyphIndex];
-			}
-
-			float convertedWidth = ((glypdWidth * 1000) / unitsPerEm);
-			if (pdfWidth != 0 && glyphIndex != 0) {
-				if (!(Math.floor(convertedWidth) == pdfWidth || Math
-						.round(convertedWidth) == pdfWidth)) {
-					this.fontContainer.addError(new ValidationError(ERROR_FONTS_METRICS));
-					this.fontContainer.setAreWidthsConsistent(false);
-					return false;
-				} else {
-					// ---- A width is declared, the glyph is present.
-					this.fontContainer.addCID(cid, convertedWidth != 0);
-				}
-			}
-
-		}
+		/* In a Mono space font program, the length of the AdvanceWidth array must be one.
+		 * According to the TrueType font specification, the Last Value of the AdvanceWidth array
+		 * is apply to the subsequent glyphs. So if the GlyphId is greater than the length of the array
+		 * the last entry is used.
+		 */
+		int numberOfLongHorMetrics = ttf.getHorizontalHeader().getNumberOfHMetrics();
+		CFFType2FontContainer type2FontContainer = ((CompositeFontContainer)this.fontContainer).getCFFType2();
+		type2FontContainer.setPdfWidths(widths);
+		type2FontContainer.setCmap(this.cidToGidMap);
+		type2FontContainer.setDefaultGlyphWidth(defaultWidth);
+		type2FontContainer.setFontObject(ttf);
+		type2FontContainer.setGlyphWidths(glyphWidths);
+		type2FontContainer.setNumberOfLongHorMetrics(numberOfLongHorMetrics);
+		type2FontContainer.setUnitsPerEm(unitsPerEm);
+		
 		return true;
 	}
 
@@ -798,31 +696,10 @@ public class CompositeFontValidator extends AbstractFontValidator {
 		// ---- Extract Widths and default Width from the CIDFont dictionary
 		LinkedHashMap<Integer, Integer> widths = getWidthsArray();
 		int defaultWidth = this.cidFont.getInt("DW", 1000);
-
-		for (Entry<Integer, Integer> entry : widths.entrySet()) {
-			int cid = entry.getKey();
-			int pdfWidth = entry.getValue();
-			int glyphWidth = 0;
-
-			try {
-				// ---- Search the CID in all CFFFont in the FontProgram
-				for (CFFFont cff : lCFonts) {
-					glyphWidth = cff.getWidth(cid);
-					if (glyphWidth != defaultWidth) {
-						break;
-					}
-				}
-			} catch (IOException e) {
-				throw new ValidationException("Unable to get width of the CID/SID : "
-						+ cid);
-			}
-
-			if (pdfWidth != 0 && pdfWidth != glyphWidth) {
-				this.fontContainer.addError(new ValidationError(ERROR_FONTS_METRICS));
-				this.fontContainer.setAreWidthsConsistent(false);
-				return false;
-			}
-		}
+		CFFType0FontContainer type0FontContainer = ((CompositeFontContainer)this.fontContainer).getCFFType0();
+		type0FontContainer.setFontObject(lCFonts);
+		type0FontContainer.setDefaultGlyphWidth(defaultWidth);
+		type0FontContainer.setWidthsArray(widths);
 
 		return true;
 	}

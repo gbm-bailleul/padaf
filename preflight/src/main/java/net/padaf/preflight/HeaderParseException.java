@@ -21,7 +21,6 @@
  */
 package net.padaf.preflight;
 
-import net.padaf.preflight.javacc.PDFParserConstants;
 import net.padaf.preflight.javacc.ParseException;
 
 /**

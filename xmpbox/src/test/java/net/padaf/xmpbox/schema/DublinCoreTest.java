@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.padaf.xmpbox.XMPMetadata;
-import net.padaf.xmpbox.schema.DublinCoreSchema;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -36,56 +35,61 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class DublinCoreTest extends AbstractXMPSchemaTest {
 
-	
-	  @Before
-	  public void initTempMetaData() throws Exception {
-	    metadata=new XMPMetadata();
-	    schema = metadata.createAndAddDublinCoreSchema();
-	    schemaClass = DublinCoreSchema.class;
-	  }
+	@Before
+	public void initTempMetaData() throws Exception {
+		metadata = new XMPMetadata();
+		schema = metadata.createAndAddDublinCoreSchema();
+		schemaClass = DublinCoreSchema.class;
+	}
 
-	  @Parameters
-	  public static Collection<Object[]> initializeParameters() throws Exception {
-	    List<Object[]> data = new ArrayList<Object[]>();
-	    data.add(wrapProperty("contributor","bag Text",new String []{"contri 1","contri 2"}));
-        data.add(wrapProperty("coverage","Text","scope of the resource"));
-        data.add(wrapProperty("creator","seq Text",new String[]{"creator 1","creator 2","creator 3"}));
-        data.add(wrapProperty("date","seq Date",new Calendar[]{Calendar.getInstance()}));
-        
-        Map<String, String> desc = new HashMap<String, String>(2);
-        desc.put("fr", "en français");
-        desc.put("en", "in english");
-        data.add(wrapProperty("description","Lang Alt", desc));
+	@Parameters
+	public static Collection<Object[]> initializeParameters() throws Exception {
+		List<Object[]> data = new ArrayList<Object[]>();
+		data.add(wrapProperty("contributor", "bag Text", new String[] {
+				"contri 1", "contri 2" }));
+		data.add(wrapProperty("coverage", "Text", "scope of the resource"));
+		data.add(wrapProperty("creator", "seq Text", new String[] {
+				"creator 1", "creator 2", "creator 3" }));
+		data.add(wrapProperty("date", "seq Date", new Calendar[] { Calendar
+				.getInstance() }));
 
-        data.add(wrapProperty("format","Text","text/html")); 
-        data.add(wrapProperty("identifier","Text","my id")); 
-        data.add(wrapProperty("language","bag Text",new String[]{"fr","en","es"}));
-        data.add(wrapProperty("publisher","bag Text",new String[]{"pub1","pub2"}));
-        data.add(wrapProperty("relation","bag Text",new String[]{"rel1","relation 2"}));
+		Map<String, String> desc = new HashMap<String, String>(2);
+		desc.put("fr", "en français");
+		desc.put("en", "in english");
+		data.add(wrapProperty("description", "Lang Alt", desc));
 
-        Map<String, String> rights = new HashMap<String, String>(2);
-        rights.put("fr", "protégé");
-        rights.put("en", "protected");
-        data.add(wrapProperty("rights","Lang Alt", rights));
-        
-        data.add(wrapProperty("source","Text","my source")); 
-        data.add(wrapProperty("subject","bag Text",new String [] {"subj1","subj2"})); 
+		data.add(wrapProperty("format", "Text", "text/html"));
+		data.add(wrapProperty("identifier", "Text", "my id"));
+		data.add(wrapProperty("language", "bag Text", new String[] { "fr",
+				"en", "es" }));
+		data.add(wrapProperty("publisher", "bag Text", new String[] { "pub1",
+				"pub2" }));
+		data.add(wrapProperty("relation", "bag Text", new String[] { "rel1",
+				"relation 2" }));
 
-        Map<String, String> title = new HashMap<String, String>(2);
-        title.put("fr", "essai");
-        title.put("en", "test");
-        title.put("es", "prueba");
-        data.add(wrapProperty("title","Lang Alt", title));
+		Map<String, String> rights = new HashMap<String, String>(2);
+		rights.put("fr", "protégé");
+		rights.put("en", "protected");
+		data.add(wrapProperty("rights", "Lang Alt", rights));
 
-        data.add(wrapProperty("type","bag Text",new String [] {"text","test","dummy"})); 
+		data.add(wrapProperty("source", "Text", "my source"));
+		data.add(wrapProperty("subject", "bag Text", new String[] { "subj1",
+				"subj2" }));
 
- 	    return data;
-	  }
+		Map<String, String> title = new HashMap<String, String>(2);
+		title.put("fr", "essai");
+		title.put("en", "test");
+		title.put("es", "prueba");
+		data.add(wrapProperty("title", "Lang Alt", title));
 
-	  
-	  public DublinCoreTest(String property,String type,Object value) {
-	    super(property,type, value);
-	  }
+		data.add(wrapProperty("type", "bag Text", new String[] { "text",
+				"test", "dummy" }));
 
+		return data;
+	}
+
+	public DublinCoreTest(String property, String type, Object value) {
+		super(property, type, value);
+	}
 
 }

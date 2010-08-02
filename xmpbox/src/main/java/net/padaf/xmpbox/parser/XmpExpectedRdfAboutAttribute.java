@@ -18,29 +18,42 @@
  ******************************************************************************/
 package net.padaf.xmpbox.parser;
 
-
 /**
- * This exception is thrown when a rdf:Description not contains attribute rdf:about
- * @author Germain Costenobel
- *
+ * This exception is thrown when a rdf:Description not contains attribute
+ * rdf:about
+ * 
+ * @author a183132
+ * 
  */
 public class XmpExpectedRdfAboutAttribute extends Exception {
-
-
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 737516114298078255L;
 
+	/**
+	 * Build This exception with specified error message
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 */
 	public XmpExpectedRdfAboutAttribute(String message) {
 		super(message);
-		
+
 	}
 
+	/**
+	 * Build This exception with specified error message and the original cause
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            Original Cause of this exception
+	 */
 	public XmpExpectedRdfAboutAttribute(String message, Throwable cause) {
 		super(message, cause);
-		
+
 	}
 
 }

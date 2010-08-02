@@ -20,11 +20,11 @@ package net.padaf.preflight.graphics;
 
 import java.util.List;
 
-import org.apache.pdfbox.cos.COSStream;
-
 import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult.ValidationError;
+
+import org.apache.pdfbox.cos.COSStream;
 
 public class XObjPostscriptValidator extends AbstractXObjValidator {
 

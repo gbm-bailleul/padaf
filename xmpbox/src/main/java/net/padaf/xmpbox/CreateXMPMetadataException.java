@@ -21,10 +21,11 @@ package net.padaf.xmpbox;
 import net.padaf.xmpbox.parser.XmpParsingException;
 
 /**
- * This exception is thrown when a problem is encountered during the creation of XMPMetadata Document
- *  
- * @author Germain Costenobel
- *
+ * This exception is thrown when a problem is encountered during the creation of
+ * XMPMetadata Document
+ * 
+ * @author a183132
+ * 
  */
 public class CreateXMPMetadataException extends XmpParsingException {
 
@@ -33,11 +34,13 @@ public class CreateXMPMetadataException extends XmpParsingException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	/**
 	 * Create an instance of CreateXMPMetadataException
-	 * @param message a description of the encountered problem
-	 * @param cause the cause of the exception
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
+	 * @param cause
+	 *            the cause of the exception
 	 */
 	public CreateXMPMetadataException(String message, Throwable cause) {
 		super(message, cause);
@@ -45,7 +48,9 @@ public class CreateXMPMetadataException extends XmpParsingException {
 
 	/**
 	 * Create an instance of CreateXMPMetadataException
-	 * @param message a description of the encountered problem
+	 * 
+	 * @param message
+	 *            a description of the encountered problem
 	 */
 	public CreateXMPMetadataException(String message) {
 		super(message);

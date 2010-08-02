@@ -21,7 +21,9 @@
  */
 package net.padaf.preflight.actions;
 
-import static net.padaf.preflight.ValidationConstants.*;
+import static net.padaf.preflight.ValidationConstants.ACTION_DICTIONARY_KEY_D;
+import static net.padaf.preflight.ValidationConstants.ERROR_ACTION_INVALID_TYPE;
+import static net.padaf.preflight.ValidationConstants.ERROR_ACTION_MISING_KEY;
 
 import java.util.List;
 

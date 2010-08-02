@@ -23,20 +23,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+/**
+ * To be used at runtime
+ */
 @Retention(RetentionPolicy.RUNTIME)
-
-
 @Target(ElementType.FIELD)
-
 /**
  * Annotation to specify attributes expected for a property
  */
 public @interface PropertyAttributesAnnotation {
+	/**
+	 * List of attributes which are expected
+	 * 
+	 */
 	String[] expectedAttributes();
 
-
 }
-	
-	
-

@@ -23,50 +23,47 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import net.padaf.xmpbox.parser.PropMapping;
-
 import org.junit.Before;
 import org.junit.Test;
 
 public class PropMappingTest {
 
 	protected PropMapping propMap;
-	protected String nsURI="http://www.test.org/PropMap#";
-	
+	protected String nsURI = "http://www.test.org/PropMap#";
+
 	@Before
-	public void init(){
-		propMap=new PropMapping(nsURI);
+	public void init() {
+		propMap = new PropMapping(nsURI);
 	}
-	
+
 	@Test
-	public void testURI(){
+	public void testURI() {
 		Assert.assertEquals(nsURI, propMap.getConcernedNamespace());
 	}
-	
+
 	@Test
-	public void testPropMapAdding(){
-		String name="propName";
-		String type="PropType";
-		
+	public void testPropMapAdding() {
+		String name = "propName";
+		String type = "PropType";
+
 		propMap.addNewProperty(name, type, null);
 		Assert.assertEquals(1, propMap.getPropertiesName().size());
 		Assert.assertEquals(name, propMap.getPropertiesName().get(0));
 		Assert.assertNull(propMap.getPropertyAttributes(name));
 		Assert.assertEquals(type, propMap.getPropertyType(name));
-		
-		
+
 	}
-	
+
 	@Test
-	public void testPropMapAttr(){
-		String name="propName";
-		String type="PropType";
-		List<String> attr=new ArrayList<String>();
-		String att1="attr1";
-		String att2="attr2";
+	public void testPropMapAttr() {
+		String name = "propName";
+		String type = "PropType";
+		List<String> attr = new ArrayList<String>();
+		String att1 = "attr1";
+		String att2 = "attr2";
 		attr.add(att1);
 		attr.add(att2);
-		
+
 		propMap.addNewProperty(name, type, attr);
 		Assert.assertEquals(attr, propMap.getPropertyAttributes(name));
 	}

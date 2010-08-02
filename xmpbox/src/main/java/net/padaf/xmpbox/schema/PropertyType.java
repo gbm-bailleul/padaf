@@ -23,18 +23,21 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+/**
+ * to be used at runtime
+ */
 @Retention(RetentionPolicy.RUNTIME)
-
-
 @Target(ElementType.FIELD)
-
 /**
  * Annotation to specify type expected for a property
  */
 public @interface PropertyType {
+
+	/**
+	 * get valuetype defined in this description that must be used to build
+	 * properties descriptions in schema descriptions
+	 * 
+	 * 
+	 */
 	String propertyType();
 }
-	
-	
-

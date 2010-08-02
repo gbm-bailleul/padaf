@@ -18,14 +18,14 @@
  ******************************************************************************/
 package net.padaf.preflight.actions;
 
+import static net.padaf.preflight.ValidationConstants.ERROR_ACTION_FORBIDDEN_ACTIONS_EXPLICITLY_FORBIDDEN;
+
 import java.util.List;
 
 import net.padaf.preflight.ValidationResult.ValidationError;
 
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
-
-import static net.padaf.preflight.ValidationConstants.*;
 
 /**
  * ActionManager for InvalidAction. An invalid action is an action which isn't

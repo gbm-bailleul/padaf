@@ -32,7 +32,7 @@ public class TestBookmarkValidationHelper {
   @Test(expected = ValidationException.class)
   public void noCatalogEntry() throws Exception {
     PDDocument pdoc = new NOCatalogDocument();
-    BookmarkValidationHelper helper = new BookmarkValidationHelper(PdfAValidatorFactory.pdfa1bStandardConfig);
+    BookmarkValidationHelper helper = new BookmarkValidationHelper(PdfAValidatorFactory.getStandardPDFA1BConfiguration());
     DocumentHandlerStub hdl = new DocumentHandlerStub(null);
     hdl.setDocument(pdoc);
     helper.innerValidate(hdl);
