@@ -3,7 +3,7 @@
 	<groupId>net.padaf</groupId>
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.5.1-SNAPSHOT</version>
+	<version>0.5.1</version>
 
  <scm>
 <connection>scm:git:git://github.com/gba-awl/padaf.git</connection>
