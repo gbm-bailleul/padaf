@@ -3,7 +3,16 @@
 	<groupId>net.padaf</groupId>
 	<artifactId>pdfa-root</artifactId>
 	<packaging>pom</packaging>
-	<version>0.5.1</version>
+	<version>0.5.1-SNAPSHOT</version>
+
+ <scm>
+<connection>scm:git:git://github.com/gba-awl/padaf.git</connection>
+<developerConnection>scm:git:https://github.com/gba-awl/padaf.git</developerConnection>
+<url>http://github.com/gba-awl/padaf</url>
+</scm>
+
+
+
 
 
 
