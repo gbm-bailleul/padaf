@@ -7,7 +7,7 @@
 
  <scm>
 <connection>scm:git:git://github.com/gba-awl/padaf.git</connection>
-<developerConnection>scm:git:https://github.com/gba-awl/padaf.git</developerConnection>
+<developerConnection>scm:git:https://gba-awl@github.com/gba-awl/padaf.git</developerConnection>
 <url>http://github.com/gba-awl/padaf</url>
 </scm>
 
