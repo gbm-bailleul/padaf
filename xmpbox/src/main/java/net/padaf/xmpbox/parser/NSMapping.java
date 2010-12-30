@@ -104,15 +104,11 @@ public class NSMapping {
 	private void init() throws XmpSchemaException {
 		addNameSpace("http://ns.adobe.com/xap/1.0/", XMPBasicSchema.class);
 		addNameSpace("http://purl.org/dc/elements/1.1/", DublinCoreSchema.class);
-		addNameSpace("http://www.aiim.org/pdfa/ns/extension/",
-				PDFAExtensionSchema.class);
-		addNameSpace("http://ns.adobe.com/xap/1.0/mm/",
-				XMPMediaManagementSchema.class);
+		addNameSpace("http://www.aiim.org/pdfa/ns/extension/", PDFAExtensionSchema.class);
+		addNameSpace("http://ns.adobe.com/xap/1.0/mm/",	XMPMediaManagementSchema.class);
 		addNameSpace("http://ns.adobe.com/pdf/1.3/", AdobePDFSchema.class);
-		addNameSpace("http://www.aiim.org/pdfa/ns/id/",
-				PDFAIdentificationSchema.class);
-		addNameSpace("http://ns.adobe.com/xap/1.0/rights/",
-				XMPRightsManagementSchema.class);
+		addNameSpace("http://www.aiim.org/pdfa/ns/id/",	PDFAIdentificationSchema.class);
+		addNameSpace("http://ns.adobe.com/xap/1.0/rights/",	XMPRightsManagementSchema.class);
 	}
 
 	/**
@@ -127,8 +123,7 @@ public class NSMapping {
 	 */
 	protected void addNameSpace(String ns, Class<? extends XMPSchema> classSchem)
 			throws XmpSchemaException {
-		nsMaps.put(ns, new XMPSchemaFactory(ns, classSchem,
-				initializePropMapping(ns, classSchem)));
+		nsMaps.put(ns, new XMPSchemaFactory(ns, classSchem,	initializePropMapping(ns, classSchem)));
 	}
 
 	/**
@@ -331,18 +326,15 @@ public class NSMapping {
 		PropMapping propMap = new PropMapping(desc.getNameSpaceURI());
 		List<PDFAPropertyDescription> props = desc.getProperties();
 		for (int i = 0; i < props.size(); i++) {
-			String type = getValueTypeEquivalence(desc, props.get(i)
-					.getValueTypeValue());
+			String type = getValueTypeEquivalence(desc, props.get(i).getValueTypeValue());
 			propMap.addNewProperty(props.get(i).getNameValue(), type, null);
 			if (type.equals("Field")) {
-				declareAssociatedFieldType(desc, props.get(i)
-						.getValueTypeValue(), propMap);
+				declareAssociatedFieldType(desc, props.get(i).getValueTypeValue(), propMap);
 			}
 		}
 		String nsName = desc.getPrefix();
 		String ns = desc.getNameSpaceURI();
-		nsMaps.put(ns, new XMPSchemaFactory(nsName, ns, XMPSchema.class,
-				propMap));
+		nsMaps.put(ns, new XMPSchemaFactory(nsName, ns, XMPSchema.class, propMap));
 	}
 
 	/**
@@ -357,14 +349,12 @@ public class NSMapping {
 	 * @throws XmpSchemaException
 	 *             When Instancing specified Object Schema failed
 	 */
-	public XMPSchema getAssociatedSchemaObject(XMPMetadata metadata,
-			String namespace) throws XmpSchemaException {
+	public XMPSchema getAssociatedSchemaObject(XMPMetadata metadata, String namespace, String prefix) throws XmpSchemaException {
 		if (!nsMaps.containsKey(namespace)) {
 			return null;
 		}
 		XMPSchemaFactory factory = nsMaps.get(namespace);
-		return factory.createXMPSchema(metadata);
-
+		return factory.createXMPSchema(metadata, prefix);
 	}
 
 	/**

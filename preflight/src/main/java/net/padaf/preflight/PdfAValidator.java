@@ -34,5 +34,11 @@ public interface PdfAValidator {
    * @throws ValidationException
    */
   ValidationResult validate(DataSource source) throws ValidationException;
+  
+  
+  /**
+   * Return the version qualified name of the product
+   */
+  String getFullName ();
 
 }

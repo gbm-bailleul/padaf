@@ -46,6 +46,7 @@ public class PdfParseException extends ParseException {
     this.currentToken = e.currentToken;
     this.expectedTokenSequences = e.expectedTokenSequences;
     this.tokenImage = e.tokenImage;
+    this.initCause(e);
     if (e instanceof PdfParseException) {
       this.errorCode = ((PdfParseException) e).errorCode;
     }

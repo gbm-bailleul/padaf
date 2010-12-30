@@ -1,5 +1,6 @@
 package net.padaf.preflight.font;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,12 +9,13 @@ import net.padaf.preflight.ValidationConstants;
 import org.apache.fontbox.ttf.CMAPEncodingEntry;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.encoding.Encoding;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 
 public class TrueTypeFontContainer extends AbstractFontContainer {
 	private List<?> widthsArray = new ArrayList(0);
 	private int firstCharInWidthsArray = 0;
-
+	
 	/**
 	 * Represent the missingWidth value of the FontDescriptor dictionary.
 	 * According to the PDF Reference, if this value is missing, the default 
@@ -72,8 +74,44 @@ public class TrueTypeFontContainer extends AbstractFontContainer {
 	  float widthProvidedByPdfDictionary = this.defaultGlyphWidth;
 	  float widthInFontProgram ;
 
+	  int innerFontCid = cid;
+	  if (cmap.getPlatformEncodingId() == 1 && cmap.getPlatformId() == 3) {
+	  	try {
+				Encoding fontEncoding = this.font.getEncoding();
+				String character = fontEncoding.getCharacter(cid);
+				char[] characterArray = character.toCharArray();
+				if (characterArray.length == 1 ) {
+					innerFontCid = (int)characterArray[0];
+				} else {
+					// TODO OD-PDFA-87 A faire?
+					innerFontCid = (int)characterArray[0];
+					for (int i = 1; i < characterArray.length; ++i) {
+						if (cmap.getGlyphId((int)characterArray[i]) == 0) {
+							GlyphException e = new GlyphException(ValidationConstants.ERROR_FONTS_GLYPH_MISSING, 
+									cid, 
+									"A glyph for the character \"" + cid 
+				  				+ "\" in the font program \""
+				  				+ this.font.getBaseFont() 
+				  				+ "\"is missing. There are " + characterArray.length + " glyph used by this character...");
+							addKnownCidElement(new GlyphDetail(cid, e));
+							throw e;	
+						}
+					}
+				}
+			} catch (IOException ioe) {
+				GlyphException e = new GlyphException(ValidationConstants.ERROR_FONTS_ENCODING_IO, 
+						cid, 
+						"Unable to get the encoding object from the PDFont object during the validation of cid \"" + cid 
+	  				+ "\" in the font program \""
+	  				+ this.font.getBaseFont() 
+	  				+ "\".");
+				addKnownCidElement(new GlyphDetail(cid, e));
+				throw e;	
+			}
+	  }
+
 	  // search glyph
-	  int glyphId = cmap.getGlyphId(cid);
+	  int glyphId = cmap.getGlyphId(innerFontCid);
 		if (glyphId == 0) {
 			GlyphException e = new GlyphException(ValidationConstants.ERROR_FONTS_GLYPH_MISSING, 
 																						cid, 
@@ -84,6 +122,7 @@ public class TrueTypeFontContainer extends AbstractFontContainer {
 			addKnownCidElement(new GlyphDetail(cid, e));
 		  throw e;	
 		}
+
 		// compute glyph width
 		float glypdWidth = glyphWidths[numberOfLongHorMetrics - 1];
 		if (glyphId < numberOfLongHorMetrics) {

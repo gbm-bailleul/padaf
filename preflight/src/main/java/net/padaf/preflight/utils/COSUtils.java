@@ -123,6 +123,17 @@ public class COSUtils {
   }
 
   /**
+   * return true if elt is COSInteger or COSFloat
+   *
+   * @param elt
+   * @param doc
+   * @return boolean
+   */
+  public static boolean isNumeric (COSBase elt, COSDocument doc) {
+	  return isInteger(elt, doc) || isFloat(elt, doc);
+  }
+  
+  /**
    * return true if the elt is a COSInteger or a reference to a COSInteger
    * 
    * @param elt
@@ -298,8 +309,12 @@ public class COSUtils {
       try {
         COSObjectKey key = new COSObjectKey((COSObject) cbase);
         COSObject obj = cDoc.getObjectFromPool(key);
-        if (obj != null && obj.getObject() instanceof COSFloat) {
+        if (obj ==null) {
+        	return null;
+        } else if (obj.getObject() instanceof COSFloat) {
           return ((COSFloat) obj.getObject()).floatValue();
+        } else if (obj.getObject() instanceof COSInteger) {
+        	return (float)((COSInteger)obj.getObject()).intValue();
         } else {
           return null;
         }
@@ -308,6 +323,8 @@ public class COSUtils {
       }
     } else if (cbase instanceof COSFloat) {
       return ((COSFloat) cbase).floatValue();
+    } else if (cbase instanceof COSInteger) {
+        return (float)((COSInteger) cbase).intValue();
     } else {
       return null;
     }
@@ -327,8 +344,12 @@ public class COSUtils {
       try {
         COSObjectKey key = new COSObjectKey((COSObject) cbase);
         COSObject obj = cDoc.getObjectFromPool(key);
-        if (obj != null && obj.getObject() instanceof COSInteger) {
+        if (obj == null) {
+        	return null;
+        } else if (obj.getObject() instanceof COSInteger) {
           return ((COSInteger) obj.getObject()).intValue();
+        } else if (obj.getObject() instanceof COSFloat) {
+          return ((COSFloat) obj.getObject()).intValue();
         } else {
           return null;
         }
@@ -337,6 +358,8 @@ public class COSUtils {
       }
     } else if (cbase instanceof COSInteger) {
       return ((COSInteger) cbase).intValue();
+    } else if (cbase instanceof COSFloat) {
+      return ((COSFloat) cbase).intValue();
     } else {
       return null;
     }

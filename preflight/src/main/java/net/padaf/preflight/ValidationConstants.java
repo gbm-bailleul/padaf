@@ -588,6 +588,10 @@ public interface ValidationConstants {
    */
   static final String ERROR_FONTS_ENCODING_ERROR = "3.1.12";
   /**
+   * Encoding entry can't be read due to IOException
+   */
+  static final String ERROR_FONTS_ENCODING_IO = "3.1.13";
+  /**
    * The embedded font is damaged
    */
   static final String ERROR_FONTS_DAMAGED = "3.2";

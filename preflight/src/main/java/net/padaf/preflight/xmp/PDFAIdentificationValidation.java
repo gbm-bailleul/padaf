@@ -51,16 +51,15 @@ public class PDFAIdentificationValidation {
     List<ValidationError> ve = new ArrayList<ValidationError>();
     PDFAIdentificationSchema id = metadata.getPDFIdentificationSchema();
     if (id == null) {
-      ve.add(new ValidationError(
-          ValidationConstants.ERROR_METADATA_PDFA_ID_MISSING));
+      ve.add(new ValidationError(ValidationConstants.ERROR_METADATA_PDFA_ID_MISSING));
       return ve;
     }
+
+    // According to the PDF/A specification, the prefix must be pdfaid for this schema.
     if (!id.getPrefix().equals(PDFAIdentificationSchema.IDPREFIX)) {
-      if (metadata.getSchema(PDFAIdentificationSchema.IDPREFIX,
-          XMPBasicSchema.XMPBASICURI) == null) {
+      if (metadata.getSchema(PDFAIdentificationSchema.IDPREFIX, XMPBasicSchema.XMPBASICURI) == null) {
         ve.add(UnexpectedPrefixFoundError(id.getPrefix(),
-            PDFAIdentificationSchema.IDPREFIX, PDFAIdentificationSchema.class
-                .getName()));
+            PDFAIdentificationSchema.IDPREFIX, PDFAIdentificationSchema.class.getName()));
       } else {
         id = (PDFAIdentificationSchema) metadata.getSchema(
             PDFAIdentificationSchema.IDPREFIX, PDFAIdentificationSchema.IDURI);

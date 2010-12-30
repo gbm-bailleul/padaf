@@ -18,6 +18,8 @@
  ******************************************************************************/
 package net.padaf.preflight;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -26,12 +28,32 @@ import java.util.List;
 
 import javax.activation.DataSource;
 
+import org.apache.commons.io.IOUtils;
+
 import net.padaf.preflight.ValidationResult.ValidationError;
 import net.padaf.preflight.helpers.AbstractValidationHelper;
 import net.padaf.preflight.javacc.ParseException;
 
 public abstract class AbstractValidator implements PdfAValidator {
+
+	static {
+		try {
+			InputStream is = AbstractValidator.class.getClassLoader().getResourceAsStream("project.version");
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			IOUtils.copy(is, bos);
+			IOUtils.closeQuietly(is);
+			IOUtils.closeQuietly(bos);
+			fullName = "PADAF - " + new String(bos.toByteArray(),"us-ascii");
+		} catch (Exception e) {
+			e.printStackTrace();
+			fullName = "PADAF - Unknown version";
+		}
+	}
+	
 	protected ValidatorConfig config = null;
+	
+	protected static String fullName;
+	
 
 	protected Collection<AbstractValidationHelper> priorHelpers = new ArrayList<AbstractValidationHelper>();
 	protected Collection<AbstractValidationHelper> standHelpers = new ArrayList<AbstractValidationHelper>();
@@ -42,17 +64,17 @@ public abstract class AbstractValidator implements PdfAValidator {
 	 * @throws ValidationException
 	 */
 	public AbstractValidator ( ValidatorConfig cfg ) throws ValidationException {
-	  config = cfg;
+		config = cfg;
 
-	  Collection<Class<? extends AbstractValidationHelper>> ph = cfg.getPriorHelpers();
-	  for (Class<? extends AbstractValidationHelper> priorHlpCls : ph) {
-	    this.priorHelpers.add(instantiateHelper(priorHlpCls, cfg));
-	  }
+		Collection<Class<? extends AbstractValidationHelper>> ph = cfg.getPriorHelpers();
+		for (Class<? extends AbstractValidationHelper> priorHlpCls : ph) {
+			this.priorHelpers.add(instantiateHelper(priorHlpCls, cfg));
+		}
 
-	  Collection<Class<? extends AbstractValidationHelper>> sh = cfg.getStandHelpers();
-	  for (Class<? extends AbstractValidationHelper> standHlpCls : sh) {
-	    this.priorHelpers.add(instantiateHelper(standHlpCls, cfg));
-	  }
+		Collection<Class<? extends AbstractValidationHelper>> sh = cfg.getStandHelpers();
+		for (Class<? extends AbstractValidationHelper> standHlpCls : sh) {
+			this.priorHelpers.add(instantiateHelper(standHlpCls, cfg));
+		}
 
 	}
 
@@ -67,8 +89,8 @@ public abstract class AbstractValidator implements PdfAValidator {
 	private AbstractValidationHelper instantiateHelper(Class<? extends AbstractValidationHelper> avhCls, ValidatorConfig cfg)
 	throws ValidationException {
 		try {
-		  Constructor<? extends AbstractValidationHelper> construct = avhCls.getConstructor(ValidatorConfig.class);
-		  return construct.newInstance(cfg);
+			Constructor<? extends AbstractValidationHelper> construct = avhCls.getConstructor(ValidatorConfig.class);
+			return construct.newInstance(cfg);
 		} catch (NoSuchMethodException e) {
 			throw new ValidationException("Unable to create an instance of ValidationHelper : " + e.getMessage(), e);
 		} catch (InvocationTargetException e) {
@@ -131,8 +153,18 @@ public abstract class AbstractValidator implements PdfAValidator {
 	 */
 	protected ValidationResult createErrorResult(ParseException e) {
 		if (e instanceof PdfParseException) {
-			return new ValidationResult(new ValidationError(((PdfParseException) e)
-					.getErrorCode()));
+			if (e.getCause()==null) {
+				return new ValidationResult(new ValidationError(((PdfParseException) e)
+						.getErrorCode()));
+
+			} else if (e.getCause().getMessage()==null) {
+				return new ValidationResult(new ValidationError(((PdfParseException) e)
+						.getErrorCode()));
+			} else {
+				return new ValidationResult(new ValidationError(((PdfParseException) e)
+						.getErrorCode(),e.getCause().getMessage()));
+
+			}
 		}
 		return createUnknownErrorResult();
 	}
@@ -149,4 +181,16 @@ public abstract class AbstractValidator implements PdfAValidator {
 		ValidationResult result = new ValidationResult(error);
 		return result;
 	}
+
+	/* (non-Javadoc)
+	 * @see net.padaf.preflight.PdfAValidator#getFullName()
+	 */
+	@Override
+	public String getFullName() {
+		return fullName;
+	}
+	
+	
+	
+	
 }

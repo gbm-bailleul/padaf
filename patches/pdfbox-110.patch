@@ -14,7 +14,7 @@ diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/fontbox/pom.x
     <parent>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox-parent</artifactId>
-!     <version>1.1.0-awl-3</version>
+!     <version>1.1.0-awl-5</version>
       <relativePath>../parent/pom.xml</relativePath>
     </parent>
   
@@ -2716,7 +2716,7 @@ diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/jempbox/pom.x
     <parent>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox-parent</artifactId>
-!     <version>1.1.0-awl-3</version>
+!     <version>1.1.0-awl-5</version>
       <relativePath>../parent/pom.xml</relativePath>
     </parent>
   
@@ -2822,7 +2822,7 @@ diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/parent/pom.xm
   
     <groupId>org.apache.pdfbox</groupId>
     <artifactId>pdfbox-parent</artifactId>
-!   <version>1.1.0-awl-3</version>
+!   <version>1.1.0-awl-5</version>
     <packaging>pom</packaging>
   
     <name>PDFBox parent</name>
@@ -2876,7 +2876,7 @@ diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pdfbox/pom.xm
     <parent>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox-parent</artifactId>
-!     <version>1.1.0-awl-3</version>
+!     <version>1.1.0-awl-5</version>
       <relativePath>../parent/pom.xml</relativePath>
     </parent>
   
@@ -4220,7 +4220,7 @@ diff -r --context --new-file -I '@version \$Revision' pdfbox-1.1.0/pom.xml pdfbo
     <parent>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox-parent</artifactId>
-!     <version>1.1.0-awl-3</version>
+!     <version>1.1.0-awl-5</version>
       <relativePath>parent/pom.xml</relativePath>
     </parent>
   

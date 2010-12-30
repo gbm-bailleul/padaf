@@ -231,8 +231,10 @@ public class ValidationResult {
 		 *          the error explanation
 		 */
 		public ValidationError(String errorCode, String details) {
-			this.errorCode = errorCode;
-			this.details = details;
+			this(errorCode);
+			StringBuilder sb = new StringBuilder(this.details.length()+details.length()+2);
+			sb.append(this.details).append(", ").append(details);
+			this.details = sb.toString();
 		}
 
 		/**

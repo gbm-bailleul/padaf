@@ -386,7 +386,7 @@ void dictionary_object () :
 	{
 		int entries = (int)(tokenNumber / 2);
 		if (entries > MAX_DICT_ENTRIES) {
-			throw new PdfParseException("Too Many Entries : " + entries, ERROR_SYNTAX_TOO_MANY_ENTRIES);
+			throw new PdfParseException("Too Many Entries In Dictionary : " + entries, ERROR_SYNTAX_TOO_MANY_ENTRIES);
 		}
 	}
 }

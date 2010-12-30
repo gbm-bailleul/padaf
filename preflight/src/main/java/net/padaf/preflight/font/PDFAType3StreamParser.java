@@ -29,6 +29,7 @@ import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.utils.ContentStreamEngine;
 
 import org.apache.fontbox.util.BoundingBox;
+import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSStream;
@@ -43,7 +44,7 @@ import org.apache.pdfbox.util.PDFOperator;
  */
 public class PDFAType3StreamParser extends ContentStreamEngine {
   private boolean firstOperator = true;
-  private int width = 0;
+  private float width = 0;
 
   private PDInlinedImage image = null;
   private BoundingBox box = null;
@@ -147,7 +148,9 @@ public class PDFAType3StreamParser extends ContentStreamEngine {
     if (obj instanceof Number) {
       width = ((Number) obj).intValue();
     } else if (obj instanceof COSInteger) {
-      width = ((COSInteger) obj).intValue();
+      width = ((COSInteger) obj).floatValue();
+    } else if (obj instanceof COSFloat) {
+    	width = ((COSFloat)obj).floatValue();
     } else {
       throw new IOException(
           "Unexpected argument type. Expected : COSInteger or Number / Received : "
@@ -158,7 +161,7 @@ public class PDFAType3StreamParser extends ContentStreamEngine {
   /**
    * @return the width of the CharProc glyph description
    */
-  public int getWidth() {
+  public float getWidth() {
     return this.width;
   }
 }

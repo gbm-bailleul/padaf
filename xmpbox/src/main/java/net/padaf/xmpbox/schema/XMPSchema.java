@@ -72,8 +72,7 @@ public class XMPSchema implements Elementable {
 	 *            The URI of the namespace, ie "http://ns.adobe.com/pdf/1.3/"
 	 * 
 	 */
-	public XMPSchema(XMPMetadata metadata, String namespaceName,
-			String namespaceURI) {
+	public XMPSchema(XMPMetadata metadata, String namespaceName, String namespaceURI) {
 		this.metadata = metadata;
 		content = new ComplexPropertyContainer(metadata,
 				"http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf",

@@ -113,21 +113,25 @@ public class XMPSchemaFactory {
 	 * 
 	 * @param metadata
 	 *            Metadata to attach the Schema created
+	 * @param prefix
+	 * 						The namespace prefix (optional)
 	 * @return the schema created and added to metadata
 	 * @throws XmpSchemaException
 	 *             When Instancing specified Object Schema failed
 	 */
 	@SuppressWarnings("unchecked")
-	public XMPSchema createXMPSchema(XMPMetadata metadata)
-			throws XmpSchemaException {
+	public XMPSchema createXMPSchema(XMPMetadata metadata, String prefix)
+	throws XmpSchemaException {
 		XMPSchema schema = null;
 		Class[] argsClass;
 		Object[] schemaArgs;
 
 		if (isDeclarative) {
-			argsClass = new Class[] { XMPMetadata.class, String.class,
-					String.class };
+			argsClass = new Class[] { XMPMetadata.class, String.class, String.class };
 			schemaArgs = new Object[] { metadata, nsName, namespace };
+		} else if (prefix != null && !"".equals(prefix)) {
+			argsClass = new Class[] { XMPMetadata.class, String.class };
+			schemaArgs = new Object[] { metadata, prefix };
 		} else {
 			argsClass = new Class[] { XMPMetadata.class };
 			schemaArgs = new Object[] { metadata };

@@ -369,8 +369,8 @@ public class SynchronizedMetaDataValidation {
    * @return List of validation errors
    * @throws ValidationException
    */
-  public List<ValidationError> validateMetadataSynchronization(
-      PDDocument document, XMPMetadata metadata) throws ValidationException {
+  public List<ValidationError> validateMetadataSynchronization(PDDocument document, XMPMetadata metadata) 
+  throws ValidationException {
     List<ValidationError> ve = new ArrayList<ValidationError>();
 
     if (document == null) {
@@ -381,19 +381,7 @@ public class SynchronizedMetaDataValidation {
         throw new ValidationException("Metadata provided are null");
       } else {
         DublinCoreSchema dc = metadata.getDublinCoreSchema();
-        if (dc != null) {
-          if (!dc.getPrefix().equals(DublinCoreSchema.PREFERRED_DC_PREFIX)) {
-            if (metadata.getSchema(DublinCoreSchema.PREFERRED_DC_PREFIX,
-                DublinCoreSchema.DCURI) == null) {
-              ve.add(UnexpectedPrefixFoundError(dc.getPrefix(),
-                  DublinCoreSchema.PREFERRED_DC_PREFIX, DublinCoreSchema.class
-                      .getName()));
-            } else {
-              dc = (DublinCoreSchema) metadata.getSchema(
-                  DublinCoreSchema.PREFERRED_DC_PREFIX, DublinCoreSchema.DCURI);
-            }
-          }
-        }
+
         // TITLE
         analyzeTitleProperty(dico, dc, ve);
         // AUTHOR
@@ -402,39 +390,14 @@ public class SynchronizedMetaDataValidation {
         analyzeSubjectProperty(dico, dc, ve);
 
         AdobePDFSchema pdf = metadata.getAdobePDFSchema();
-        if (pdf != null) {
-          if (!pdf.getPrefix().equals(AdobePDFSchema.PREFERRED_PDF_PREFIX)) {
-            if (metadata.getSchema(AdobePDFSchema.PREFERRED_PDF_PREFIX,
-                AdobePDFSchema.PDFURI) == null) {
-              ve.add(UnexpectedPrefixFoundError(pdf.getPrefix(),
-                  AdobePDFSchema.PREFERRED_PDF_PREFIX, AdobePDFSchema.class
-                      .getName()));
-            } else {
-              pdf = (AdobePDFSchema) metadata.getSchema(
-                  AdobePDFSchema.PREFERRED_PDF_PREFIX, AdobePDFSchema.PDFURI);
-            }
-          }
-        }
+
         // KEYWORDS
         analyzeKeywordsProperty(dico, pdf, ve);
         // PRODUCER
         analyzeProducerProperty(dico, pdf, ve);
 
         XMPBasicSchema xmp = metadata.getXMPBasicSchema();
-        if (xmp != null) {
-          if (!xmp.getPrefix().equals(XMPBasicSchema.PREFERRED_XMP_PREFIX)) {
-            if (metadata.getSchema(XMPBasicSchema.PREFERRED_XMP_PREFIX,
-                XMPBasicSchema.XMPBASICURI) == null) {
-              ve.add(UnexpectedPrefixFoundError(xmp.getPrefix(),
-                  XMPBasicSchema.PREFERRED_XMP_PREFIX, XMPBasicSchema.class
-                      .getName()));
-            } else {
-              xmp = (XMPBasicSchema) metadata.getSchema(
-                  XMPBasicSchema.PREFERRED_XMP_PREFIX,
-                  XMPBasicSchema.XMPBASICURI);
-            }
-          }
-        }
+
         // CREATOR TOOL
         analyzeCreatorToolProperty(dico, xmp, ve);
 

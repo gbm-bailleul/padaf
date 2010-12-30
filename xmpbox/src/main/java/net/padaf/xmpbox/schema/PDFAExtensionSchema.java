@@ -48,7 +48,7 @@ public class PDFAExtensionSchema extends XMPSchema {
 	public static final String PDFASCHEMAURI = "http://www.aiim.org/pdfa/ns/schema#";
 
 	public static final String PDFAPROPERTY = "pdfaProperty";
-	public static final String PDFAPROPERTYSEP = "pdfaProperty:";
+	public static final String PDFAPROPERTYSEP = "pdfaProperty:";	
 	public static final String PDFAPROPERTYURI = "http://www.aiim.org/pdfa/ns/property#";
 
 	public static final String PDFATYPE = "pdfaType";
@@ -83,7 +83,11 @@ public class PDFAExtensionSchema extends XMPSchema {
 	 *            The metadata to attach this schema XMPMetadata
 	 */
 	public PDFAExtensionSchema(XMPMetadata metadata) {
-		super(metadata, PDFAEXTENSION, PDFAEXTENSIONURI);
+		this(metadata,PDFAEXTENSION);
+	}
+
+	public PDFAExtensionSchema(XMPMetadata metadata, String prefix) {
+		super(metadata, prefix, PDFAEXTENSIONURI);
 		setAttribute(new Attribute(NS_NAMESPACE, "xmlns", PDFASCHEMA,
 				PDFASCHEMAURI));
 		setAttribute(new Attribute(NS_NAMESPACE, "xmlns", PDFAPROPERTY,
@@ -96,7 +100,6 @@ public class PDFAExtensionSchema extends XMPSchema {
 		getElement().appendChild(descriptions.getElement());
 
 	}
-
 	/**
 	 * Build a new PDFExtension schema with specified namespaces declaration
 	 * 

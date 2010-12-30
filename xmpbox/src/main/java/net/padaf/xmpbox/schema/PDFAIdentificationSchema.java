@@ -65,6 +65,10 @@ public class PDFAIdentificationSchema extends XMPSchema {
 		super(metadata, IDPREFIX, IDURI);
 	}
 
+	public PDFAIdentificationSchema(XMPMetadata metadata, String prefix) {
+		super(metadata, prefix, IDURI);
+	}
+
 	/**
 	 * Set the PDFA Version identifier (with string)
 	 * 

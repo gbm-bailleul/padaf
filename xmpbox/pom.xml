@@ -20,14 +20,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.padaf</groupId>
 	<artifactId>xmpbox</artifactId>
-	<version>0.5.2-SNAPSHOT</version>
+	<version>0.5.6</version>
 	<name>xmpbox</name>
 	<description>xmpbox is an API used to parse,validate and create objects based on XMP Contents.</description>
 
 	<parent>
 		<groupId>net.padaf</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.5.2-SNAPSHOT</version>
+		<version>0.5.6</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 
@@ -63,13 +63,6 @@
 
 	<reporting>
 		<plugins>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-			</plugin>
-
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>taglist-maven-plugin</artifactId>
@@ -118,7 +111,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<!-- <version>2.4.2</version> -->
+				<version>2.6</version>
 				<configuration>
 					<showSuccess>true</showSuccess>
 					<aggregate>true</aggregate>

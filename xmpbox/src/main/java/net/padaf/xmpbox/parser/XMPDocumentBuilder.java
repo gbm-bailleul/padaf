@@ -496,20 +496,17 @@ public class XMPDocumentBuilder {
 		} else {
 			// TODO Considering first namespace is that corresponding to the
 			// schema (see if it must be changed)
-			XMPSchema schema = nsMap.getAssociatedSchemaObject(metadata, reader
-					.get().getNamespaceURI(0));
+			String namespaceUri = reader.get().getNamespaceURI(0);
+			String namespacePrefix = reader.get().getNamespacePrefix(0);
+			XMPSchema schema = nsMap.getAssociatedSchemaObject(metadata, namespaceUri, namespacePrefix);
 			if (schema != null) {
-				namespaces.remove(reader.get().getNamespacePrefix(0));
+				namespaces.remove(namespacePrefix);
 			} else {
-				schema = metadata
-						.createAndAddDefaultSchema(reader.get()
-								.getNamespacePrefix(0), reader.get()
-								.getNamespaceURI(0));
+				schema = metadata.createAndAddDefaultSchema(namespacePrefix,namespaceUri);
 			}
 			for (int i = 1; i < cptNS; i++) {
 				schema.setAttribute(new Attribute(XMPSchema.NS_NAMESPACE,
-						"xmlns", reader.get().getNamespacePrefix(i), reader
-								.get().getNamespaceURI(i)));
+						"xmlns", reader.get().getNamespacePrefix(i), reader.get().getNamespaceURI(i)));
 			}
 			treatDescriptionAttributes(metadata, schema);
 			while (reader.get().nextTag() == XMLStreamReader.START_ELEMENT) {
