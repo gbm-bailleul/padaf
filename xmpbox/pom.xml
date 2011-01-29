@@ -20,14 +20,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.padaf</groupId>
 	<artifactId>xmpbox</artifactId>
-	<version>0.5.6</version>
 	<name>xmpbox</name>
 	<description>xmpbox is an API used to parse,validate and create objects based on XMP Contents.</description>
 
 	<parent>
 		<groupId>net.padaf</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.5.6</version>
+		<version>0.6.0-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 

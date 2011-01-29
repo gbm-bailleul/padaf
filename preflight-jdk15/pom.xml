@@ -17,12 +17,11 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.padaf</groupId>
-		<version>0.5.6</version>
+		<version>0.6.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.padaf</groupId>
 	<artifactId>preflight-jdk15</artifactId>
-	<version>0.5.6</version>
 
 	<properties>
 		<compileSource>1.5</compileSource>
@@ -107,7 +106,7 @@
 		<dependency>
 			<groupId>net.padaf</groupId>
 			<artifactId>xmpbox-jdk15</artifactId>
-			<version>0.5.6</version>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- TODO add or automatic ? -->
 		<dependency>
@@ -128,7 +127,12 @@
 			<version>1.2.12</version>
 			<scope>compile</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.pdfa</groupId>
+			<artifactId>isartor</artifactId>
+			<version>1.0-20080813</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 
