@@ -54,9 +54,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.sun.xml.stream</groupId>
-			<artifactId>sjsxp</artifactId>
-			<version>1.0.1</version>
+			<groupId>stax</groupId>
+			<artifactId>stax</artifactId>
+			<version>1.2.0</version>
 		</dependency>
 
 		<dependency>
