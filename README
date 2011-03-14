@@ -1,3 +1,3 @@
-Padaf uses a patched version of pdfbox (and fontbox). Theses patches do 
-not change behaviours of pdfbox but add some missing pieces of implementation.
+Since versio 0.6.0, Padaf does not need anymore a patched version of pdfbox (and fontbox).
+It uses standart pdfbox 1.5.0 version
 
