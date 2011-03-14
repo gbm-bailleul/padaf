@@ -446,7 +446,7 @@ public class Type1 {
 		String label = null;
 
 		try {
-			label = this.encoding.getName(cid).getName();
+			label = this.encoding.getName(cid);
 		} catch (IOException e) {
 			label = this.cidToLabel.get(cid);
 			if (label == null) {

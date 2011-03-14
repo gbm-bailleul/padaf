@@ -115,7 +115,7 @@ public class XObjFormValidator extends AbstractXObjValidator {
   protected boolean validateXObjectContent(List<ValidationError> result)
       throws ValidationException {
 
-    ContentStreamWrapper csWrapper = new ContentStreamWrapper(handler, null);
+    ContentStreamWrapper csWrapper = new ContentStreamWrapper(handler);
     List<ValidationError> csParseErrors = csWrapper
         .validXObjContentStream(pdXObj);
     if (csParseErrors == null
@@ -199,7 +199,7 @@ public class XObjFormValidator extends AbstractXObjValidator {
       COSDictionary shadings = (COSDictionary) resources.getCOSDictionary()
           .getDictionaryObject(PATTERN_KEY_SHADING);
       if (shadings != null) {
-        for (Object key : shadings.keyList()) {
+        for (Object key : shadings.keySet()) {
           COSDictionary aShading = (COSDictionary) shadings
               .getDictionaryObject((COSName) key);
           ShadingPattern sp = new ShadingPattern(handler, aShading);

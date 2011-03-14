@@ -374,19 +374,20 @@ public class CompositeFontValidator extends AbstractFontValidator {
 
 			CMap fontboxCMap = new CMapParser().parse(null, aCMap
 					.getUnfilteredStream());
-			Object wmValue = fontboxCMap.getCmapEntry("WMode");
-			Object cmnVamue = fontboxCMap.getCmapEntry("CMapName");
+			int wmValue = fontboxCMap.getWMode();
+			String cmnValue = fontboxCMap.getName(); //getCmapEntry("CMapName");
 
-			if (!(wmValue instanceof Integer)
-					|| !((Integer)wmValue).equals(wmode)) {
+
+			if (wmValue != wmode) {
+
 				this.fontContainer.addError(new ValidationError(
 						ERROR_FONTS_CIDKEYED_CMAP_INVALID_OR_MISSING,
 				"WMode is inconsistent"));
 				return false;
 			}
 
-			if (!(cmnVamue instanceof String)
-					|| !((String)cmnVamue).equals(cmapName)) {
+			if (!cmnValue.equals(cmapName)) {
+
 				this.fontContainer.addError(new ValidationError(
 						ERROR_FONTS_CIDKEYED_CMAP_INVALID_OR_MISSING,
 				"CMapName is inconsistent"));
@@ -473,7 +474,7 @@ public class CompositeFontValidator extends AbstractFontValidator {
 		boolean fbbox = false, asc = false, desc = false, stemv = false;
 
 		COSDictionary fontDescDictionary = pdFontDesc.getCOSDictionary();
-		for (Object key : fontDescDictionary.keyList()) {
+		for (Object key : fontDescDictionary.keySet()) {
 
 			if (!(key instanceof COSName)) {
 				this.fontContainer.addError(new ValidationResult.ValidationError(
@@ -680,7 +681,7 @@ public class CompositeFontValidator extends AbstractFontValidator {
 		type2FontContainer.setGlyphWidths(glyphWidths);
 		type2FontContainer.setNumberOfLongHorMetrics(numberOfLongHorMetrics);
 		type2FontContainer.setUnitsPerEm(unitsPerEm);
-		
+
 		return true;
 	}
 
@@ -744,7 +745,7 @@ public class CompositeFontValidator extends AbstractFontValidator {
 				if (!hasLength1) {
 					this.fontContainer.addError(new ValidationResult.ValidationError(
 							ValidationConstants.ERROR_FONTS_FONT_FILEX_INVALID,
-							"The FontFile is invalid"));
+					"The FontFile is invalid"));
 					return false;
 				}
 
@@ -847,7 +848,7 @@ public class CompositeFontValidator extends AbstractFontValidator {
 							.getDocument())) {
 				this.fontContainer.addError(new ValidationResult.ValidationError(
 						ERROR_FONTS_CIDSET_MISSING_FOR_SUBSET,
-						"The CIDSet entry is missing for the Composite Subset"));
+				"The CIDSet entry is missing for the Composite Subset"));
 				return false;
 			}
 		}
@@ -866,7 +867,7 @@ public class CompositeFontValidator extends AbstractFontValidator {
 				.getDocument().getDocument());
 		if (fontDescDic == null) {
 			throw new ValidationException(
-					"Unable to process CIDFontType2 because of the font descriptor is invalid.");
+			"Unable to process CIDFontType2 because of the font descriptor is invalid.");
 		}
 		PDFontDescriptorDictionary pfDescriptor = new PDFontDescriptorDictionary(
 				fontDescDic);

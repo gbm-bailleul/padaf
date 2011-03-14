@@ -64,8 +64,7 @@ public class TilingPattern implements XObjectValidator {
    */
   protected boolean parsePatternContent(List<ValidationError> errors)
       throws ValidationException {
-    ContentStreamWrapper csWrapper = new ContentStreamWrapper(documentHandler,
-        null);
+    ContentStreamWrapper csWrapper = new ContentStreamWrapper(documentHandler);
     List<ValidationError> csParseErrors = csWrapper
         .validPatternContentStream(pattern);
     if (csParseErrors == null

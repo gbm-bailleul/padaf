@@ -65,7 +65,8 @@ public class PDFAType3StreamParser extends ContentStreamEngine {
    *           If there is an error processing the stream.
    */
   public Image createImage(COSStream type3Stream) throws IOException {
-    processStream(null, null, type3Stream);
+  	resetEngine();
+    processSubStream(null, null, type3Stream);
     return image.createImage();
   }
 

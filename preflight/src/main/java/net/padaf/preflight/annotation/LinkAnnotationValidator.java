@@ -105,7 +105,7 @@ public class LinkAnnotationValidator extends AnnotationValidator {
     boolean rect = false;
     boolean f = false;
 
-    for (Object key : this.annotDictionary.keyList()) {
+    for (Object key : this.annotDictionary.keySet()) {
       if (!(key instanceof COSName)) {
         errors.add(new ValidationResult.ValidationError(
             ValidationConstants.ERROR_SYNTAX_DICTIONARY_KEY_INVALID,

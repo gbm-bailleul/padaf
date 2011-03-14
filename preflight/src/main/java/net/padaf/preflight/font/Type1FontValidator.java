@@ -95,12 +95,7 @@ public class Type1FontValidator extends SimpleFontValidator {
         return false;
       }
     } else if (COSUtils.isDictionary(this.encoding, cDoc)) {
-      try {
-        this.pFont.getEncoding();
-      } catch (IOException e) {
-        this.fontContainer.addError(new ValidationError(ERROR_FONTS_ENCODING));
-        return false;
-      }
+        this.pFont.getFontEncoding();
     } else if (this.encoding != null) {
       this.fontContainer.addError(new ValidationError(ERROR_FONTS_ENCODING));
       return false;
@@ -248,12 +243,11 @@ public class Type1FontValidator extends SimpleFontValidator {
       int length2 = streamObj.getInt(COSName
           .getPDFName(FONT_DICTIONARY_KEY_LENGTH2));
       
-      Type1Parser parserForMetrics = Type1Parser.createParserWithEncodingObject(bis, length1, length2, pFont.getEncoding());
+      Type1Parser parserForMetrics = Type1Parser.createParserWithEncodingObject(bis, length1, length2, pFont.getFontEncoding());
       Type1 parsedData = parserForMetrics.parse();
 
       List<?> pdfWidths = this.pFont.getWidths();
       int firstChar = pFont.getFirstChar();
-      int lastChar = pFont.getLastChar();
       float defaultGlyphWidth = pFontDesc.getMissingWidth();
       
       COSArray widths = null;

@@ -79,8 +79,7 @@ public class ExtGStateContainer {
     COSDictionary extGStates = COSUtils.getAsDictionary(egsEntry, cDoc);
 
     if (extGStates != null) {
-      List<?> keys = extGStates.keyList();
-      for (Object object : keys) {
+      for (Object object : extGStates.keySet()) {
         COSName key = (COSName) object;
         if (key.getName().matches(
             TRANPARENCY_DICTIONARY_KEY_EXTGSTATE_ENTRY_REGEX)) {

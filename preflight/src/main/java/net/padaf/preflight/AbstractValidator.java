@@ -185,7 +185,6 @@ public abstract class AbstractValidator implements PdfAValidator {
 	/* (non-Javadoc)
 	 * @see net.padaf.preflight.PdfAValidator#getFullName()
 	 */
-	@Override
 	public String getFullName() {
 		return fullName;
 	}

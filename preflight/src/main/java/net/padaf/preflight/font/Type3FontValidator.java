@@ -21,6 +21,7 @@ package net.padaf.preflight.font;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.padaf.preflight.DocumentHandler;
 import net.padaf.preflight.ValidationException;
@@ -328,7 +329,7 @@ public class Type3FontValidator extends AbstractFontValidator {
 			if (COSUtils.isNumeric(arrContent, cDoc)) {
 				float width = COSUtils.getAsFloat(arrContent, cDoc);
 
-				COSName charName = null;
+				String charName = null;
 				try {
 					charName = this.type3Encoding.getName(cid);
 				} catch (IOException e) {
@@ -336,11 +337,11 @@ public class Type3FontValidator extends AbstractFontValidator {
 					throw new ValidationException("Unable to check Widths consistency", e);
 				}
 
-				COSBase item = charProcsDictionary.getItem(charName);
+				COSBase item = charProcsDictionary.getItem(COSName.getPDFName(charName));
 				COSStream charStream = COSUtils.getAsStream(item, cDoc);
 				if (charStream == null && width != 0) {
 					GlyphException glyphEx = new GlyphException(ERROR_FONTS_METRICS, cid, 
-							"The CharProcs \"" + charName.getName()
+							"The CharProcs \"" + charName
 							+ "\" doesn't exist but the width is " + width);
 					GlyphDetail glyphDetail = new GlyphDetail(cid, glyphEx);
 					this.fontContainer.addKnownCidElement(glyphDetail);
@@ -357,11 +358,12 @@ public class Type3FontValidator extends AbstractFontValidator {
 								pRes = new PDResources(resAsDict);
 							}
 						}
-						parser.processStream(null, pRes, charStream);
+						parser.resetEngine();
+						parser.processSubStream(null, pRes, charStream);
 
 						if (width != parser.getWidth()) {
 							GlyphException glyphEx = new GlyphException(ERROR_FONTS_METRICS, cid, 
-									"The CharProcs \"" + charName.getName()
+									"The CharProcs \"" + charName
 									+ "\" should have a width equals to " + width);
 							GlyphDetail glyphDetail = new GlyphDetail(cid, glyphEx);
 							this.fontContainer.addKnownCidElement(glyphDetail);
@@ -430,13 +432,8 @@ public class Type3FontValidator extends AbstractFontValidator {
 		if (cbImg != null) {
 			// ---- the referenced objects must be present in the PDF file
 			COSDictionary dicImgs = COSUtils.getAsDictionary(cbImg, cDoc);
-			List<?> keyList = dicImgs.keyList();
+			Set<COSName> keyList = dicImgs.keySet();
 			for (Object key : keyList) {
-				if (!(key instanceof COSName)) {
-					this.fontContainer.addError(new ValidationError(
-							ERROR_SYNTAX_DICTIONARY_KEY_INVALID));
-					return false;
-				}
 
 				COSBase item = dictionary.getItem((COSName) key);
 				COSDictionary xObjImg = COSUtils.getAsDictionary(item, cDoc);
@@ -460,13 +457,8 @@ public class Type3FontValidator extends AbstractFontValidator {
 		if (cbFont != null) {
 			// ---- the referenced object must be present in the PDF file
 			COSDictionary dicFonts = COSUtils.getAsDictionary(cbFont, cDoc);
-			List<?> keyList = dicFonts.keyList();
+			Set<COSName> keyList = dicFonts.keySet();
 			for (Object key : keyList) {
-				if (!(key instanceof COSName)) {
-					this.fontContainer.addError(new ValidationError(
-							ERROR_SYNTAX_DICTIONARY_KEY_INVALID));
-					return false;
-				}
 
 				COSBase item = dictionary.getItem((COSName) key);
 				COSDictionary xObjFont = COSUtils.getAsDictionary(item, cDoc);
@@ -527,9 +519,8 @@ public class Type3FontValidator extends AbstractFontValidator {
 			COSDictionary shadings = (COSDictionary) dictionary
 			.getDictionaryObject(PATTERN_KEY_SHADING);
 			if (shadings != null) {
-				for (Object key : shadings.keyList()) {
-					COSDictionary aShading = (COSDictionary) shadings
-					.getDictionaryObject((COSName) key);
+				for (COSName key : shadings.keySet()) {
+					COSDictionary aShading = (COSDictionary) shadings.getDictionaryObject(key);
 					ShadingPattern sp = new ShadingPattern(handler, aShading);
 					List<ValidationError> lErrors = sp.validate();
 					if (lErrors != null && !lErrors.isEmpty()) {

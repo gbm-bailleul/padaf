@@ -38,7 +38,6 @@ import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSStream;
@@ -158,11 +157,10 @@ public class TrueTypeFontValidator extends SimpleFontValidator {
 				}
 
 				// ---- check the encoding part.
-				try {
 					if (pFontDesc.isNonSymbolic()) {
 						// ---- only MacRomanEncoding or WinAnsiEncoding are allowed for a non
 						// symbolic font
-						Encoding encodingValue = this.pFont.getEncoding();
+						Encoding encodingValue = this.pFont.getFontEncoding();
 						if (encodingValue == null
 								|| !(encodingValue instanceof MacRomanEncoding || encodingValue instanceof WinAnsiEncoding)) {
 							this.fontContainer.addError(new ValidationResult.ValidationError(
@@ -185,12 +183,6 @@ public class TrueTypeFontValidator extends SimpleFontValidator {
 						// ----- should never happen
 						return true;
 					}
-				} catch (IOException e) {
-					this.fontContainer.addError(new ValidationResult.ValidationError(
-							ValidationConstants.ERROR_FONTS_DICTIONARY_INVALID,
-							"The Font encoding entry can't be read"));
-					return false;
-				}
 
 				/*
 				 * ---- try to load the font using the TTFParser object. If the font is
@@ -280,8 +272,7 @@ public class TrueTypeFontValidator extends SimpleFontValidator {
 		if (this.pFontDesc.isSymbolic()) {
 			return cmap.getCmaps()[0];
 		} else {
-			try {
-				if (this.pFont.getEncoding() instanceof WinAnsiEncoding) {
+				if (this.pFont.getFontEncoding() instanceof WinAnsiEncoding) {
 					for (CMAPEncodingEntry cmapEntry : cmap.getCmaps()) {
 						// ---- Returns the WinAnsiEncoding CMap
 						if ((cmapEntry.getPlatformId() == 3)
@@ -298,9 +289,6 @@ public class TrueTypeFontValidator extends SimpleFontValidator {
 						}
 					}
 				}
-			} catch (IOException e) {
-				throw new ValidationException("Unexpected error : " + e.getMessage());
-			}
 		}
 
 		throw new ValidationException("CMap not found in the TrueType FontProgam");

@@ -109,8 +109,7 @@ public class ActionManagerFactory {
 		if (aa != null) {
 			COSDictionary aaDict = COSUtils.getAsDictionary(aa, cDoc);
 			if (aaDict != null) {
-				List<?> keys = aaDict.keyList();
-				for (Object key : keys) {
+				for (Object key : aaDict.keySet()) {
 					COSName name = (COSName) key;
 					callCreateAction(aaDict.getItem(name), cDoc, result, name.getName(), alreadyCreated);
 				}

@@ -47,6 +47,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.graphics.PDGraphicsState;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectForm;
 import org.apache.pdfbox.pdmodel.text.PDTextState;
 import org.apache.pdfbox.util.PDFOperator;
@@ -54,9 +55,8 @@ import org.apache.pdfbox.util.operator.OperatorProcessor;
 
 public class ContentStreamWrapper extends ContentStreamEngine {
 
-	public ContentStreamWrapper(DocumentHandler handler, PDPage page) {
+	public ContentStreamWrapper(DocumentHandler handler) {
 		super(handler);
-		this.page = page;
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 	 *         succeed.
 	 * @throws ValidationException.
 	 */
-	public List<ValidationError> validPageContentStream()
+	public List<ValidationError> validPageContentStream(PDPage page)
 	throws ValidationException {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
@@ -99,7 +99,8 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
 		try {
-			processStream(null, xobj.getResources(), xobj.getCOSStream());
+			resetEnginContext();
+			processSubStream(null, xobj.getResources(), xobj.getCOSStream());
 		} catch (ContentStreamException e) {
 			errors.add(new ValidationError(e.getValidationError(), e.getMessage()));
 		} catch (IOException e) {
@@ -125,7 +126,8 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 		try {
 			COSDictionary res = (COSDictionary) pattern
 			.getDictionaryObject(DICTIONARY_KEY_RESOURCES);
-			processStream(null, new PDResources(res), pattern);
+			resetEnginContext();
+			processSubStream(null, new PDResources(res), pattern);
 		} catch (ContentStreamException e) {
 			errors.add(new ValidationError(e.getValidationError(), e.getMessage()));
 		} catch (IOException e) {
@@ -134,6 +136,14 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 		}
 
 		return errors;
+	}
+
+	public final void resetEnginContext() {
+		this.setGraphicsState(new PDGraphicsState());
+		this.setTextMatrix(null);
+		this.setTextLineMatrix(null);
+		this.getGraphicsStack().clear();
+		// this.streamResourcesStack.clear();
 	}
 
 	/*
@@ -149,15 +159,13 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 		// ---- Here is a copy of the super method because the else block is
 		// different. (If the operator is unknown, throw an exception)
 		String operation = operator.getOperation();
-		OperatorProcessor processor = (OperatorProcessor) operators.get(operation);
+		OperatorProcessor processor = (OperatorProcessor) contentStreamEngineOperators.get(operation);
 		if (processor != null) {
 			processor.setContext(this);
 			processor.process(operator, arguments);
 		} else {
-			if (!unsupportedOperators.contains(operation)) {
-				throwContentStreamException("The operator \"" + operation
-						+ "\" isn't supported.", ERROR_SYNTAX_CONTENT_STREAM_UNSUPPORTED_OP);
-			}
+			throwContentStreamException("The operator \"" + operation
+					+ "\" isn't supported.", ERROR_SYNTAX_CONTENT_STREAM_UNSUPPORTED_OP);
 		}
 
 		// --- Process Specific Validation
@@ -265,7 +273,7 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 	 */
 	public void validText(byte[] string) throws IOException {
 		// --- TextSize accessible through the TextState
-		PDTextState textState = graphicsState.getTextState();
+		PDTextState textState = getGraphicsState().getTextState();
 		final int renderingMode = textState.getRenderingMode();
 		final PDFont font = textState.getFont();
 
@@ -324,14 +332,6 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 			} catch (GlyphException e) {
 				throwContentStreamException(e.getMessage(), e.getErrorCode());  
 			}
-		}
-	}
-
-	private void checkCIDBiggerThanMaxValue(int cid) throws ContentStreamException {
-		if (cid > ValidationConstants.MAX_CID) {
-			ContentStreamException exception = new ContentStreamException("CID " + cid + " bigger than " + ValidationConstants.MAX_CID);
-			exception.setValidationError(ValidationConstants.ERROR_SYNTAX_CID_RANGE);
-			throw exception;
 		}
 	}
 }

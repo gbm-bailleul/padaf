@@ -195,7 +195,7 @@ public class TrailerValidationHelper extends AbstractValidationHelper {
     boolean info = false;
     boolean encrypt = false;
 
-    for (Object key : trailer.keyList()) {
+    for (Object key : trailer.keySet()) {
       if (!(key instanceof COSName)) {
         lErrors.add(new ValidationResult.ValidationError(
             ValidationConstants.ERROR_SYNTAX_DICTIONARY_KEY_INVALID,
@@ -312,7 +312,7 @@ public class TrailerValidationHelper extends AbstractValidationHelper {
     for (Object object : lObj) {
       COSBase curObj = ((COSObject) object).getObject();
       if (curObj instanceof COSDictionary
-          && ((COSDictionary) curObj).keyList().contains(
+          && ((COSDictionary) curObj).keySet().contains(
               COSName.getPDFName(DICTIONARY_KEY_LINEARIZED))) {
         return (COSDictionary) curObj;
       }
@@ -336,7 +336,7 @@ public class TrailerValidationHelper extends AbstractValidationHelper {
     boolean n = false;
     boolean t = false;
 
-    for (Object key : linearizedDict.keyList()) {
+    for (Object key : linearizedDict.keySet()) {
       if (!(key instanceof COSName)) {
         lErrors.add(new ValidationResult.ValidationError(
             ValidationConstants.ERROR_SYNTAX_DICTIONARY_KEY_INVALID,

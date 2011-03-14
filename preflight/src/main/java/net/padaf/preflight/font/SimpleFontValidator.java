@@ -203,7 +203,7 @@ public abstract class SimpleFontValidator extends AbstractFontValidator {
     boolean fname = false, flags = false, itangle = false, cheight = false;
     boolean fbbox = false, asc = false, desc = false, stemv = false;
 
-    for (Object key : this.fDescriptor.keyList()) {
+    for (Object key : this.fDescriptor.keySet()) {
       if (!(key instanceof COSName)) {
         this.fontContainer.addError(new ValidationResult.ValidationError(
             ValidationConstants.ERROR_SYNTAX_DICTIONARY_KEY_INVALID,

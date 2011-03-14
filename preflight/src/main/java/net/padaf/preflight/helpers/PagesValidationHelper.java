@@ -167,7 +167,7 @@ public class PagesValidationHelper extends AbstractValidationHelper {
         .getDictionaryObject(PATTERN_KEY_SHADING);
     boolean res = true;
     if (shadings != null) {
-      for (Object key : shadings.keyList()) {
+      for (Object key : shadings.keySet()) {
         COSDictionary aShading = (COSDictionary) shadings
             .getDictionaryObject((COSName) key);
         ShadingPattern sp = new ShadingPattern(handler, aShading);
@@ -192,8 +192,8 @@ public class PagesValidationHelper extends AbstractValidationHelper {
   protected boolean validateContent(PDPage page, DocumentHandler handler,
       List<ValidationError> result) throws ValidationException {
 
-    ContentStreamWrapper csWrapper = new ContentStreamWrapper(handler, page);
-    List<ValidationError> csParseErrors = csWrapper.validPageContentStream();
+    ContentStreamWrapper csWrapper = new ContentStreamWrapper(handler);
+    List<ValidationError> csParseErrors = csWrapper.validPageContentStream(page);
     if (csParseErrors == null || csParseErrors.isEmpty()) {
       return true;
     }

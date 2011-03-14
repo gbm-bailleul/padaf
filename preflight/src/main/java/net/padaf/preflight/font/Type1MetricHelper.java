@@ -994,14 +994,14 @@ public class Type1MetricHelper {
 		String label = null;
 
 		try {
-			label = this.encoding.getName(cid).getName();
+			label = this.encoding.getName(cid);
 		} catch (IOException e) {
 			label = this.cidToLabel.get(cid);
-			if (label == null) {
-				label = NOTDEF;
-			}
 		}
 
+		if (label == null) {
+			label = NOTDEF;
+		}
 		return label.charAt(0) == NAME_START ? label : NAME_START + label;
 	}
 

@@ -77,7 +77,7 @@ public class TrueTypeFontContainer extends AbstractFontContainer {
 	  int innerFontCid = cid;
 	  if (cmap.getPlatformEncodingId() == 1 && cmap.getPlatformId() == 3) {
 	  	try {
-				Encoding fontEncoding = this.font.getEncoding();
+				Encoding fontEncoding = this.font.getFontEncoding();
 				String character = fontEncoding.getCharacter(cid);
 				char[] characterArray = character.toCharArray();
 				if (characterArray.length == 1 ) {
