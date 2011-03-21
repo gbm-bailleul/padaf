@@ -2,6 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.padaf</groupId>
 	<artifactId>padaf</artifactId>
+	<name>Padaf</name>
 	<packaging>pom</packaging>
 	<version>0.6.1-SNAPSHOT</version>
 
