@@ -19,6 +19,7 @@
  ******************************************************************************/
 package net.padaf.preflight.font;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -147,8 +148,11 @@ public class CFFType2FontContainer extends AbstractFontContainer {
 		this.unitsPerEm = unitsPerEm;
 	}
 
-	void setGlyphWidths(int[] glyphWidths) {
-		this.glyphWidths = glyphWidths;
+	void setGlyphWidths(int[] _glyphWidths) {
+		this.glyphWidths = new int[_glyphWidths.length];
+		for( int i =0 ; i < _glyphWidths.length; ++i) {
+			this.glyphWidths[i] = _glyphWidths[i];
+		}
 	}
 
 }

@@ -182,7 +182,7 @@ public abstract class ContentStreamEngine extends PDFStreamEngine {
 		registerOperatorProcessor("sh", so);
 	}
 
-	public void registerOperatorProcessor( String operator, OperatorProcessor op )
+	public final void registerOperatorProcessor( String operator, OperatorProcessor op )
 	{
 		super.registerOperatorProcessor(operator, op);
 		contentStreamEngineOperators.put( operator, op );

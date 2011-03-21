@@ -32,7 +32,6 @@ import net.padaf.preflight.ValidationConstants;
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult.ValidationError;
 import net.padaf.preflight.font.AbstractFontContainer.State;
-import net.padaf.preflight.xmp.FontMetaDataValidation;
 import net.padaf.xmpbox.XMPMetadata;
 import net.padaf.xmpbox.parser.XMPDocumentBuilder;
 import net.padaf.xmpbox.parser.XmpExpectedRdfAboutAttribute;

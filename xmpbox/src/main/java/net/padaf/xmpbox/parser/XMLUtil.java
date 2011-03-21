@@ -212,9 +212,7 @@ public final class XMLUtil {
 		if (intValue == null) {
 			if (currentValue != null) {
 				parent.removeChild(currentValue);
-			} else {
-				// it doesn't exist so we don't need to remove it.
-			}
+			} // else it doesn't exist so we don't need to remove it.
 		} else {
 			if (currentValue == null) {
 				currentValue = parent.getOwnerDocument()
@@ -255,9 +253,7 @@ public final class XMLUtil {
 		if (nodeValue == null) {
 			if (currentValue != null) {
 				parent.removeChild(currentValue);
-			} else {
-				// it doesn't exist so we don't need to remove it.
-			}
+			} // else it doesn't exist so we don't need to remove it.
 		} else {
 			if (currentValue == null) {
 				currentValue = parent.getOwnerDocument()
@@ -353,21 +349,17 @@ public final class XMLUtil {
 	 */
 	public static void save(Document doc, String file, String encoding)
 			throws TransformerException {
-		try {
-			Transformer transformer = TransformerFactory.newInstance()
-					.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
-					"yes");
-			// initialize StreamResult with File object to save to file
+		Transformer transformer = TransformerFactory.newInstance()
+		.newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
+				"yes");
+		// initialize StreamResult with File object to save to file
 
-			Result result = new StreamResult(new File(file));
-			DOMSource source = new DOMSource(doc);
-			transformer.transform(source, result);
-		} finally {
-
-		}
+		Result result = new StreamResult(new File(file));
+		DOMSource source = new DOMSource(doc);
+		transformer.transform(source, result);
 	}
 
 	/**
@@ -385,21 +377,17 @@ public final class XMLUtil {
 	 */
 	public static void save(Node doc, OutputStream outStream, String encoding)
 			throws TransformerException {
-		try {
-			Transformer transformer = TransformerFactory.newInstance()
-					.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
-					"yes");
+		Transformer transformer = TransformerFactory.newInstance()
+		.newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
+				"yes");
 
-			// initialize StreamResult with File object to save to file
-			Result result = new StreamResult(outStream);
-			DOMSource source = new DOMSource(doc);
-			transformer.transform(source, result);
-		} finally {
-
-		}
+		// initialize StreamResult with File object to save to file
+		Result result = new StreamResult(outStream);
+		DOMSource source = new DOMSource(doc);
+		transformer.transform(source, result);
 	}
 
 	/**

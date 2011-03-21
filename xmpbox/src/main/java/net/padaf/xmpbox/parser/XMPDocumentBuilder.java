@@ -289,7 +289,7 @@ public class XMPDocumentBuilder {
 			XMLStreamException {
 		try {
 			int type = reader.get().next();
-			while (type == XMLStreamReader.COMMENT) {
+			while (type == XMLStreamReader.COMMENT || type == XMLStreamReader.SPACE) {
 				type = reader.get().next();
 			}
 			if (type != expectType) {
