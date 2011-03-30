@@ -7,6 +7,7 @@
 
  	<properties>
  		<pdfbox.version>1.5.0</pdfbox.version>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
  	</properties>
 
 	
@@ -36,7 +37,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0-beta-1</version>
       </plugin>
 			</plugins>
 		</pluginManagement>

@@ -41,6 +41,7 @@
 		<javacPath>${user.javac6}</javacPath>
 		<pdfa.valid>${user.pdfa.valid}</pdfa.valid>
 		<pdfa.invalid>${user.pdfa.invalid}</pdfa.invalid>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>
