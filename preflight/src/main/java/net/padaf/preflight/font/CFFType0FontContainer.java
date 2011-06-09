@@ -63,6 +63,8 @@ public class CFFType0FontContainer extends AbstractFontContainer {
 		for (CFFFont font : this.fontObject) {
 			Collection<Mapping> cMapping = font.getMappings();
 			for (Mapping mapping : cMapping) {
+				// -- REMARK : May be this code must be changed like the Type1FontContainer to Map the SID with the character name?
+				// -- Not enough PDF with this kind of Font to test the current implementation
 				if (mapping.getSID()==cid) {
 					cidFound = true;
 				}
