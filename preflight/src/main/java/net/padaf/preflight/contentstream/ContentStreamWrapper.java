@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.padaf.preflight.DocumentHandler;
-import net.padaf.preflight.ValidationConstants;
 import net.padaf.preflight.ValidationException;
 import net.padaf.preflight.ValidationResult.ValidationError;
 import net.padaf.preflight.font.AbstractFontContainer;
@@ -40,6 +39,7 @@ import net.padaf.preflight.utils.ContentStreamEngine;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
@@ -222,13 +222,38 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 	throws ContentStreamException, IOException {
 		// ---- For a Text operator, the arguments list should contain only one
 		// COSString object
-		Object objStr = arguments.get(0);
-		if (objStr instanceof COSString) {
-			validText(((COSString) objStr).getBytes());
-		} else if (!(objStr instanceof COSInteger)) {
-			throwContentStreamException("Invalid argument for the operator : "
-					+ operator.getOperation(),
-					ERROR_SYNTAX_CONTENT_STREAM_INVALID_ARGUMENT);
+		if ("\"".equals(operator.getOperation())) {
+			if (arguments.size() != 3) {
+				throwContentStreamException("Invalid argument for the operator : "
+						+ operator.getOperation(),
+						ERROR_SYNTAX_CONTENT_STREAM_INVALID_ARGUMENT);
+			}
+			Object arg0 = arguments.get(0);
+			Object arg1 = arguments.get(1);
+			Object arg2 = arguments.get(2);
+			if (!(arg0 instanceof COSInteger || arg0 instanceof COSFloat) || 
+					!(arg1 instanceof COSInteger || arg1 instanceof COSFloat) ) {
+				throwContentStreamException("Invalid argument for the operator : "
+						+ operator.getOperation(),
+						ERROR_SYNTAX_CONTENT_STREAM_INVALID_ARGUMENT);				
+			}
+
+			if (arg2 instanceof COSString) {
+				validText(((COSString) arg2).getBytes());
+			} else {
+				throwContentStreamException("Invalid argument for the operator : "
+						+ operator.getOperation(),
+						ERROR_SYNTAX_CONTENT_STREAM_INVALID_ARGUMENT);
+			}
+		} else {
+			Object objStr = arguments.get(0);
+			if (objStr instanceof COSString) {
+				validText(((COSString) objStr).getBytes());
+			} else if (!(objStr instanceof COSInteger)) {
+				throwContentStreamException("Invalid argument for the operator : "
+						+ operator.getOperation(),
+						ERROR_SYNTAX_CONTENT_STREAM_INVALID_ARGUMENT);
+			}
 		}
 	}
 
@@ -251,7 +276,7 @@ public class ContentStreamWrapper extends ContentStreamEngine {
 				validStringArray(operator, ((COSArray) object).toList());
 			} else if (object instanceof COSString) {
 				validText(((COSString) object).getBytes());
-			} else if (!(object instanceof COSInteger)) {
+			} else if (!(object instanceof COSInteger || object instanceof COSFloat)) {
 				throwContentStreamException("Invalid argument for the operator : "
 						+ operator.getOperation(),
 						ERROR_SYNTAX_CONTENT_STREAM_INVALID_ARGUMENT);

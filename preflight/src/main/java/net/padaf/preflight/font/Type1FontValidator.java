@@ -176,9 +176,6 @@ public class Type1FontValidator extends SimpleFontValidator {
 		|| (ff1 == null && ff2 != null && ff3 == null)
 		|| (ff1 == null && ff2 == null && ff3 != null);
 
-		// && (ff3 == null || !((COSDictionary)ff3.getCOSObject()).getString(COSName.SUBTYPE).equals("Type1C"))
-//		COSDictionary co = (COSDictionary)ff3.getCOSObject();
-//		String str = co.getNameAsString("Subtype");
 		if ((ff1 == null && (ff3 == null || !"Type1C".equals(((COSDictionary)ff3.getCOSObject()).getNameAsString(COSName.SUBTYPE)))) || !onlyOne) {
 			this.fontContainer.addError(new ValidationResult.ValidationError(
 					ERROR_FONTS_FONT_FILEX_INVALID, "The FontFile is invalid"));
