@@ -162,7 +162,7 @@ public class PDFAExtensionTest {
 				.getNamespaceValue());
 
 		String schemDesc = "Schema Acte de naissance";
-		String schemURI = "http://test.atos.com/xap/adn/";
+		String schemURI = "http://test.apache.com/xap/adn/";
 		String schemPrefix = "adn";
 
 		SchemaDescription desc = schem.createSchemaDescription();
@@ -199,14 +199,14 @@ public class PDFAExtensionTest {
 		// Check if no problem when create 2 description and display result
 		SchemaDescription desc2 = schem.createSchemaDescription();
 		desc2.setSchemaValue("2eme schema de test");
-		desc2.setNameSpaceURIValue("http://test.atos.com/xap/test/");
+		desc2.setNameSpaceURIValue("http://test.apache.com/xap/test/");
 		desc2.setPrefixValue("tst");
 		desc2.addProperty("TestText", "OwnType", "external",
 				"just a text property");
 		schem.addSchemaDescription(desc2);
 		// Check value type
 		String valType = "OwnType";
-		String nsType = "http://test.atos.com/xap/test/";
+		String nsType = "http://test.apache.com/xap/test/";
 		String prefType = "tst";
 		String descType = "Test Own type";
 		desc2.addValueType(valType, nsType, prefType, "must be replaced", null);

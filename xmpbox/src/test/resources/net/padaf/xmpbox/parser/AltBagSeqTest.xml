@@ -76,12 +76,12 @@ xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">
 		</rdf:Seq>
 	</pdfaSchema:property>
 	<pdfaSchema:schema>Schema Acte de naissance</pdfaSchema:schema>
-	<pdfaSchema:namespaceURI>http://test.atos.com/xap/adn/</pdfaSchema:namespaceURI>
+	<pdfaSchema:namespaceURI>http://test.apache.com/xap/adn/</pdfaSchema:namespaceURI>
 	<pdfaSchema:prefix>adn</pdfaSchema:prefix>
   </rdf:li>
  </rdf:Bag>
 </pdfaExtension:schemas></rdf:Description>
-<rdf:Description rdf:about="" xmlns:adn="http://test.atos.com/xap/adn/"><adn:cdp>59183</adn:cdp><adn:nom>Spécimen</adn:nom><adn:dateNaissance>1985-01-05</adn:dateNaissance><adn:ville>Dunkerque</adn:ville><adn:dpt>59</adn:dpt><adn:codePays>FR</adn:codePays><adn:pays>France</adn:pays><adn:prenom><rdf:Seq><rdf:li>Natacha</rdf:li><rdf:li>Marguerite</rdf:li><rdf:li>Suzanne</rdf:li></rdf:Seq></adn:prenom>
+<rdf:Description rdf:about="" xmlns:adn="http://test.apache.com/xap/adn/"><adn:cdp>59183</adn:cdp><adn:nom>Spécimen</adn:nom><adn:dateNaissance>1985-01-05</adn:dateNaissance><adn:ville>Dunkerque</adn:ville><adn:dpt>59</adn:dpt><adn:codePays>FR</adn:codePays><adn:pays>France</adn:pays><adn:prenom><rdf:Seq><rdf:li>Natacha</rdf:li><rdf:li>Marguerite</rdf:li><rdf:li>Suzanne</rdf:li></rdf:Seq></adn:prenom>
 <adn:bagTest><rdf:Bag><rdf:li>bagval1</rdf:li><rdf:li>bagval2</rdf:li></rdf:Bag></adn:bagTest>
 <adn:LangAltTest><rdf:Alt><rdf:li xml:lang="x-default">Default information</rdf:li><rdf:li xml:lang="fr-FR">Infos français</rdf:li></rdf:Alt></adn:LangAltTest>
 </rdf:Description>

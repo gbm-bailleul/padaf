@@ -38,7 +38,7 @@ public class BirthCertificateSchemaWithXMLDescriptions extends XMPSchema {
 
 	public static final String PREFERED_PREFIX = "adn";
 
-	public static final String NAMESPACE = "http://test.atos.com/xap/adn/";
+	public static final String NAMESPACE = "http://test.apache.com/xap/adn/";
 
 	@PropertyType(propertyType = "Text")
 	@PropertyExtensionDefinition(propertyCategory = "external")

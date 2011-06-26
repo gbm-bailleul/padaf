@@ -1,5 +1,4 @@
 <!--
-  Copyright 2010 Atos Worldline SAS
   
         Licensed to the Apache Software Foundation (ASF) under one
        or more contributor license agreements.  See the NOTICE file
@@ -99,7 +98,7 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>2.2</version>
 				<configuration>
-					<configLocation>atos-edoc-checkstyle.xml</configLocation>
+					<configLocation>edoc-checkstyle.xml</configLocation>
 				</configuration>
 			</plugin>
 
