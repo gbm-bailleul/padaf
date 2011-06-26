@@ -63,7 +63,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>net.padaf.preflight.Validator_A1b</mainClass>
+							<mainClass>org.apache.padaf.preflight.Validator_A1b</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -97,11 +97,11 @@
 				<configuration>
 					<instrumentation>
 						<ignores>
-							<ignore>net.padaf.preflight.javacc.*</ignore>
-							<ignore>net.padaf.preflight.javacc.extractor.*</ignore>
+							<ignore>org.apache.padaf.preflight.javacc.*</ignore>
+							<ignore>org.apache..padaf.preflight.javacc.extractor.*</ignore>
 						</ignores>
 						<excludes>
-							<exclude>net/padaf/preflight/javacc/**/*.class</exclude>
+							<exclude>org/apache/padaf/preflight/javacc/**/*.class</exclude>
 						</excludes>
 					</instrumentation>
 				</configuration>
@@ -147,7 +147,7 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.padaf</groupId>
+			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>xmpbox</artifactId>
 			<version>${project.version}</version>
 		</dependency>
