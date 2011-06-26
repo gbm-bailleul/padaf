@@ -66,8 +66,8 @@
         <module name="ArrayTypeStyle"/>
         <module name="TodoComment"/>
         <module name="ParameterName">
-            <metadata name="com.atlassw.tools.eclipse.checkstyle.comment" value="Parameter atos name"/>
-            <property name="id" value="ParameterAtosName"/>
+            <metadata name="com.atlassw.tools.eclipse.checkstyle.comment" value="Parameter name"/>
+            <property name="id" value="ParameterName"/>
             <property name="format" value="^_?[a-z][a-zA-Z0-9]*$"/>
         </module>
     </module>
