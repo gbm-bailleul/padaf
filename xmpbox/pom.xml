@@ -25,9 +25,9 @@
 
 	<parent>
 		<groupId>net.padaf</groupId>
-		<artifactId>parent</artifactId>
+		<artifactId>padaf-parent</artifactId>
 		<version>0.6.2-SNAPSHOT</version>
-		<relativePath>../parent</relativePath>
+		<relativePath>../padaf-parent</relativePath>
 	</parent>
 
 	<properties>

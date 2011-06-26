@@ -10,12 +10,6 @@
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
  	</properties>
 
-	<scm>
-		<connection>scm:git:git://git@github.com/gba-awl/padaf.git</connection>
-		<developerConnection>scm:git:https://gba-awl@github.com/gba-awl/padaf.git</developerConnection>
-		<url>http://github.com/gba-awl/padaf</url>
-	</scm>
-
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -45,11 +39,9 @@
 	</licenses>
 
 	<modules>
-		<module>parent</module>
-    <module>xmpbox</module>
+		<module>padaf-parent</module>
+    		<module>xmpbox</module>
 		<module>preflight</module>
-		<module>xmpbox-jdk15</module>
-		<module>preflight-jdk15</module>
 	</modules>
 </project>
 

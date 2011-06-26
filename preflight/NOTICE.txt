@@ -1,7 +1,0 @@
-PaDaF Preflight
-Copyright 2010 Atos Worldline SAS
-
-This product includes software developed at
-Atos Worldline SAS (http://www.atosworldline.com)
-
-
