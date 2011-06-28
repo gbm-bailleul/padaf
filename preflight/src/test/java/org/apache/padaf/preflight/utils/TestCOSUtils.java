@@ -26,9 +26,11 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.padaf.preflight.utils.COSUtils;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
@@ -54,7 +56,8 @@ public class TestCOSUtils {
       assertFalse(COSUtils.isInteger(co, new IOCOSDocument()));
 
       COSDocument doc = new COSDocument();
-      doc.setXRef(new COSObjectKey(co), 1000);
+//      doc.setXRef(new COSObjectKey(co), 1000);
+      addToXref(doc,new COSObjectKey(co),1000);
       COSUtils.isInteger(co, doc);
       doc.close();
     } catch (IOException e) {
@@ -72,7 +75,8 @@ public class TestCOSUtils {
       assertFalse(COSUtils.isFloat(co, new IOCOSDocument()));
 
       COSDocument doc = new COSDocument();
-      doc.setXRef(new COSObjectKey(co), 1000);
+//      doc.setXRef(new COSObjectKey(co), 1000);
+      addToXref(doc,new COSObjectKey(co),1000);
       COSUtils.isFloat(co, doc);
       doc.close();
     } catch (IOException e) {
@@ -90,7 +94,8 @@ public class TestCOSUtils {
       assertFalse(COSUtils.isString(co, new IOCOSDocument()));
 
       COSDocument doc = new COSDocument();
-      doc.setXRef(new COSObjectKey(co), 1000);
+//      doc.setXRef(new COSObjectKey(co), 1000);
+      addToXref(doc,new COSObjectKey(co),1000);
       COSUtils.isString(co, doc);
       doc.close();
     } catch (IOException e) {
@@ -108,7 +113,8 @@ public class TestCOSUtils {
       assertFalse(COSUtils.isStream(co, new IOCOSDocument()));
 
       COSDocument doc = new COSDocument();
-      doc.setXRef(new COSObjectKey(co), 1000);
+//      doc.setXRef(new COSObjectKey(co), 1000);
+      addToXref(doc,new COSObjectKey(co),1000);
       COSUtils.isStream(co, doc);
       doc.close();
     } catch (IOException e) {
@@ -126,7 +132,9 @@ public class TestCOSUtils {
       assertFalse(COSUtils.isDictionary(co, new IOCOSDocument()));
 
       COSDocument doc = new COSDocument();
-      doc.setXRef(new COSObjectKey(co), 1000);
+//      doc.setXRef(new COSObjectKey(co), 1000);
+      addToXref(doc,new COSObjectKey(co),1000);
+
       COSUtils.isDictionary(co, doc);
       doc.close();
     } catch (IOException e) {
@@ -144,7 +152,8 @@ public class TestCOSUtils {
       assertFalse(COSUtils.isArray(co, new IOCOSDocument()));
 
       COSDocument doc = new COSDocument();
-      doc.setXRef(new COSObjectKey(co), 1000);
+//      doc.setXRef(new COSObjectKey(co), 1000);
+      addToXref(doc,new COSObjectKey(co),1000);
       COSUtils.isArray(co, doc);
       doc.close();
     } catch (IOException e) {
@@ -171,6 +180,13 @@ public class TestCOSUtils {
     }
   }
 
+  
+  protected void addToXref( COSDocument doc, COSObjectKey key, int value) {
+	  Map<COSObjectKey, Integer>  xrefTable = new HashMap<COSObjectKey, Integer>(1);
+	  xrefTable.put(key, value);
+	  doc.addXRefTable(xrefTable);
+  }
+  
   /**
    * Class used to check the catch block in COSUtils methods
    */
