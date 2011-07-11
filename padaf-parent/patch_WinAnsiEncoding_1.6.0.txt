@@ -1,0 +1,13 @@
+--- WinAnsiEncoding.java	2011-07-07 14:29:18.215046230 +0200
++++ src/main/java/org/apache/pdfbox/encoding/WinAnsiEncoding.java	2011-07-07 14:30:27.015046264 +0200
+@@ -133,10 +133,6 @@
+         addCharacterEncoding( 054, "comma" );;
+         addCharacterEncoding( 0251, "copyright" );;
+ 
+-        /**
+-         * Added because cweb.pdf uses circlecopyrt
+-         */
+-        addCharacterEncoding( 0251, "circlecopyrt" );;
+         addCharacterEncoding( 0244, "currency" );;
+         addCharacterEncoding( 0144, "d" );;
+         addCharacterEncoding( 0206, "dagger" );;
